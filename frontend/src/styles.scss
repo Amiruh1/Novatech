@@ -1,0 +1,1315 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  NovaTech 2026 — Global Design System                                   ║
+// ║  Inspired by: HyperOS · OxygenOS 16 · VisionOS · Linear · Vercel       ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@import 'primeflex/primeflex.css';
+@import 'primeicons/primeicons.css';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
+// font-display: swap está incluido en el parámetro display=swap de la URL
+
+// ── 1. Design Tokens 2026 ─────────────────────────────────────────────────────
+:root {
+  // Colors — base palette
+  --app-bg:             #f2f6fb;
+  --app-bg-glow-a:      rgba(13, 148, 136, 0.07);
+  --app-bg-glow-b:      rgba(14, 165, 233, 0.09);
+  --app-surface:        #ffffff;
+  --app-surface-muted:  #f8fafc;
+  --app-border:         #e2e8f3;
+  --app-border-subtle:  #edf1f8;
+  --app-text:           #0f172a;
+  --app-text-2:         #334155;
+  --app-muted:          #64748b;
+  --app-primary:        #0d9488;
+  --app-primary-strong: #0f766e;
+  --app-primary-glow:   rgba(13, 148, 136, 0.2);
+  --app-danger:         #dc2626;
+  --app-danger-glow:    rgba(220, 38, 38, 0.15);
+  --app-danger-soft:    rgba(220, 38, 38, 0.08);
+  --app-warning:        #d97706;
+  --app-warning-glow:   rgba(217, 119, 6, 0.14);
+  --app-warning-soft:   rgba(217, 119, 6, 0.09);
+  --app-success:        #16a34a;
+  --app-success-glow:   rgba(22, 163, 74, 0.14);
+  --app-success-soft:   rgba(22, 163, 74, 0.08);
+  // Accent — indigo/violet (UI chrome, icons, decorative)
+  --app-accent:         #6366f1;
+  --app-accent-strong:  #4f46e5;
+  --app-accent-glow:    rgba(99, 102, 241, 0.15);
+  --app-accent-soft:    rgba(99, 102, 241, 0.08);
+  // Info — sky blue (informational elements, address, links)
+  --app-info:           #0ea5e9;
+  --app-info-strong:    #0284c7;
+  --app-info-glow:      rgba(14, 165, 233, 0.15);
+  --app-info-soft:      rgba(14, 165, 233, 0.08);
+  // Glass tokens — adapts per theme
+  --glass-bg:           rgba(255, 255, 255, 0.72);
+  --glass-border:       rgba(255, 255, 255, 0.88);
+  --glass-shadow:       0 8px 32px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.85);
+  --glass-blur:         16px;
+  --glass-saturate:     180%;
+  --glass-specular:     rgba(255, 255, 255, 0.55);
+
+  // Spacing Scale — 4px base
+  --sp-1:  0.25rem;   // 4px
+  --sp-2:  0.5rem;    // 8px
+  --sp-3:  0.75rem;   // 12px
+  --sp-4:  1rem;      // 16px
+  --sp-5:  1.25rem;   // 20px
+  --sp-6:  1.5rem;    // 24px
+  --sp-8:  2rem;      // 32px
+  --sp-10: 2.5rem;    // 40px
+  --sp-12: 3rem;      // 48px
+  --sp-16: 4rem;      // 64px
+  --sp-20: 5rem;      // 80px
+
+  // Border Radius Scale
+  --r-xs:   0.25rem;
+  --r-sm:   0.5rem;
+  --r-md:   0.75rem;
+  --r-lg:   1rem;
+  --r-xl:   1.25rem;
+  --r-2xl:  1.75rem;
+  --r-pill: 9999px;
+
+  // Legacy compat tokens
+  --radius-card: var(--r-2xl);
+  --radius-pill: var(--r-pill);
+
+  // Shadow Elevations — 5 levels
+  --shadow-soft:    0 1px 3px rgba(15,23,42,.04), 0 4px 12px -4px rgba(15,23,42,.06);
+  --shadow-medium:  0 4px 16px -4px rgba(15,23,42,.1), 0 2px 6px rgba(15,23,42,.04);
+  --shadow-premium: 0 8px 32px -8px rgba(15,23,42,.14), 0 4px 12px rgba(15,23,42,.05);
+  --shadow-glass:   0 8px 32px rgba(15,23,42,.05), inset 0 1px 0 rgba(255,255,255,.9);
+  --shadow-float:   0 16px 48px -12px rgba(15,23,42,.22), 0 4px 16px rgba(15,23,42,.07);
+  --shadow-modal:   0 2px 8px rgba(15,23,42,.05), 0 12px 40px -8px rgba(15,23,42,.18), 0 40px 80px -24px rgba(15,23,42,.26);
+
+  // Legacy compat
+  --card-shadow: var(--shadow-premium);
+  --soft-shadow: var(--shadow-medium);
+
+  // Motion System — spring physics inspired
+  --ease-spring:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out:     cubic-bezier(0.16,  1,    0.3,  1);
+  --ease-bounce:  cubic-bezier(0.34,  1.56, 0.64, 1);
+  --ease-smooth:  cubic-bezier(0.4,   0,    0.2,  1);
+  --dur-fast:  120ms;
+  --dur-base:  220ms;
+  --dur-slow:  380ms;
+  --dur-enter: 440ms;
+
+  // Shell layout
+  --sidebar-width:           17rem;
+  --sidebar-collapsed-width: 5.5rem;
+  --topbar-height:           4.5rem;
+  --page-padding:            1.5rem;
+
+  // Shell palette
+  --shell-gradient-start: #060d1c;
+  --shell-gradient-mid:   #0b1628;
+  --shell-gradient-end:   #0d1f36;
+  --shell-sidebar-text:   #dbeafe;
+  --shell-accent:         #14b8a6;
+  --shell-accent-2:       #38bdf8;
+}
+
+// ── 2. Themes ──────────────────────────────────────────────────────────────────
+body.theme-ocean {
+  // Fondos con tinte azul-oceánico suave
+  --app-bg:             #f0f8ff;
+  --app-surface-muted:  #eaf4ff;
+  --app-border-subtle:  #d6eaff;
+  --app-bg-glow-a:      rgba(13, 148, 136, 0.14);
+  --app-bg-glow-b:      rgba(14, 165, 233, 0.18);
+  // Primary teal-cyan
+  --app-primary:        #0d9488;
+  --app-primary-strong: #0f766e;
+  --app-primary-glow:   rgba(13, 148, 136, 0.22);
+  // Acento índigo como profundidad oceánica
+  --app-accent:         #4f46e5;
+  --app-accent-strong:  #3730a3;
+  --app-accent-glow:    rgba(79, 70, 229, 0.18);
+  --app-accent-soft:    rgba(79, 70, 229, 0.07);
+  // Shell — azul marino profundo
+  --shell-gradient-start: #050f22;
+  --shell-gradient-mid:   #0b1d3e;
+  --shell-gradient-end:   #0e2952;
+  --shell-accent:         #14b8a6;
+  --shell-accent-2:       #60a5fa;
+}
+
+body.theme-sunset {
+  // Fondos cálidos ámbar-coral
+  --app-bg:             #fffbf4;
+  --app-bg-glow-a:      rgba(234, 88, 12, 0.18);
+  --app-bg-glow-b:      rgba(244, 63, 94, 0.14);
+  --app-surface:        #fff8f1;
+  --app-surface-muted:  #fff0e0;
+  --app-border:         #fcd4a6;
+  --app-border-subtle:  #ffe5c4;
+  --app-text:           #3b1007;
+  --app-text-2:         #7c2d12;
+  --app-muted:          #92400e;
+  // Primary — naranja ardiente con rosa coral de acento
+  --app-primary:        #ea580c;
+  --app-primary-strong: #c2410c;
+  --app-primary-glow:   rgba(234, 88, 12, 0.24);
+  --app-accent:         #f43f5e;
+  --app-accent-strong:  #e11d48;
+  --app-accent-glow:    rgba(244, 63, 94, 0.2);
+  --app-accent-soft:    rgba(244, 63, 94, 0.07);
+  --app-success:        #059669;
+  --app-info:           #d97706;
+  --app-info-strong:    #b45309;
+  --app-info-soft:      rgba(217, 119, 6, 0.09);
+  // Shell — crepúsculo profundo
+  --shell-gradient-start: #2d0900;
+  --shell-gradient-mid:   #7c1d0c;
+  --shell-gradient-end:   #991b10;
+  --shell-sidebar-text:   #ffedd5;
+  --shell-accent:         #fb923c;
+  --shell-accent-2:       #fb7185;
+}
+
+body.theme-graphite {
+  // Fondos — pizarra oscura con tinte violeta suave
+  --app-bg:             #0c1120;
+  --app-bg-glow-a:      rgba(139, 92, 246, 0.08);
+  --app-bg-glow-b:      rgba(56, 189, 248, 0.07);
+  --app-surface:        #161e30;
+  --app-surface-muted:  #1e2d47;
+  --app-border:         #2e3f5c;
+  --app-border-subtle:  #253450;
+  --app-text:           #f0f4fc;
+  --app-text-2:         #c8d4e8;
+  --app-muted:          #8fa0bb;
+  // Primary — cyan brillante
+  --app-primary:        #2dd4bf;
+  --app-primary-strong: #14b8a6;
+  --app-primary-glow:   rgba(45, 212, 191, 0.26);
+  // Acento — violeta eléctrico (identidad única Graphite)
+  --app-accent:         #a78bfa;
+  --app-accent-strong:  #7c3aed;
+  --app-accent-glow:    rgba(167, 139, 250, 0.24);
+  --app-accent-soft:    rgba(167, 139, 250, 0.10);
+  --app-success:        #10b981;
+  --app-success-soft:   rgba(16, 185, 129, 0.12);
+  --app-danger-soft:    rgba(248, 113, 113, 0.12);
+  --app-warning-soft:   rgba(251, 191, 36, 0.10);
+  --app-info:           #38bdf8;
+  --app-info-strong:    #0ea5e9;
+  --app-info-glow:      rgba(56, 189, 248, 0.22);
+  --app-info-soft:      rgba(56, 189, 248, 0.10);
+  // Glass — semitransparente oscuro con especular violeta
+  --glass-bg:           rgba(22, 30, 48, 0.76);
+  --glass-border:       rgba(46, 63, 92, 0.6);
+  --glass-shadow:       0 8px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(167,139,250,.06);
+  --glass-saturate:     150%;
+  --glass-specular:     rgba(167, 139, 250, 0.1);
+  // Shell — noche absoluta con tinte violeta
+  --shell-gradient-start: #000000;
+  --shell-gradient-mid:   #07030f;
+  --shell-gradient-end:   #0c1120;
+  --shell-sidebar-text:   #f0f4fc;
+  --shell-accent:         #38bdf8;
+  --shell-accent-2:       #a78bfa;
+  --shadow-modal: 0 2px 8px rgba(0,0,0,.12), 0 12px 40px -8px rgba(0,0,0,.4), 0 40px 80px -24px rgba(167,139,250,.12);
+}
+
+// ── 3. Reset & Base ────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--app-text);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  background:
+    radial-gradient(ellipse at 0% 0%,   var(--app-bg-glow-a) 0%, transparent 55%),
+    radial-gradient(ellipse at 95% 100%, var(--app-bg-glow-b) 0%, transparent 50%),
+    var(--app-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .page-title {
+  font-family: 'Sora', 'Manrope', system-ui, sans-serif;
+  line-height: 1.25;
+}
+
+// ── 4. Shell Layout ────────────────────────────────────────────────────────────
+.app-shell-page {
+  min-height: 100vh;
+  margin-left: var(--sidebar-width);
+  padding: calc(var(--topbar-height) + var(--sp-4)) var(--page-padding) var(--page-padding);
+  transition: margin-left var(--dur-slow) var(--ease-smooth);
+}
+
+body.sidebar-collapsed .app-shell-page {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+@media (max-width: 1024px) {
+  .app-shell-page {
+    margin-left: 0 !important;
+    padding: calc(var(--topbar-height) + var(--sp-3)) var(--sp-4) calc(var(--sp-16) + var(--sp-6));
+  }
+}
+
+// ── 5. Typography ──────────────────────────────────────────────────────────────
+.page-intro { margin-bottom: var(--sp-5); }
+
+.page-title {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.4vw, 2.2rem);
+  font-weight: 800;
+  color: var(--app-text);
+  letter-spacing: -0.04em;
+  line-height: 1.18;
+}
+
+.page-subtitle {
+  margin-top: var(--sp-2);
+  color: var(--app-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+// ── 6. Surface Cards ───────────────────────────────────────────────────────────
+.app-surface-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition: box-shadow var(--dur-base) var(--ease-smooth);
+}
+
+.card-head {
+  padding: var(--sp-4) var(--sp-5) var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+// Variante con separador — solo cuando el contenido del body requiere separación visual explícita
+.card-head--divided {
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--app-border-subtle);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--app-text);
+}
+
+.card-subtitle {
+  color: var(--app-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.1rem;
+}
+
+.card-body { padding: var(--sp-5); }
+
+// ── 7. Global premium interactions ────────────────────────────────────────────
+
+// Press feedback — scale(0.97) spring on all interactive buttons
+.p-button:not(:disabled):active,
+button:not(:disabled):not([pbutton]):active {
+  transform: scale(0.97) !important;
+  transition: transform 80ms var(--ease-spring) !important;
+}
+
+// Glass surface utility — saturate + specular highlight
+.glass-surface {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--glass-specular);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Tabular nums — precios, KPIs, montos (evita saltos al animar)
+.stat-value,
+.fav-price-main,
+.fav-price-old,
+.amount,
+.cart-item-price,
+.product-price,
+[class*="-price"],
+[class*="-total"],
+[class*="-monto"],
+[class*="-ingreso"] {
+  font-variant-numeric: tabular-nums;
+}
+
+// ── 8. Admin shared components ────────────────────────────────────────────────
+
+// Search input pill — unificado en todos los módulos admin
+.admin-search-wrap,
+.search-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-xl);
+  background: var(--app-surface);
+  padding: 0.4rem 0.7rem;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+
+  &:focus-within {
+    border-color: var(--app-primary);
+    box-shadow: 0 0 0 3px var(--app-primary-glow);
+  }
+
+  i { color: var(--app-muted); font-size: 0.85rem; flex-shrink: 0; }
+
+  input {
+    border: none;
+    background: transparent;
+    color: var(--app-text);
+    font-size: 0.875rem;
+    width: 100%;
+    min-width: 10rem;
+    &:focus { box-shadow: none; outline: none; }
+    &::placeholder { color: var(--app-muted); }
+  }
+}
+
+// Admin filter label — sin mayúsculas
+.filter-label,
+.admin-filter-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--app-muted);
+}
+
+// Admin product block cell — imagen + info unificados
+.prod-block {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0; // permite que flex child se trunque
+
+  .prod-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--r-lg);
+    object-fit: contain;
+    background: var(--app-surface-muted);
+    border: 1px solid var(--app-border-subtle);
+    flex-shrink: 0;
+  }
+
+  // div info (nombre + meta) — no expande la columna
+  > div {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .prod-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--app-text);
+    line-height: 1.3;
+    // Nombres largos: 2 líneas máx, luego ellipsis
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+
+  .prod-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+    margin-top: 0.2rem;
+    min-width: 0;
+  }
+
+  .prod-sku {
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: var(--app-muted);
+    background: var(--app-border-subtle);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--r-xs);
+    letter-spacing: 0.03em;
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prod-cat,
+  .prod-brand {
+    font-size: 0.72rem;
+    color: var(--app-muted);
+    font-weight: 500;
+    max-width: 10rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prod-cat::after { content: '·'; margin-left: var(--sp-2); }
+}
+
+// ── Utilidades globales de truncación de texto ─────────────────────────────
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.text-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.text-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+// Columnas de tabla — limita ancho para que texto largo no desborde
+.col-name    { max-width: 22rem; }
+.col-email   { max-width: 18rem; }
+.col-address { max-width: 20rem; }
+.col-narrow  { max-width: 10rem; }
+
+// Admin payment pills
+.payment-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--app-info-glow);
+  border-radius: var(--r-pill);
+  background: var(--app-info-soft);
+  color: var(--app-info-strong);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.28rem 0.65rem;
+
+  i { color: var(--app-info); font-size: 0.72rem; }
+  strong { color: var(--app-text); }
+}
+
+// ── 9. KPI / Stat Cards ────────────────────────────────────────────────────────
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+
+.stat-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-soft);
+  padding: var(--sp-5) var(--sp-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-spring), box-shadow var(--dur-base) var(--ease-smooth);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--app-primary-glow) 0%, transparent 65%);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-smooth);
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-premium);
+    &::after { opacity: 1; }
+  }
+}
+
+.stat-card > div { min-width: 0; }
+
+.stat-card .icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--r-lg);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(145deg, var(--app-primary), var(--app-primary-strong));
+  box-shadow: 0 4px 14px var(--app-primary-glow);
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.stat-card:hover .icon { transform: scale(1.08) rotate(-4deg); }
+
+.stat-label {
+  color: var(--app-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 800;
+  margin-top: var(--sp-1);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+  font-family: 'Sora', system-ui, sans-serif;
+}
+
+// ── 8. Status Chips ────────────────────────────────────────────────────────────
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  border-radius: var(--r-pill);
+  padding: 0.28rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// ── 9. Form System ─────────────────────────────────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-5);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.form-field.full { grid-column: 1 / -1; }
+
+.form-field label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--app-text-2);
+  letter-spacing: 0.01em;
+}
+
+.form-field .help  { font-size: 0.72rem; color: var(--app-muted); }
+.form-field .error { font-size: 0.72rem; color: #b91c1c; font-weight: 600; }
+
+.readonly-value {
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-md);
+  background: var(--app-surface-muted);
+  padding: var(--sp-2) var(--sp-3);
+  color: var(--app-text-2);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.form-section {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  margin-bottom: var(--sp-1);
+
+  i { font-size: 0.75rem; color: var(--app-primary); flex-shrink: 0; }
+
+  span {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--app-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--app-border), transparent);
+  }
+}
+
+// ── 10. PrimeNG: Buttons ───────────────────────────────────────────────────────
+.p-button {
+  border-radius: var(--r-lg) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  transition:
+    transform var(--dur-fast) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-smooth),
+    background var(--dur-base) var(--ease-smooth) !important;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):enabled:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.22) !important;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):enabled:active {
+  transform: translateY(0) scale(0.97) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+// Primary button glow on hover
+.p-button:enabled:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px -12px rgba(15, 23, 42, 0.4);
+}
+
+// ── 11. PrimeNG: Inputs ────────────────────────────────────────────────────────
+.p-inputtext,
+.p-select,
+.p-inputnumber-input,
+.p-password-input,
+.p-textarea {
+  background: var(--app-surface-muted) !important;
+  border: 1.5px solid var(--app-border) !important;
+  border-radius: var(--r-md) !important;
+  color: var(--app-text) !important;
+  transition:
+    border-color var(--dur-fast) var(--ease-smooth),
+    box-shadow var(--dur-base) var(--ease-smooth) !important;
+}
+
+.p-inputtext:enabled:hover,
+.p-select:not(.p-disabled):hover {
+  border-color: var(--app-muted) !important;
+}
+
+.p-inputtext:enabled:focus,
+.p-select.p-focus,
+.p-inputnumber-input:enabled:focus,
+.p-password-input:enabled:focus,
+.p-textarea:enabled:focus {
+  border-color: var(--app-primary) !important;
+  background: var(--app-surface) !important;
+  box-shadow: 0 0 0 3.5px var(--app-primary-glow) !important;
+}
+
+.p-select-panel {
+  border-radius: var(--r-xl) !important;
+  border: 1px solid var(--app-border) !important;
+  box-shadow: var(--shadow-float) !important;
+  overflow: hidden;
+}
+
+.p-select-option { color: var(--app-text); }
+
+// ── 12. PrimeNG: Tags ─────────────────────────────────────────────────────────
+.p-tag {
+  border-radius: var(--r-pill) !important;
+  font-weight: 700 !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.04em !important;
+}
+
+// ── 13. PrimeNG: DataTable ─────────────────────────────────────────────────────
+.p-datatable {
+  border: 1px solid var(--app-border) !important;
+  border-radius: var(--r-xl) !important;
+  overflow: hidden !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--app-surface-muted) !important;
+  color: var(--app-muted) !important;
+  border-bottom: 1px solid var(--app-border) !important;
+  font-size: 0.68rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-weight: 800 !important;
+  padding: var(--sp-3) var(--sp-4) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  border-bottom: 1px solid var(--app-border-subtle) !important;
+  padding: var(--sp-4) !important;
+  transition: background var(--dur-fast) var(--ease-smooth);
+}
+
+.p-datatable .p-datatable-tbody > tr:nth-child(even) > td {
+  background: var(--app-surface-muted);
+}
+
+.p-datatable .p-datatable-tbody > tr:hover > td {
+  background: var(--app-border-subtle) !important;
+}
+
+// ── 14. Dialog System 2026 — iOS spring suave ─────────────────────────────────
+
+// Overlay backdrop — fade muy suave
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// Enter: escala desde 68% con spring gentil — sin blur para evitar el "pop"
+@keyframes dlgIn {
+  0%   { opacity: 0; transform: scale(0.68) translateY(6px); }
+  100% { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+
+// Exit: encoge al centro, limpio
+@keyframes dlgOut {
+  0%   { opacity: 1; transform: scale(1);    }
+  100% { opacity: 0; transform: scale(0.82); }
+}
+
+.p-dialog-mask {
+  animation: overlayIn 200ms var(--ease-smooth) both;
+}
+
+.p-dialog {
+  border-radius: var(--r-2xl) !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-modal) !important;
+  transform-origin: center center !important;
+  // Spring con overshoot mínimo (llega a ~1.04 y vuelve) — como iOS, sin mareos
+  animation: dlgIn 400ms cubic-bezier(0.34, 1.26, 0.64, 1) both !important;
+}
+
+.p-component-overlay-leave .p-dialog {
+  animation: dlgOut 220ms var(--ease-smooth) both !important;
+}
+
+.p-dialog .p-dialog-header {
+  padding: 0 !important;
+  border-bottom: none !important;
+  background: transparent !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: stretch !important;
+  overflow: hidden !important;
+}
+
+.p-dialog .p-dialog-header-actions {
+  position: absolute !important;
+  right: var(--sp-3) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 20 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.p-dialog .p-dialog-header-actions .p-button,
+.p-dialog .p-dialog-header-actions button,
+.p-dialog .p-dialog-header-action {
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 50% !important;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 2.25rem !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow: none !important;
+  transition: background var(--dur-fast) var(--ease-smooth), transform var(--dur-fast) var(--ease-spring) !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  display: flex !important;
+  align-items: center !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.32) !important;
+    transform: scale(1.1) !important;
+  }
+}
+
+.p-dialog .p-dialog-header-actions svg,
+.p-dialog .p-dialog-header-actions .p-button svg,
+.p-dialog .p-dialog-header-actions .pi {
+  color: rgba(255, 255, 255, 0.9) !important;
+  fill: rgba(255, 255, 255, 0.9) !important;
+  width: 0.85rem !important;
+  height: 0.85rem !important;
+  font-size: 0.85rem !important;
+}
+
+.p-dialog .p-dialog-content {
+  background: var(--app-surface) !important;
+  padding: var(--sp-6) var(--sp-6) var(--sp-3) !important;
+}
+
+.p-dialog .p-dialog-footer {
+  background: var(--app-surface) !important;
+  border-top: none !important;
+  padding: var(--sp-3) var(--sp-6) var(--sp-5) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: var(--sp-2) !important;
+}
+
+.p-dialog .p-dialog-footer .p-button {
+  border-radius: var(--r-md) !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  padding: 0.6rem 1.35rem !important;
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-base) var(--ease-smooth) !important;
+
+  &:not(:disabled):not(.p-button-text):hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18) !important;
+  }
+}
+
+// ─ Dialog hero header (shared by all dialogs)
+.dlg-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5) 3.5rem var(--sp-5) var(--sp-5);
+  background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-primary-strong) 100%);
+  min-height: 5rem;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+
+  &.dlg-danger  { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+  &.dlg-address { background: linear-gradient(135deg, #0369a1 0%, #075985 100%); }
+  &.dlg-audit   { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+}
+
+.dlg-hero-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+}
+
+.dlg-hero-title {
+  display: block;
+  color: #fff;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.dlg-hero-sub {
+  display: block;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+
+// ─ ConfirmDialog
+.p-confirmdialog.p-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  padding: var(--sp-5) 3.8rem var(--sp-5) var(--sp-5) !important;
+  min-height: 5rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.p-confirmdialog .p-dialog-title {
+  color: #fff !important;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.p-confirmdialog .p-dialog-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--sp-5) !important;
+  padding: var(--sp-6) !important;
+  background: var(--app-surface) !important;
+}
+
+.p-confirmdialog .p-confirm-dialog-icon,
+.p-confirmdialog .p-confirmdialog-icon {
+  font-size: 2rem !important;
+  color: #dc2626 !important;
+  flex-shrink: 0 !important;
+}
+
+.p-confirmdialog .p-confirm-dialog-message,
+.p-confirmdialog .p-confirmdialog-message {
+  font-size: 0.95rem !important;
+  color: var(--app-text) !important;
+  line-height: 1.6 !important;
+}
+
+.p-confirmdialog .p-dialog-footer {
+  background: var(--app-surface) !important;
+  padding: 0 var(--sp-6) var(--sp-5) !important;
+  border-top: none !important;
+  justify-content: stretch !important;
+}
+
+.p-confirmdialog .p-dialog-footer .p-button {
+  flex: 1 !important;
+  border-radius: var(--r-md) !important;
+  font-weight: 700 !important;
+}
+
+// ── 14b. Glass / Liquid Buttons — iOS Liquid Glass identity ───────────────────
+
+// Fix p-password global — input llena el ancho, iconfield se expande
+// (el fix específico del ojo está en configuracion.scss con ::ng-deep)
+.p-password {
+  width: 100%;
+
+  p-iconfield,
+  .p-iconfield {
+    width: 100% !important;
+  }
+
+  .p-inputtext {
+    width: 100% !important;
+  }
+}
+
+// ── Liquid Glass — efecto agua/vidrio iOS para botones CTA principales
+// Aplica sobre botones de acción en headers admin (Nuevo producto, etc.)
+.header-actions .p-button:not(.p-button-text):not(.p-button-outlined),
+.page-intro-actions .p-button:not(.p-button-text):not(.p-button-outlined) {
+  position: relative !important;
+  overflow: hidden !important;
+  // Sombra con glow del primary
+  box-shadow:
+    0 4px 20px var(--app-primary-glow),
+    inset 0 1px 0 rgba(255,255,255,0.3) !important;
+
+  // Specular highlight — línea de luz en el borde superior
+  &::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.5) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+  }
+
+  // Capa de vidrio — gradiente diagonal de luz
+  &::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 55%) !important;
+    pointer-events: none !important;
+    border-radius: inherit !important;
+    z-index: 1 !important;
+  }
+
+  &:hover:not(:disabled) {
+    box-shadow:
+      0 8px 30px var(--app-primary-glow),
+      inset 0 1px 0 rgba(255,255,255,0.45) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+// ── 15. Modal Footer Buttons ───────────────────────────────────────────────────
+.btn-modal-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+  width: 100%;
+}
+
+// Shared base for all modal buttons
+.btn-modal-cancelar,
+.btn-modal-guardar,
+.btn-modal-danger,
+.btn-modal-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 0.68rem 1.3rem;
+  border-radius: var(--r-md);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    background var(--dur-base) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-smooth);
+  border: none;
+
+  &:hover:not(:disabled) { transform: translateY(-2px); }
+  &:active:not(:disabled) { transform: scale(0.97); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.btn-modal-cancelar {
+  background: transparent;
+  color: var(--app-muted);
+  border: 1.5px solid var(--app-border) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--app-surface-muted);
+    border-color: var(--app-muted) !important;
+  }
+}
+
+.btn-modal-guardar {
+  background: var(--app-primary);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: var(--app-primary-strong);
+    box-shadow: 0 6px 20px var(--app-primary-glow);
+  }
+}
+
+.btn-modal-danger {
+  background: #dc2626;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #b91c1c;
+    box-shadow: 0 6px 20px var(--app-danger-glow);
+  }
+}
+
+.btn-modal-success {
+  background: var(--app-success);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #15803d;
+    box-shadow: 0 6px 20px var(--app-success-glow);
+  }
+}
+
+// ── 16. Empty States 2026 ──────────────────────────────────────────────────────
+.table-empty-state {
+  text-align: center;
+  padding: var(--sp-16) var(--sp-4);
+  color: var(--app-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.empty-icon-wrap {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--app-surface-muted), var(--app-border-subtle));
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: var(--sp-2);
+}
+
+.table-empty-state i {
+  font-size: 2.25rem;
+  color: var(--app-muted);
+  margin-bottom: 0;
+}
+
+.table-empty-state h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.table-empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+  max-width: 28rem;
+  line-height: 1.6;
+}
+
+// ── 17. Keyframe Animations ────────────────────────────────────────────────────
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes softPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes staggerFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+// ── 18. prefers-reduced-motion ─────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ── 19. prefers-color-scheme: dark — activa Graphite automáticamente ───────────
+@media (prefers-color-scheme: dark) {
+  // Solo aplica si el usuario NO eligió un tema explícito
+  body:not([class*="theme"]) {
+    --app-bg:             #0f172a;
+    --app-bg-glow-a:      rgba(56, 189, 248, 0.06);
+    --app-bg-glow-b:      rgba(99, 102, 241, 0.06);
+    --app-surface:        #1e293b;
+    --app-surface-muted:  #334155;
+    --app-border:         #475569;
+    --app-border-subtle:  #3b4f64;
+    --app-text:           #f1f5f9;
+    --app-text-2:         #cbd5e1;
+    --app-muted:          #94a3b8;
+    --app-primary:        #2dd4bf;
+    --app-primary-strong: #14b8a6;
+    --app-primary-glow:   rgba(45, 212, 191, 0.22);
+    --app-success:        #10b981;
+    --shell-gradient-start: #000000;
+    --shell-gradient-mid:   #020617;
+    --shell-gradient-end:   #0f172a;
+    --shell-sidebar-text:   #f1f5f9;
+    --shell-accent:         #38bdf8;
+    --shell-accent-2:       #818cf8;
+  }
+}
+
+// ── 20. Screen-reader only utility ────────────────────────────────────────────
+// Usado por la región aria-live global en shell-layout.component.html
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ── 21. prefers-reduced-motion: override Angular Animations ───────────────────
+// La sección 18 ya colapsa CSS transitions/animations.
+// Este bloque garantiza que los triggers de @angular/animations tampoco se muevan.
+@media (prefers-reduced-motion: reduce) {
+  .ng-animating {
+    animation-duration: 0.01ms !important;
+    animation-delay:    0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ── Skip Link ──────────────────────────────────────────────────────────────────
+.skip-link {
+  position: fixed;
+  top: -5rem;
+  left: var(--sp-4);
+  z-index: 99999;
+  background: var(--app-primary);
+  color: #fff;
+  padding: var(--sp-2) var(--sp-6);
+  border-radius: var(--r-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: var(--shadow-float);
+  transition: top var(--dur-fast) linear;
+
+  &:focus {
+    top: var(--sp-2);
+    outline: 3px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 2px;
+  }
+}
+
+// ── 22. Focus Visible — anillo global coherente con design system ───────────────
+:focus-visible {
+  outline: 2.5px solid var(--app-primary);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+// Desactivar outline on click para elementos que lo necesitan solo en teclado
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// ── 23. Responsive Utilities ───────────────────────────────────────────────────
+@media (max-width: 860px) {
+  .stats-grid,
+  .form-grid { grid-template-columns: 1fr; }
+}

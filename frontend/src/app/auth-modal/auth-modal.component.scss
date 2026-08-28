@@ -1,0 +1,473 @@
+// ── Auth Modal — NovaTech 2026 ────────────────────────────────────────────────
+:host { display: block; }
+
+// ── Validación inline — solo aparece cuando hay error/ok ─────────────────────
+.char-counter {
+  display: block;
+  text-align: right;
+  font-size: 0.72rem;
+  color: var(--app-muted);
+  margin-top: 0.2rem;
+  animation: fadeSlideUp var(--dur-base) var(--ease-out) both;
+  &.char-warn { color: var(--app-warning); font-weight: 600; }
+}
+
+.field-req {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--app-muted);
+  margin-top: 0.18rem;
+  transition: color 0.2s;
+  animation: fadeSlideUp var(--dur-base) var(--ease-out) both;
+  &.req-error { color: var(--app-danger);  font-weight: 600; }
+  &.req-ok    { color: var(--app-success); font-weight: 600; }
+}
+
+// ── p-dialog override — sin header, borde redondeado ─────────────────────────
+:host ::ng-deep .auth-modal-shell {
+  .p-dialog-header { display: none !important; }
+  .p-dialog-content {
+    padding: 0 !important;
+    border-radius: var(--r-2xl) !important;
+    overflow: hidden !important;
+  }
+}
+
+// ── p-password dentro del formulario de registro ──────────────────────────────
+:host ::ng-deep .auth-form {
+  p-password { display: block !important; width: 100% !important; }
+
+  .p-password {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+  }
+
+  p-iconfield, .p-iconfield {
+    display: flex !important;
+    flex: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    position: relative !important;
+    align-items: center !important;
+  }
+
+  .p-password .p-inputtext {
+    flex: 1 !important;
+    width: 100% !important;
+    padding-right: 2.8rem !important;
+  }
+
+  .p-inputicon,
+  .p-icon-wrapper,
+  .p-password-toggle-mask-icon {
+    position: absolute !important;
+    right: 0.75rem !important;
+    left: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--app-muted) !important;
+    cursor: pointer !important;
+    z-index: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    &:hover { color: var(--app-text) !important; }
+  }
+}
+
+// ── Layout grid — lado izquierdo (brand) + derecho (formulario) ───────────────
+.auth-grid {
+  display: grid;
+  grid-template-columns: 42% 58%;
+  min-height: 30rem;
+}
+
+// ── Brand — lado izquierdo oscuro ─────────────────────────────────────────────
+.auth-brand {
+  position: relative;
+  background: linear-gradient(160deg, #0f172a 0%, #1e3358 55%, #0b1120 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: 2rem 1.4rem;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(2px);
+
+  &-1 {
+    width: 20rem; height: 20rem;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.18), transparent 70%);
+    top: -5rem; left: -5rem;
+    animation: orbDrift 9s ease-in-out infinite;
+  }
+  &-2 {
+    width: 15rem; height: 15rem;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.15), transparent 70%);
+    bottom: -4rem; right: -3rem;
+    animation: orbDrift 11s ease-in-out infinite reverse;
+  }
+}
+
+@keyframes orbDrift {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(1.2rem, -2rem); }
+}
+
+.brand-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  z-index: 1;
+}
+
+.brand-mark {
+  width: 2.5rem; height: 2.5rem;
+  border-radius: 0.75rem;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, #14b8a6, #38bdf8);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.45);
+}
+
+.brand-name {
+  color: #f1f5f9;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: 'Sora', 'Manrope', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.mascot-wrap {
+  z-index: 1;
+  filter: drop-shadow(0 10px 28px rgba(59, 130, 246, 0.35));
+  transition: opacity 0.42s ease, transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mascot {
+  width: 9.5rem;
+  height: 9.5rem;
+  animation: mascotFloat 4s ease-in-out infinite;
+}
+
+@keyframes mascotFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-9px); }
+}
+
+.mascot .g-eyes-open,
+.mascot .g-eyes-closed {
+  transition: opacity 0.3s ease;
+}
+
+.mascot .g-paws {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity  0.28s ease;
+}
+
+.mascot.eyes-closed {
+  .g-eyes-open  { opacity: 0; }
+  .g-eyes-closed { opacity: 1; }
+  .g-paws { transform: translateY(0); opacity: 1; }
+}
+
+.mascot.eyes-open {
+  .g-eyes-open  { opacity: 1; transition-delay: 0.18s; }
+  .g-eyes-closed { opacity: 0; }
+  .g-paws { transform: translateY(48px); opacity: 0; }
+}
+
+.mascot-wrap.mascot-hidden {
+  opacity: 0;
+  transform: translateX(-160%);
+  pointer-events: none;
+}
+
+.brand-hint {
+  z-index: 1;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+  min-height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ── Formulario — lado derecho ─────────────────────────────────────────────────
+.auth-form {
+  padding: 1.8rem 1.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: var(--app-surface);       // respeta el tema (era #ffffff hardcoded)
+  overflow-y: auto;
+  max-height: 92vh;
+}
+
+// ── Tab switch Login / Crear cuenta ──────────────────────────────────────────
+.view-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.22rem;
+  border-radius: 0.9rem;
+  background: var(--app-surface-muted);  // era #f1f5f9 hardcoded
+  margin-bottom: 0.25rem;
+}
+
+.switch-btn {
+  border: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--app-muted);               // era #64748b hardcoded
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  &.active {
+    background: var(--app-surface);      // era #ffffff hardcoded
+    color: var(--app-text);              // era #0f172a hardcoded
+    box-shadow: 0 2px 12px -3px var(--app-primary-glow);
+  }
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ── Field wrap ────────────────────────────────────────────────────────────────
+.field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+
+  label {
+    color: var(--app-text-2);            // era #374151 hardcoded
+    font-size: 0.81rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 0.7rem;
+}
+
+// ── Password wrap — custom eye button (login + reset views) ──────────────────
+.pwd-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input { padding-right: 2.8rem !important; }
+}
+
+.eye-btn {
+  position: absolute;
+  right: 0.55rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--app-muted);              // era #94a3b8 hardcoded
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  transition: color var(--dur-fast) var(--ease-smooth),
+              background var(--dur-fast) var(--ease-smooth);
+  font-family: inherit;
+
+  i { font-size: 0.9rem; }
+
+  &:hover:not(:disabled) {
+    color: var(--app-primary);
+    background: var(--app-primary-glow);
+  }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Login meta row ────────────────────────────────────────────────────────────
+.login-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: -0.15rem;
+}
+
+.mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--app-border);
+  background: var(--app-surface-muted);
+  color: var(--app-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  i { font-size: 0.7rem; }
+
+  &.elevated {
+    border-color: var(--app-warning-glow);
+    background: var(--app-warning-soft);
+    color: var(--app-warning);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--app-primary);
+    color: var(--app-primary);
+    background: var(--app-primary-glow);
+  }
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.mode-warning {
+  border: 1px solid var(--app-warning-glow);
+  background: var(--app-warning-soft);
+  color: var(--app-warning);
+  border-radius: 0.7rem;
+  padding: 0.52rem 0.75rem;
+  font-size: 0.79rem;
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+// ── Submit button ─────────────────────────────────────────────────────────────
+.submit-btn {
+  margin-top: 0.1rem;
+  border-radius: var(--r-lg) !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  height: 2.75rem;
+  // Glass effect — identidad NovaTech
+  box-shadow: 0 4px 20px var(--app-primary-glow),
+              inset 0 1px 0 rgba(255,255,255,0.28) !important;
+
+  &::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, transparent 55%) !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+  }
+}
+
+// ── Forgot password hero ──────────────────────────────────────────────────────
+.forgot-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.5rem 0 0.25rem;
+
+  .forgot-icon {
+    width: 2.8rem; height: 2.8rem;
+    flex-shrink: 0;
+    border-radius: 0.8rem;
+    background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-primary-strong) 100%);
+    display: grid;
+    place-items: center;
+
+    i { color: white; font-size: 1.1rem; }
+  }
+
+  .forgot-title {
+    font-weight: 700;
+    color: var(--app-text);              // era #0f172a hardcoded
+    margin: 0 0 0.2rem;
+    font-size: 0.93rem;
+  }
+
+  .forgot-sub {
+    color: var(--app-muted);             // era #64748b hardcoded
+    font-size: 0.8rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+}
+
+.text-center { text-align: center; }
+
+// ── Google Sign-In ────────────────────────────────────────────────────────────
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--app-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--app-border);
+  }
+}
+
+// Contenedor del botón oficial de Google (renderButton genera el iframe)
+.google-btn-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 2.75rem;
+
+  // El botón de Google renderiza un iframe — forzamos ancho completo
+  > div, iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 620px) {
+  .auth-grid { grid-template-columns: 1fr; }
+
+  .auth-brand {
+    flex-direction: row;
+    padding: 1rem 1.2rem;
+    gap: 0.9rem;
+    justify-content: flex-start;
+    min-height: auto;
+
+    .mascot-wrap .mascot { width: 4rem; height: 4rem; }
+    .brand-hint { display: none; }
+    .orb { display: none; }
+  }
+
+  .auth-form { padding: 1.3rem 1.2rem; }
+  .two-col { grid-template-columns: 1fr 1fr; }
+}

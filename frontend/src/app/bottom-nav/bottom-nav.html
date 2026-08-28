@@ -1,0 +1,65 @@
+<nav class="bottom-nav" role="navigation" aria-label="Navegación principal">
+
+    <!-- Inicio -->
+    <button class="bn-item" type="button"
+        [class.active]="isActive('/tienda')"
+        (click)="irATienda()"
+        aria-label="Ir al inicio — catálogo"
+        [attr.aria-current]="isActive('/tienda') ? 'page' : null">
+        <div class="bn-icon-wrap">
+            <i class="pi pi-home" aria-hidden="true"></i>
+        </div>
+        <span class="bn-label">Inicio</span>
+    </button>
+
+    <!-- Buscar (navega a tienda con foco en búsqueda) -->
+    <button class="bn-item" type="button"
+        [class.active]="false"
+        (click)="irATienda()"
+        aria-label="Buscar productos">
+        <div class="bn-icon-wrap">
+            <i class="pi pi-search" aria-hidden="true"></i>
+        </div>
+        <span class="bn-label">Buscar</span>
+    </button>
+
+    <!-- Carrito — con badge de cantidad -->
+    <button class="bn-item bn-cart" type="button"
+        [class.active]="isActive('/carrito') || isActive('/checkout')"
+        (click)="irACarrito()"
+        [attr.aria-label]="cartCount > 0 ? 'Carrito — ' + cartCount + ' artículo(s)' : 'Carrito vacío'"
+        [attr.aria-current]="(isActive('/carrito') || isActive('/checkout')) ? 'page' : null">
+        <div class="bn-icon-wrap">
+            <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+            <span class="bn-badge" *ngIf="cartCount > 0" aria-hidden="true">
+                {{ cartCount > 9 ? '9+' : cartCount }}
+            </span>
+        </div>
+        <span class="bn-label">Carrito</span>
+    </button>
+
+    <!-- Favoritos / Mis compras -->
+    <button class="bn-item" type="button"
+        [class.active]="isActive('/miscompras')"
+        (click)="irAFavoritos()"
+        aria-label="Mis compras y favoritos"
+        [attr.aria-current]="isActive('/favoritos') ? 'page' : null">
+        <div class="bn-icon-wrap">
+            <i class="pi pi-heart" aria-hidden="true"></i>
+        </div>
+        <span class="bn-label">Favoritos</span>
+    </button>
+
+    <!-- Cuenta -->
+    <button class="bn-item" type="button"
+        [class.active]="isActive('/configuracion')"
+        (click)="irACuenta()"
+        aria-label="Mi cuenta y configuración"
+        [attr.aria-current]="isActive('/configuracion') ? 'page' : null">
+        <div class="bn-icon-wrap">
+            <i class="pi pi-user" aria-hidden="true"></i>
+        </div>
+        <span class="bn-label">Cuenta</span>
+    </button>
+
+</nav>

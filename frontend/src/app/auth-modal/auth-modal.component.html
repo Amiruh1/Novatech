@@ -1,0 +1,363 @@
+<p-dialog
+    [(visible)]="visible"
+    [modal]="true"
+    [dismissableMask]="!loading"
+    [closable]="!loading"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: 'min(52rem, 97vw)' }"
+    styleClass="auth-modal-shell"
+    [transitionOptions]="'240ms cubic-bezier(0.16, 1, 0.3, 1)'"
+    (onHide)="closeModal()"
+>
+    <div class="auth-grid">
+
+        <section class="auth-brand">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+
+            <div class="brand-logo-row">
+                <div class="brand-mark">N</div>
+                <span class="brand-name">NovaTech</span>
+            </div>
+
+            <div class="mascot-wrap" [class.mascot-hidden]="authView !== 'login'">
+                <svg
+                    class="mascot"
+                    [class.eyes-open]="showLoginPassword"
+                    [class.eyes-closed]="!showLoginPassword"
+                    viewBox="0 0 120 120"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <defs>
+                        <radialGradient id="am-head" cx="38%" cy="32%" r="65%">
+                            <stop offset="0%" stop-color="#1d4ed8"/>
+                            <stop offset="100%" stop-color="#0f172a"/>
+                        </radialGradient>
+                        <radialGradient id="am-ear" cx="40%" cy="40%" r="60%">
+                            <stop offset="0%" stop-color="#2563eb"/>
+                            <stop offset="100%" stop-color="#1e3a5f"/>
+                        </radialGradient>
+                    </defs>
+
+                    <circle cx="25" cy="24" r="15" fill="url(#am-ear)"/>
+                    <circle cx="95" cy="24" r="15" fill="url(#am-ear)"/>
+                    <circle cx="25" cy="24" r="8"  fill="#1d4ed8" opacity="0.6"/>
+                    <circle cx="95" cy="24" r="8"  fill="#1d4ed8" opacity="0.6"/>
+
+                    <circle cx="60" cy="66" r="50" fill="url(#am-head)"/>
+
+                    <g class="g-eyes-open">
+                        <circle cx="42" cy="60" r="12" fill="#ffffff"/>
+                        <circle cx="45" cy="63" r="6.5" fill="#0f172a"/>
+                        <circle cx="47" cy="59" r="2.2" fill="#ffffff"/>
+                        <circle cx="78" cy="60" r="12" fill="#ffffff"/>
+                        <circle cx="81" cy="63" r="6.5" fill="#0f172a"/>
+                        <circle cx="83" cy="59" r="2.2" fill="#ffffff"/>
+                    </g>
+
+                    <g class="g-eyes-closed">
+                        <path d="M 30 60 Q 42 50 54 60" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                        <path d="M 66 60 Q 78 50 90 60" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    </g>
+
+                    <ellipse cx="60" cy="77" rx="5" ry="3.5" fill="#60a5fa" opacity="0.85"/>
+
+                    <path d="M 50 88 Q 60 96 70 88" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+                    <g class="g-paws">
+                        <path d="M 12 108 Q 22 85 36 66" stroke="#1e3a5f" stroke-width="13" fill="none" stroke-linecap="round"/>
+                        <path d="M 108 108 Q 98 85 84 66" stroke="#1e3a5f" stroke-width="13" fill="none" stroke-linecap="round"/>
+                        <ellipse cx="36" cy="62" rx="16" ry="17" fill="#1e3a5f"/>
+                        <circle  cx="24" cy="51" r="8"  fill="#1e3a5f"/>
+                        <circle  cx="36" cy="47" r="8"  fill="#1e3a5f"/>
+                        <circle  cx="48" cy="51" r="8"  fill="#1e3a5f"/>
+                        <ellipse cx="84" cy="62" rx="16" ry="17" fill="#1e3a5f"/>
+                        <circle  cx="72" cy="51" r="8"  fill="#1e3a5f"/>
+                        <circle  cx="84" cy="47" r="8"  fill="#1e3a5f"/>
+                        <circle  cx="96" cy="51" r="8"  fill="#1e3a5f"/>
+                    </g>
+                </svg>
+            </div>
+
+            <p class="brand-hint">
+                <ng-container *ngIf="authView === 'login' && !showLoginPassword">No miro tu contraseña&nbsp;🙈</ng-container>
+                <ng-container *ngIf="authView === 'login' && showLoginPassword">¡Ahora sí la veo!&nbsp;👀</ng-container>
+                <ng-container *ngIf="authView === 'register'">¡Bienvenido a NovaTech!&nbsp;🚀</ng-container>
+                <ng-container *ngIf="authView === 'forgot'">Recuperaremos tu acceso&nbsp;🔐</ng-container>
+                <ng-container *ngIf="authView === 'forgot-code'">Ingresa el código que enviamos&nbsp;📬</ng-container>
+            </p>
+        </section>
+
+        <section class="auth-form">
+
+            <div class="view-switch">
+                <button type="button" class="switch-btn" [class.active]="authView === 'login'"
+                    (click)="switchView('login')" [disabled]="loading">
+                    Iniciar sesión
+                </button>
+                <button type="button" class="switch-btn" [class.active]="authView === 'register'"
+                    (click)="switchView('register')" [disabled]="loading">
+                    Crear cuenta
+                </button>
+            </div>
+
+            <ng-container *ngIf="authView === 'login'">
+                <div class="field-wrap">
+                    <label for="am-email">Correo</label>
+                    <input
+                        pInputText
+                        id="am-email"
+                        type="email"
+                        autocomplete="email"
+                        [(ngModel)]="loginEmail"
+                        [disabled]="loading"
+                        [placeholder]="emailPlaceholder"
+                        class="w-full"
+                    />
+                </div>
+
+                <div class="field-wrap">
+                    <label for="am-pwd">Contraseña</label>
+                    <div class="pwd-wrap">
+                        <input
+                            id="am-pwd"
+                            pInputText
+                            [type]="showLoginPassword ? 'text' : 'password'"
+                            autocomplete="current-password"
+                            [(ngModel)]="loginPassword"
+                            [disabled]="loading"
+                            placeholder="••••••••"
+                            class="w-full"
+                        />
+                        <button type="button" class="eye-btn" (click)="toggleLoginPassword()" [disabled]="loading" tabindex="-1">
+                            <i [class]="showLoginPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="login-meta-row">
+                    <button pButton type="button" label="¿Olvidaste tu contraseña?"
+                        class="p-button-link p-0 forgot-link"
+                        [disabled]="loading" (click)="switchView('forgot')">
+                    </button>
+                    <button type="button" class="mode-pill" [class.elevated]="modoAcceso === 'elevado'"
+                        (click)="toggleModo()" [disabled]="loading"
+                        [title]="modoAcceso === 'elevado' ? 'Cambiar a modo cliente' : 'Acceso administrativo'">
+                        <i [class]="modoAcceso === 'elevado' ? 'pi pi-shield' : 'pi pi-user'"></i>
+                        <span>{{ modoAcceso === 'elevado' ? 'Admin' : 'Cliente' }}</span>
+                    </button>
+                </div>
+
+                <div class="mode-warning" *ngIf="modoAcceso === 'elevado'">
+                    <i class="pi pi-lock"></i>
+                    Solo cuentas administrativas pueden iniciar en modo elevado.
+                </div>
+
+                <button pButton type="button" [label]="loginButtonLabel" icon="pi pi-sign-in"
+                    class="w-full submit-btn" [loading]="loading" [disabled]="loading"
+                    (click)="submitLogin()">
+                </button>
+
+                <!-- Google Sign-In — botón oficial (renderButton, compatible con todos los navegadores) -->
+                <div class="auth-divider"><span>o continúa con</span></div>
+                <div class="google-btn-wrap">
+                    <div id="google-btn-login"></div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="authView === 'register'">
+                <div class="field-wrap">
+                    <label>Nombre completo</label>
+                    <input pInputText [(ngModel)]="registerNombre" [disabled]="loading"
+                        placeholder="Ej. María López" maxlength="120" class="w-full"/>
+                    <small class="field-req req-error"
+                        *ngIf="registerNombre.length > 0 && registerNombre.length < 3">
+                        Mínimo 3 caracteres
+                    </small>
+                    <small class="char-counter"
+                        *ngIf="registerNombre.length > 95"
+                        [class.char-warn]="registerNombre.length > 108">
+                        {{ registerNombre.length }}/120
+                    </small>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Correo electrónico</label>
+                    <input pInputText type="email" autocomplete="email"
+                        [(ngModel)]="registerEmail" [disabled]="loading"
+                        placeholder="maria@correo.com" maxlength="320" class="w-full"/>
+                </div>
+
+                <div class="two-col">
+                    <div class="field-wrap">
+                        <label>Tipo Doc.</label>
+                        <p-select
+                            [options]="tiposDocumento"
+                            [(ngModel)]="registerTipoDocumento"
+                            [disabled]="loading"
+                            styleClass="w-full"
+                            appendTo="body"
+                        ></p-select>
+                    </div>
+                    <div class="field-wrap">
+                        <label>N° Documento</label>
+                        <input pInputText [(ngModel)]="registerNumeroDocumento" [disabled]="loading"
+                            [placeholder]="docPlaceholder" [maxlength]="docMaxLength"
+                            (input)="onDocumentoInput($event)" class="w-full"/>
+                    </div>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Contraseña</label>
+                    <p-password [(ngModel)]="registerPassword" [disabled]="loading"
+                        [feedback]="false" [toggleMask]="true"
+                        placeholder="Mínimo 8 caracteres"
+                        [maxLength]="64"
+                        inputStyleClass="w-full" styleClass="w-full">
+                    </p-password>
+                    <small class="field-req req-error"
+                        *ngIf="registerPassword.length > 0 && registerPassword.length < 8">
+                        Faltan {{ 8 - registerPassword.length }} caracter{{ 8 - registerPassword.length === 1 ? '' : 'es' }} para el mínimo
+                    </small>
+                    <small class="char-counter"
+                        *ngIf="registerPassword.length > 50"
+                        [class.char-warn]="registerPassword.length > 56">
+                        {{ registerPassword.length }}/64
+                    </small>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Confirmar contraseña</label>
+                    <p-password [(ngModel)]="registerConfirmPassword" [disabled]="loading"
+                        [feedback]="false" [toggleMask]="true"
+                        placeholder="Repite tu contraseña"
+                        [maxLength]="64"
+                        inputStyleClass="w-full" styleClass="w-full">
+                    </p-password>
+                    <small class="field-req req-error"
+                        *ngIf="registerConfirmPassword.length > 0 && registerConfirmPassword !== registerPassword">
+                        Las contraseñas no coinciden
+                    </small>
+                    <small class="field-req req-ok"
+                        *ngIf="registerConfirmPassword.length >= 8 && registerConfirmPassword === registerPassword">
+                        ✓ Contraseñas coinciden
+                    </small>
+                </div>
+
+                <button pButton type="button" label="Crear cuenta" icon="pi pi-user-plus"
+                    class="w-full submit-btn" [loading]="loading" [disabled]="loading"
+                    (click)="submitRegister()">
+                </button>
+
+                <!-- Google Sign-In — botón oficial (renderButton, compatible con todos los navegadores) -->
+                <div class="auth-divider"><span>o regístrate con</span></div>
+                <div class="google-btn-wrap">
+                    <div id="google-btn-register"></div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="authView === 'forgot'">
+                <div class="forgot-hero">
+                    <div class="forgot-icon"><i class="pi pi-envelope"></i></div>
+                    <div>
+                        <p class="forgot-title">Recupera tu contraseña</p>
+                        <p class="forgot-sub">Te enviaremos un código de 6 caracteres a tu correo.</p>
+                    </div>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Correo electrónico</label>
+                    <input pInputText type="email" [(ngModel)]="forgotEmail" [disabled]="loading"
+                        placeholder="tu@correo.com" class="w-full"/>
+                </div>
+
+                <button pButton type="button" label="Enviar código" icon="pi pi-send"
+                    class="w-full submit-btn" [loading]="loading" [disabled]="loading"
+                    (click)="submitForgot()">
+                </button>
+
+                <div class="text-center" style="margin-top: 0.25rem;">
+                    <button pButton type="button" label="← Volver al login" class="p-button-link p-0"
+                        style="font-size: 0.82rem;" [disabled]="loading" (click)="switchView('login')">
+                    </button>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="authView === 'forgot-code'">
+                <div class="forgot-hero">
+                    <div class="forgot-icon" style="background: linear-gradient(135deg,#7c3aed,#a855f7);">
+                        <i class="pi pi-key" style="color:#fff;"></i>
+                    </div>
+                    <div>
+                        <p class="forgot-title">Ingresa tu código</p>
+                        <p class="forgot-sub">Revisa tu bandeja y escribe el código de 6 caracteres que recibiste.</p>
+                    </div>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Código de recuperación</label>
+                    <input pInputText type="text" [(ngModel)]="forgotCode" [disabled]="loading"
+                        placeholder="Ej. A3K7MX" maxlength="6"
+                        style="text-transform:uppercase;letter-spacing:0.18em;font-weight:700;font-size:1.1rem;text-align:center;"
+                        class="w-full"/>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Nueva contraseña</label>
+                    <div class="pwd-wrap">
+                        <input
+                            pInputText
+                            [type]="showResetPassword ? 'text' : 'password'"
+                            [(ngModel)]="resetNueva"
+                            [disabled]="loading"
+                            placeholder="Mínimo 8 caracteres"
+                            maxlength="64"
+                            class="w-full"
+                        />
+                        <button type="button" class="eye-btn" (click)="toggleResetPassword()" [disabled]="loading" tabindex="-1">
+                            <i [class]="showResetPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                        </button>
+                    </div>
+                    <small class="field-req req-error"
+                        *ngIf="resetNueva.length > 0 && resetNueva.length < 8">
+                        Faltan {{ 8 - resetNueva.length }} caracter{{ 8 - resetNueva.length === 1 ? '' : 'es' }} para el mínimo
+                    </small>
+                </div>
+
+                <div class="field-wrap">
+                    <label>Confirmar contraseña</label>
+                    <div class="pwd-wrap">
+                        <input
+                            pInputText
+                            [type]="showResetConfirm ? 'text' : 'password'"
+                            [(ngModel)]="resetConfirm"
+                            [disabled]="loading"
+                            placeholder="Repite tu contraseña"
+                            maxlength="64"
+                            class="w-full"
+                        />
+                        <button type="button" class="eye-btn" (click)="toggleResetConfirm()" [disabled]="loading" tabindex="-1">
+                            <i [class]="showResetConfirm ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button pButton type="button" label="Restablecer contraseña" icon="pi pi-check-circle"
+                    class="w-full submit-btn" [loading]="loading" [disabled]="loading"
+                    (click)="submitResetCode()">
+                </button>
+
+                <div class="text-center" style="margin-top: 0.25rem; display:flex; justify-content:space-between;">
+                    <button pButton type="button" label="← Cambiar correo" class="p-button-link p-0"
+                        style="font-size: 0.82rem;" [disabled]="loading" (click)="switchView('forgot')">
+                    </button>
+                    <button pButton type="button" label="Volver al login" class="p-button-link p-0"
+                        style="font-size: 0.82rem;" [disabled]="loading" (click)="switchView('login')">
+                    </button>
+                </div>
+            </ng-container>
+
+        </section>
+    </div>
+</p-dialog>

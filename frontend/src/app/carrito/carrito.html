@@ -1,0 +1,154 @@
+<section class="app-shell-page">
+    <div class="page-intro">
+        <h1 class="page-title">Carrito de compras</h1>
+        <p class="page-subtitle">Revisa tus productos antes de confirmar el pago.</p>
+    </div>
+
+    <div class="carrito-layout" *ngIf="items.length > 0; else emptyCart">
+
+        <!-- Lista de productos -->
+        <div class="carrito-items">
+            <article class="app-surface-card">
+                <div class="card-head card-head--divided">
+                    <div>
+                        <h3 class="card-title">Productos seleccionados</h3>
+                        <span class="card-subtitle">{{ cart.getItemCount() }} artículo(s)</span>
+                    </div>
+                    <button pButton type="button" icon="pi pi-trash" label="Vaciar" severity="secondary"
+                        [outlined]="true" class="p-button-sm" (click)="vaciarCarrito()">
+                    </button>
+                </div>
+
+                <div class="carrito-items-list">
+                    <div class="cart-item" *ngFor="let item of items; let last = last" [class.last]="last">
+                        <!-- Imagen -->
+                        <div class="cart-item-img" [routerLink]="['/producto', item.producto.id]">
+                            <img [src]="item.producto.imagen" [alt]="item.producto.nombre"
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/80x80?text=NT'">
+                        </div>
+
+                        <!-- Info -->
+                        <div class="cart-item-info">
+                            <div class="cart-item-brand">{{ item.producto.marca || item.producto.categoria }}</div>
+                            <div class="cart-item-name" [routerLink]="['/producto', item.producto.id]">
+                                {{ item.producto.nombre }}
+                            </div>
+                            <div class="cart-item-sku" *ngIf="item.producto.sku">SKU: {{ item.producto.sku }}</div>
+                        </div>
+
+                        <!-- Cantidad -->
+                        <div class="cart-item-qty" [class.qty-updated]="savedQty[item.producto.id]">
+                            <button class="qty-btn" type="button"
+                                [disabled]="item.cantidad <= 1 || savedQty[item.producto.id]"
+                                (click)="actualizarCantidad(item.producto.id, item.cantidad - 1)">
+                                <i class="pi pi-minus"></i>
+                            </button>
+                            <span class="qty-value">
+                                <i class="pi pi-check qty-check" *ngIf="savedQty[item.producto.id]"></i>
+                                <span *ngIf="!savedQty[item.producto.id]">{{ item.cantidad }}</span>
+                            </span>
+                            <button class="qty-btn" type="button"
+                                [disabled]="item.cantidad >= item.producto.stock || savedQty[item.producto.id]"
+                                (click)="actualizarCantidad(item.producto.id, item.cantidad + 1)">
+                                <i class="pi pi-plus"></i>
+                            </button>
+                        </div>
+
+                        <!-- Precio unitario -->
+                        <div class="cart-item-unit">
+                            <span class="unit-label">c/u</span>
+                            <span class="unit-price">S/ {{ getPrecioFinal(item.producto) | number:'1.2-2' }}</span>
+                        </div>
+
+                        <!-- Subtotal -->
+                        <div class="cart-item-subtotal">
+                            S/ {{ (getPrecioFinal(item.producto) * item.cantidad) | number:'1.2-2' }}
+                        </div>
+
+                        <!-- Eliminar -->
+                        <button class="cart-item-remove" type="button"
+                            (click)="eliminar(item.producto.id)"
+                            aria-label="Eliminar producto">
+                            <i class="pi pi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- Resumen y CTA -->
+        <aside class="carrito-resumen">
+            <article class="app-surface-card resumen-card">
+                <div class="card-head">
+                    <h3 class="card-title">Resumen del pedido</h3>
+                </div>
+                <div class="card-body">
+                    <div class="resumen-lineas">
+                        <div class="resumen-linea">
+                            <span>Subtotal ({{ cart.getItemCount() }} art.)</span>
+                            <span>S/ {{ subtotal | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea muted">
+                            <span>IGV (18%)</span>
+                            <span>S/ {{ igv | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea muted">
+                            <span>Envío</span>
+                            <span class="envio-hint">Se calcula al pagar</span>
+                        </div>
+                    </div>
+
+                    <div class="resumen-total">
+                        <span>Total estimado</span>
+                        <span class="total-value">S/ {{ subtotal + igv | number:'1.2-2' }}</span>
+                    </div>
+
+                    <button class="btn-checkout" type="button" (click)="irAlCheckout()">
+                        <i class="pi pi-lock"></i>
+                        <span>Proceder al pago</span>
+                        <i class="pi pi-arrow-right btn-arrow"></i>
+                    </button>
+
+                    <div class="resumen-seguridad">
+                        <i class="pi pi-shield"></i>
+                        <span>Pago 100% seguro · Datos protegidos</span>
+                    </div>
+
+                    <div class="resumen-metodos">
+                        <span class="metodos-label">Aceptamos</span>
+                        <div class="metodos-chips">
+                            <span class="metodo-chip"><i class="pi pi-credit-card"></i> Tarjeta</span>
+                            <span class="metodo-chip"><i class="pi pi-wallet"></i> Yape</span>
+                            <span class="metodo-chip"><i class="pi pi-building"></i> Banco</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Continuar comprando -->
+            <button pButton type="button" icon="pi pi-arrow-left" label="Seguir comprando"
+                severity="secondary" [outlined]="true" class="p-button-sm w-full mt-3"
+                routerLink="/tienda">
+            </button>
+        </aside>
+
+    </div>
+</section>
+
+<ng-template #emptyCart>
+    <div class="carrito-empty-wrap">
+        <article class="app-surface-card carrito-empty">
+            <div class="table-empty-state">
+                <div class="empty-icon-wrap">
+                    <i class="pi pi-shopping-cart"></i>
+                </div>
+                <h3>Tu carrito está vacío</h3>
+                <p>Explora el catálogo y descubre lo mejor en tecnología. ¡Te esperan grandes ofertas!</p>
+                <button pButton type="button" label="Explorar catálogo"
+                    icon="pi pi-shopping-bag" routerLink="/tienda">
+                </button>
+            </div>
+        </article>
+    </div>
+</ng-template>

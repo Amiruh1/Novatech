@@ -1,0 +1,47 @@
+{
+  "name": "NovaTech — Tecnología Premium",
+  "short_name": "NovaTech",
+  "description": "Tu tienda de tecnología premium. Laptops, smartphones, periféricos y más con envío a todo el país.",
+  "start_url": "/tienda",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f766e",
+  "theme_color": "#0d9488",
+  "lang": "es",
+  "categories": ["shopping", "technology"],
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Ir a la tienda",
+      "short_name": "Tienda",
+      "url": "/tienda",
+      "icons": [{ "src": "favicon.ico", "sizes": "48x48" }]
+    },
+    {
+      "name": "Mi carrito",
+      "short_name": "Carrito",
+      "url": "/carrito",
+      "icons": [{ "src": "favicon.ico", "sizes": "48x48" }]
+    }
+  ]
+}

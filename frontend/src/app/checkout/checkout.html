@@ -1,0 +1,471 @@
+<section class="app-shell-page checkout-shell">
+
+    <!-- Progress Bar -->
+    <div class="checkout-progress" *ngIf="step < 4">
+        <div class="progress-inner">
+            <div class="progress-steps">
+                <div class="progress-step"
+                     *ngFor="let label of stepLabels; let i = index"
+                     [class.active]="step === i + 1"
+                     [class.done]="step > i + 1">
+                    <div class="step-dot">
+                        <i class="pi pi-check" *ngIf="step > i + 1"></i>
+                        <i class="pi {{ stepIcons[i] }}" *ngIf="step <= i + 1"></i>
+                    </div>
+                    <span class="step-label">{{ label }}</span>
+                </div>
+                <div class="progress-line">
+                    <div class="progress-line-fill" [style.width.%]="((step - 1) / 3) * 100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Layout ─────────────────────────────────────────────────────────── -->
+    <div class="checkout-layout" *ngIf="step < 4">
+
+        <!-- Main content -->
+        <div class="checkout-main">
+
+            <!-- ── STEP 1: Order Summary ──────────────────────────────────── -->
+            <article class="app-surface-card checkout-card" *ngIf="step === 1" [@stepAnim]>
+                <div class="card-head">
+                    <div class="step-head-icon"><i class="pi pi-list" aria-hidden="true"></i></div>
+                    <div>
+                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1">Resumen del pedido</h2>
+                        <span class="card-subtitle">{{ totalItems }} artículo(s) · Revisa antes de continuar</span>
+                    </div>
+                </div>
+                <div class="checkout-item-list">
+                    <div class="co-item" *ngFor="let item of items">
+                        <div class="co-item-img">
+                            <img [src]="item.producto.imagen" [alt]="item.producto.nombre"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/64x64?text=NT'">
+                        </div>
+                        <div class="co-item-info">
+                            <div class="co-item-brand">{{ item.producto.marca || item.producto.categoria }}</div>
+                            <div class="co-item-name">{{ item.producto.nombre }}</div>
+                            <div class="co-item-qty">x {{ item.cantidad }}</div>
+                        </div>
+                        <div class="co-item-price">
+                            S/ {{ (getPrecioFinal(item.producto) * item.cantidad) | number:'1.2-2' }}
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ── STEP 2: Address ────────────────────────────────────────── -->
+            <article class="app-surface-card checkout-card" *ngIf="step === 2" [@stepAnim]>
+                <div class="card-head">
+                    <div class="step-head-icon address"><i class="pi pi-map-marker" aria-hidden="true"></i></div>
+                    <div>
+                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1">Dirección de envío</h2>
+                        <span class="card-subtitle">¿A dónde enviamos tu pedido?</span>
+                    </div>
+                    <button pButton type="button" icon="pi pi-plus" label="Nueva"
+                        class="p-button-sm p-button-outlined ml-auto"
+                        (click)="abrirDirDialog()">
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <!-- Loading -->
+                    <div class="dir-loading" *ngIf="loadingDirs">
+                        <i class="pi pi-spin pi-spinner"></i> Cargando direcciones...
+                    </div>
+
+                    <!-- Address cards -->
+                    <div class="dir-options" *ngIf="!loadingDirs && misDirecciones.length > 0">
+                        <div class="dir-option"
+                             *ngFor="let dir of misDirecciones"
+                             [class.selected]="direccionSeleccionada === dir.id"
+                             (click)="onDireccionChange(dir.id ?? null)">
+                            <div class="dir-option-radio">
+                                <div class="radio-dot" [class.active]="direccionSeleccionada === dir.id"></div>
+                            </div>
+                            <div class="dir-option-body">
+                                <div class="dir-alias">
+                                    {{ dir.alias }}
+                                    <span class="dir-pred-tag" *ngIf="dir.predeterminada">Principal</span>
+                                </div>
+                                <div class="dir-detail">
+                                    <i class="pi pi-user"></i> {{ dir.destinatario }}
+                                </div>
+                                <div class="dir-detail">
+                                    <i class="pi pi-map-marker"></i> {{ dir.direccion_detallada }}, {{ dir.distrito }}, {{ dir.provincia }}
+                                </div>
+                            </div>
+                            <div class="dir-envio-cost" *ngIf="direccionSeleccionada === dir.id">
+                                <span class="envio-tag">Envío: S/ {{ costoEnvio }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No addresses -->
+                    <div class="dir-empty" *ngIf="!loadingDirs && !misDirecciones.length">
+                        <i class="pi pi-map"></i>
+                        <p>No tienes direcciones guardadas.</p>
+                        <button pButton type="button" label="Agregar dirección" icon="pi pi-plus"
+                            class="p-button-sm p-button-outlined" (click)="abrirDirDialog()">
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ── STEP 3: Payment ────────────────────────────────────────── -->
+            <article class="app-surface-card checkout-card" *ngIf="step === 3" [@stepAnim]>
+                <div class="card-head">
+                    <div class="step-head-icon payment"><i class="pi pi-credit-card" aria-hidden="true"></i></div>
+                    <div>
+                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1">Método de pago</h2>
+                        <span class="card-subtitle">Elige cómo quieres pagar</span>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <!-- Method selector tabs -->
+                    <div class="method-tabs">
+                        <button class="method-tab"
+                                *ngFor="let m of metodosPago"
+                                [class.active]="metodoPagoSeleccionado === m.value"
+                                (click)="metodoPagoSeleccionado = m.value"
+                                type="button">
+                            <i [class]="m.icon"></i>
+                            <span>{{ m.label }}</span>
+                        </button>
+                    </div>
+
+                    <!-- Tarjeta -->
+                    <div class="pay-fields" *ngIf="metodoPagoSeleccionado === 'tarjeta'">
+                        <div class="pay-field full">
+                            <label for="cc-name">Titular de la tarjeta</label>
+                            <input pInputText id="cc-name" type="text" autocomplete="cc-name"
+                                   [(ngModel)]="nombreTitular"
+                                   placeholder="Como figura en la tarjeta" maxlength="80" class="w-full"/>
+                        </div>
+                        <div class="pay-field full">
+                            <label for="cc-number">
+                                Número de tarjeta
+                                <span class="card-brand-tag" *ngIf="cardBrand">{{ cardBrand }}</span>
+                            </label>
+                            <input pInputText id="cc-number" type="text" inputmode="numeric"
+                                   autocomplete="cc-number" maxlength="23"
+                                   [(ngModel)]="numeroTarjeta"
+                                   (ngModelChange)="onNumeroTarjetaChange($event)"
+                                   placeholder="0000 0000 0000 0000" class="w-full card-input"/>
+                        </div>
+                        <div class="pay-field">
+                            <label for="cc-exp">Vencimiento</label>
+                            <input pInputText id="cc-exp" type="text" inputmode="numeric"
+                                   autocomplete="cc-exp" maxlength="5"
+                                   [(ngModel)]="vencimientoTarjeta"
+                                   (ngModelChange)="onVencimientoChange($event)"
+                                   placeholder="MM/YY" class="w-full"/>
+                        </div>
+                        <div class="pay-field">
+                            <label for="cc-csc">CVV</label>
+                            <input pInputText id="cc-csc" type="password" inputmode="numeric"
+                                   autocomplete="cc-csc" maxlength="4"
+                                   [(ngModel)]="cvvTarjeta"
+                                   (ngModelChange)="onCvvChange($event)"
+                                   placeholder="•••" class="w-full"/>
+                        </div>
+                    </div>
+
+                    <!-- Yape/Plin -->
+                    <div class="pay-fields" *ngIf="metodoPagoSeleccionado === 'billetera'">
+                        <div class="yape-hint">
+                            <i class="pi pi-info-circle"></i>
+                            Realiza el pago por Yape o Plin y luego ingresa los datos de la operación.
+                        </div>
+                        <div class="pay-field">
+                            <label>Teléfono Yape / Plin</label>
+                            <input pInputText type="text" inputmode="numeric" maxlength="9"
+                                   [(ngModel)]="telefonoBilletera"
+                                   (ngModelChange)="onTelefonoChange($event)"
+                                   placeholder="9XXXXXXXX" class="w-full"/>
+                        </div>
+                        <div class="pay-field">
+                            <label>Código de operación</label>
+                            <input pInputText type="text" inputmode="numeric" maxlength="12"
+                                   [(ngModel)]="codigoVerificacion"
+                                   (ngModelChange)="onCodigoChange($event)"
+                                   placeholder="Ej. 092738" class="w-full"/>
+                        </div>
+                    </div>
+
+                    <!-- Transferencia -->
+                    <div class="pay-fields" *ngIf="metodoPagoSeleccionado === 'transferencia'">
+                        <div class="yape-hint">
+                            <i class="pi pi-info-circle"></i>
+                            Realiza la transferencia y adjunta el número de operación.
+                        </div>
+                        <div class="pay-field">
+                            <label>Banco</label>
+                            <input pInputText type="text" [(ngModel)]="bancoTransferencia"
+                                   placeholder="Ej. BCP, Interbank, BBVA" maxlength="60" class="w-full"/>
+                        </div>
+                        <div class="pay-field">
+                            <label>Número de operación</label>
+                            <input pInputText type="text" [(ngModel)]="nroOperacionTransferencia"
+                                   placeholder="Ej. 00912873" maxlength="30" class="w-full"/>
+                        </div>
+                    </div>
+
+                    <!-- Comprobante -->
+                    <div class="comprobante-section">
+                        <div class="section-label-co">Tipo de comprobante</div>
+                        <div class="comprobante-tabs">
+                            <button class="comp-tab" type="button"
+                                    [class.active]="tipoComprobante === 'boleta'"
+                                    (click)="tipoComprobante = 'boleta'">
+                                <i class="pi pi-file"></i> Boleta
+                            </button>
+                            <button class="comp-tab" type="button"
+                                    [class.active]="tipoComprobante === 'factura'"
+                                    (click)="tipoComprobante = 'factura'">
+                                <i class="pi pi-building"></i> Factura
+                            </button>
+                        </div>
+
+                        <div class="pay-fields mt-4" *ngIf="tipoComprobante === 'factura'">
+                            <div class="pay-field">
+                                <label>RUC (11 dígitos)</label>
+                                <input pInputText type="text" inputmode="numeric" maxlength="11"
+                                       [(ngModel)]="documentoFiscal"
+                                       (ngModelChange)="onRucChange($event)"
+                                       placeholder="20123456789" class="w-full"/>
+                            </div>
+                            <div class="pay-field">
+                                <label>Razón social</label>
+                                <input pInputText type="text" [(ngModel)]="razonSocial"
+                                       placeholder="Ej. Empresa SAC" maxlength="150" class="w-full"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comentario -->
+                    <div class="pay-field mt-4">
+                        <label>Comentario de entrega (opcional)</label>
+                        <textarea pTextarea rows="2" [(ngModel)]="comentarioPago"
+                                  placeholder="Referencias, instrucciones especiales, etc."
+                                  maxlength="300" class="w-full"></textarea>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- Order sidebar -->
+        <aside class="checkout-sidebar">
+            <article class="app-surface-card">
+                <div class="card-head">
+                    <h3 class="card-title">Tu pedido</h3>
+                </div>
+                <div class="card-body sidebar-body">
+
+                    <!-- Mini item list -->
+                    <div class="sidebar-items">
+                        <div class="sidebar-item" *ngFor="let item of items">
+                            <div class="sb-img">
+                                <img [src]="item.producto.imagen" [alt]="item.producto.nombre"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/44x44?text=NT'">
+                                <span class="sb-qty">{{ item.cantidad }}</span>
+                            </div>
+                            <div class="sb-name">{{ item.producto.nombre }}</div>
+                            <div class="sb-price">S/ {{ (getPrecioFinal(item.producto) * item.cantidad) | number:'1.2-2' }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Address summary (step 3+) -->
+                    <div class="sidebar-section" *ngIf="step >= 3 && direccionActual">
+                        <div class="sidebar-section-label">Envío a</div>
+                        <div class="sidebar-address">
+                            <i class="pi pi-map-marker"></i>
+                            <div>
+                                <strong>{{ direccionActual.alias }}</strong>
+                                <small>{{ direccionActual.distrito }}, {{ direccionActual.provincia }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="sidebar-totals">
+                        <div class="sidebar-total-row">
+                            <span>Subtotal</span>
+                            <span>S/ {{ subtotal | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="sidebar-total-row muted">
+                            <span>IGV (18%)</span>
+                            <span>S/ {{ igv | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="sidebar-total-row muted">
+                            <span>Envío</span>
+                            <span *ngIf="costoEnvio > 0">S/ {{ costoEnvio | number:'1.2-2' }}</span>
+                            <span *ngIf="costoEnvio === 0" class="pending-text">Por definir</span>
+                        </div>
+                        <div class="sidebar-total-final">
+                            <span>Total</span>
+                            <span>S/ {{ total | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <button class="co-btn-next" type="button"
+                        [disabled]="procesando"
+                        (click)="siguiente()">
+                        <i class="pi pi-spin pi-spinner" *ngIf="procesando"></i>
+                        <i class="pi pi-arrow-right" *ngIf="!procesando && step < 3"></i>
+                        <i class="pi pi-lock" *ngIf="!procesando && step === 3"></i>
+                        <span>{{
+                            procesando ? 'Procesando...' :
+                            step === 1 ? 'Continuar a dirección' :
+                            step === 2 ? 'Continuar a pago' :
+                            'Confirmar pedido'
+                        }}</span>
+                    </button>
+
+                    <button class="co-btn-back" type="button" (click)="anterior()">
+                        <i class="pi pi-arrow-left"></i>
+                        <span>{{ step === 1 ? 'Volver al carrito' : 'Paso anterior' }}</span>
+                    </button>
+
+                    <div class="co-secure">
+                        <i class="pi pi-shield"></i>
+                        <span>Transacción 100% segura</span>
+                    </div>
+                </div>
+            </article>
+        </aside>
+
+    </div>
+
+    <!-- ── STEP 4: Success ──────────────────────────────────────────────── -->
+    <div class="checkout-success" *ngIf="step === 4" [@successAnim]>
+        <div class="success-icon-wrap">
+            <div class="success-ring"></div>
+            <div class="success-check"><i class="pi pi-check"></i></div>
+        </div>
+        <h1 class="success-title">¡Pedido confirmado!</h1>
+        <p class="success-subtitle">
+            Tu pedido <strong>#{{ ventaId }}</strong> fue registrado correctamente.
+            Recibirás actualizaciones sobre el estado de tu despacho.
+        </p>
+        <div class="success-meta">
+            <div class="meta-item">
+                <i class="pi pi-calendar"></i>
+                <div>
+                    <span class="meta-label">Fecha</span>
+                    <span class="meta-value">{{ ventaFecha }}</span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <i class="pi pi-credit-card"></i>
+                <div>
+                    <span class="meta-label">Método de pago</span>
+                    <span class="meta-value">{{ ventaMetodo }}</span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <i class="pi pi-dollar"></i>
+                <div>
+                    <span class="meta-label">Total pagado</span>
+                    <span class="meta-value primary">S/ {{ total | number:'1.2-2' }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="success-actions">
+            <button class="co-btn-next" type="button" (click)="irAMisCompras()">
+                <i class="pi pi-list-check"></i>
+                <span>Ver mis compras</span>
+            </button>
+            <button class="co-btn-back" type="button" (click)="irATienda()">
+                <i class="pi pi-shopping-bag"></i>
+                <span>Seguir comprando</span>
+            </button>
+        </div>
+    </div>
+
+</section>
+
+<!-- ── Mobile Sticky Action Bar — CTA siempre accesible ──────── -->
+<div class="checkout-mobile-bar" *ngIf="step < 4" role="region" aria-label="Acción de pago">
+    <div class="cmb-total">
+        <span class="cmb-label">Total</span>
+        <span class="cmb-value">S/ {{ total | number:'1.2-2' }}</span>
+    </div>
+    <button class="cmb-cta" type="button"
+        [disabled]="procesando"
+        (click)="siguiente()"
+        [attr.aria-label]="procesando ? 'Procesando pedido' : (step < 3 ? 'Siguiente paso' : 'Confirmar pedido')">
+        <i class="pi pi-spin pi-spinner" *ngIf="procesando" aria-hidden="true"></i>
+        <i class="pi pi-arrow-right" *ngIf="!procesando && step < 3" aria-hidden="true"></i>
+        <i class="pi pi-lock" *ngIf="!procesando && step === 3" aria-hidden="true"></i>
+        <span>{{ procesando ? 'Procesando...' : step < 3 ? 'Continuar' : 'Confirmar pedido' }}</span>
+    </button>
+</div>
+
+<!-- Quick-add address dialog -->
+<p-dialog [(visible)]="showDirDialog" [modal]="true" [draggable]="false" [resizable]="false"
+    [closable]="!guardandoDir" [style]="{ width: 'min(34rem, 96vw)' }"
+    [transitionOptions]="'200ms ease-out'">
+    <ng-template pTemplate="header">
+        <div class="dlg-hero dlg-address">
+            <div class="dlg-hero-icon"><i class="pi pi-map-marker"></i></div>
+            <div>
+                <span class="dlg-hero-title">Nueva dirección</span>
+                <span class="dlg-hero-sub">Datos de entrega para tu pedido</span>
+            </div>
+        </div>
+    </ng-template>
+    <div class="dir-form mt-2">
+        <div class="form-group">
+            <label>Alias *</label>
+            <input pInputText [(ngModel)]="nuevaDireccion.alias" placeholder="Ej. Casa, Trabajo"
+                   maxlength="80" [disabled]="guardandoDir" class="w-full" />
+        </div>
+        <div class="form-group">
+            <label>Destinatario *</label>
+            <input pInputText [(ngModel)]="nuevaDireccion.destinatario"
+                   placeholder="Nombre de quien recibe" maxlength="120"
+                   [disabled]="guardandoDir" class="w-full" />
+        </div>
+        <div class="form-group">
+            <label>Dirección detallada *</label>
+            <input pInputText [(ngModel)]="nuevaDireccion.direccion_detallada"
+                   placeholder="Av. / Jr. / Calle + número" maxlength="220"
+                   [disabled]="guardandoDir" class="w-full" />
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Distrito *</label>
+                <input pInputText [(ngModel)]="nuevaDireccion.distrito"
+                       placeholder="Ej. Miraflores" maxlength="80"
+                       [disabled]="guardandoDir" class="w-full" />
+            </div>
+            <div class="form-group">
+                <label>Provincia *</label>
+                <input pInputText [(ngModel)]="nuevaDireccion.provincia"
+                       placeholder="Ej. Lima" maxlength="80"
+                       [disabled]="guardandoDir" class="w-full" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Referencias (opcional)</label>
+            <input pInputText [(ngModel)]="nuevaDireccion.referencias"
+                   placeholder="Cerca de, color de puerta..." [disabled]="guardandoDir" class="w-full" />
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" [disabled]="guardandoDir" (click)="showDirDialog = false">
+                <i class="pi pi-times"></i><span>Cancelar</span>
+            </button>
+            <button class="btn-modal-guardar" [disabled]="guardandoDir" (click)="guardarDireccion()">
+                <i class="pi pi-spin pi-spinner" *ngIf="guardandoDir"></i>
+                <i class="pi pi-check" *ngIf="!guardandoDir"></i>
+                <span>{{ guardandoDir ? 'Guardando...' : 'Guardar dirección' }}</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
