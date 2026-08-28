@@ -1,0 +1,492 @@
+<section class="app-shell-page tienda-shell">
+    
+    <div class="tienda-hero-container mb-4" *ngIf="heroBanners.length > 0">
+        <div class="hero-banners-scroll" [style.transform]="'translateX(-' + (activeBannerIndex * 100) + '%)'">
+            <article class="hero-banner-item" *ngFor="let banner of heroBanners" [style.backgroundImage]="'url(' + banner.imagen + ')'">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h2>{{ banner.titulo }}</h2>
+                    <p>{{ banner.subtitulo }}</p>
+                    <button *ngIf="banner.link" pButton type="button" label="Explorar ofertas" icon="pi pi-arrow-right" class="p-button-rounded hero-btn mt-3" (click)="navegarABanner(banner.link)"></button>
+                </div>
+            </article>
+        </div>
+        
+        <button class="hero-nav-btn hero-nav-prev" *ngIf="heroBanners.length > 1" (click)="bannerAnteriorManual()">
+            <i class="pi pi-chevron-left"></i>
+        </button>
+        <button class="hero-nav-btn hero-nav-next" *ngIf="heroBanners.length > 1" (click)="siguienteBannerManual()">
+            <i class="pi pi-chevron-right"></i>
+        </button>
+
+        <div class="hero-banners-dots" *ngIf="heroBanners.length > 1">
+            <button class="dot-btn" *ngFor="let b of heroBanners; let i = index" [class.active]="i === activeBannerIndex" (click)="setBanner(i)"></button>
+        </div>
+    </div>
+
+    <div class="category-circles-wrapper mb-5">
+        <div class="category-circles-scroll">
+            <div class="category-circle-item" 
+                 *ngFor="let cat of categorias" 
+                 (click)="filtrarPorCategoria(cat)" 
+                 [class.active]="categoriaActual === cat">
+                <div class="circle-img-container">
+                    <img [src]="getCategoryImageUrl(cat)" [alt]="cat" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=Cat'">
+                </div>
+                <span class="circle-label">{{ cat }}</span>
+            </div>
+            
+            <div class="category-circle-item" 
+                 (click)="filtrarPorCategoria('Todas')" 
+                 [class.active]="categoriaActual === 'Todas'">
+                <div class="circle-img-container all-categories">
+                    <i class="pi pi-th-large"></i>
+                </div>
+                <span class="circle-label">Ver todo</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-intro">
+        <h1 class="page-title" *ngIf="categoriaActual !== 'Todas'">{{ categoriaActual }} en NovaTech</h1>
+        <h1 class="page-title" *ngIf="categoriaActual === 'Todas'">Cat&aacute;logo de Productos</h1>
+        <p class="page-subtitle">Explora lo mejor en tecnolog&iacute;a, filtra por categor&iacute;a y agrega al carrito en un clic.</p>
+    </div>
+
+    <article class="app-surface-card recent-card mb-4" *ngIf="mostrarVistosRecientes">
+        <div class="card-head">
+            <div>
+                <h3 class="card-title">Vistos recientemente</h3>
+                <span class="card-subtitle">Retoma productos que estuviste evaluando.</span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="recent-row">
+                <article class="recent-item" *ngFor="let item of vistosRecientes">
+                    <div class="recent-image" [routerLink]="['/producto', item.id]">
+                        <img [src]="item.imagen" [alt]="item.nombre" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/110x110?text=Sin+Imagen'">
+                    </div>
+
+                    <div class="recent-copy">
+                        <small>{{ item.categoria || 'Categoria' }}</small>
+                        <strong [routerLink]="['/producto', item.id]">{{ item.nombre }}</strong>
+                        <span>S/ {{ item.precio | number:'1.2-2' }}</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </article>
+
+    <div class="grid">
+        <aside class="col-12 lg:col-3">
+            <article class="app-surface-card filters-card">
+                <div class="card-head">
+                    <h3 class="card-title">Filtros</h3>
+                </div>
+
+                <div class="card-body">
+                    <span class="block section-label">Categor&iacute;as</span>
+
+                    <button
+                        type="button"
+                        class="filter-item"
+                        [class.active]="categoriaActual === 'Todas'"
+                        (click)="filtrarPorCategoria('Todas')"
+                    >
+                        <span>Todas</span>
+                    </button>
+
+                    <ng-container *ngFor="let cat of categorias">
+                        <button
+                            type="button"
+                            class="filter-item"
+                            [class.active]="categoriaActual === cat"
+                            [class.has-subcats]="categoriaActual === cat && subcategoriasActuales.length > 0"
+                            (click)="filtrarPorCategoria(cat)"
+                        >
+                            <span>{{ cat }}</span>
+                            <i [class]="(categoriaActual === cat && subcategoriasActuales.length > 0) ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
+                        </button>
+
+                        <div *ngIf="categoriaActual === cat && subcategoriasActuales.length > 0" class="subcategorias-inline">
+                            <button
+                                type="button"
+                                class="filter-item filter-item-sub"
+                                [class.active]="subcategoriaActual === ''"
+                                (click)="filtrarPorSubcategoria('')"
+                            >
+                                <span>Todas las {{ cat | lowercase }}</span>
+                                <i class="pi pi-angle-right"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="filter-item filter-item-sub"
+                                *ngFor="let sub of subcategoriasActuales"
+                                [class.active]="subcategoriaActual === sub.nombre"
+                                (click)="filtrarPorSubcategoria(sub.nombre)"
+                            >
+                                <span>{{ sub.nombre }}</span>
+                                <i class="pi pi-angle-right"></i>
+                            </button>
+                        </div>
+                    </ng-container>
+
+                    <span class="block section-label mt-3">Marcas</span>
+
+                    <button
+                        type="button"
+                        class="filter-item"
+                        [class.active]="marcaActual === 'Todas'"
+                        (click)="filtrarPorMarca('Todas')"
+                    >
+                        <span>Todas</span>
+                        <i class="pi pi-angle-right"></i>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-item"
+                        *ngFor="let marca of marcas"
+                        [class.active]="marcaActual === marca"
+                        (click)="filtrarPorMarca(marca)"
+                    >
+                        <span>{{ marca }}</span>
+                        <i class="pi pi-angle-right"></i>
+                    </button>
+
+                    <span class="block section-label mt-3">Entrega</span>
+
+                    <button type="button" class="toggle-chip" [class.active]="soloDisponibles" (click)="toggleSoloDisponibles()">
+                        <i class="pi pi-check-square"></i>
+                        Solo disponibles
+                    </button>
+
+                    <button type="button" class="toggle-chip" [class.active]="envioRapido" (click)="toggleEnvioRapido()">
+                        <i class="pi pi-send"></i>
+                        Envio rapido
+                    </button>
+
+                    <span class="block section-label mt-3">Rango de precio</span>
+                    <div class="price-range-filter">
+                        <p-slider [(ngModel)]="precioRango" [range]="true" [min]="0" [max]="10000" [step]="50" (onSlideEnd)="aplicarPrecioRango()"></p-slider>
+                        <div class="price-range-labels">
+                            <span>S/ {{ precioRango[0] }}</span>
+                            <span>S/ {{ precioRango[1] }}</span>
+                        </div>
+                    </div>
+
+                    <div class="service-box">
+                        <div class="service-title">Beneficios de compra</div>
+                        <div class="service-item"><i class="pi pi-check-circle"></i> Garant&iacute;a extendida</div>
+                        <div class="service-item"><i class="pi pi-truck"></i> Env&iacute;o a todo el pa&iacute;s</div>
+                        <div class="service-item"><i class="pi pi-shield"></i> Pago seguro</div>
+                    </div>
+                </div>
+            </article>
+        </aside>
+
+        <div class="col-12 lg:col-9">
+            <article class="app-surface-card catalog-card">
+                <div class="card-head products-head">
+                    <div>
+                        <h3 class="card-title">{{ categoriaActual === 'Todas' ? 'Todos los productos' : categoriaActual }}</h3>
+                        <span class="card-subtitle">{{ totalRegistros }} resultados</span>
+                    </div>
+
+                    <div class="head-tools">
+                        <div class="search-box search-autocomplete">
+                            <input
+                                pInputText
+                                type="text"
+                                [(ngModel)]="busquedaTexto"
+                                (ngModelChange)="onSearchChange($event)"
+                                placeholder="Buscar por nombre, categor&iacute;a, marca o SKU"
+                                (keyup.enter)="aplicarBusqueda()"
+                                (focus)="computeSugerencias(busquedaTexto)"
+                                (blur)="ocultarSugerencias()"
+                                autocomplete="off"
+                            />
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-search"
+                                class="p-button-sm p-button-text"
+                                (click)="aplicarBusqueda()"
+                                pTooltip="Buscar"
+                                tooltipPosition="top"
+                            ></button>
+
+                            <div class="search-dropdown" *ngIf="mostrarSugerencias">
+                                <button
+                                    type="button"
+                                    class="suggestion-item"
+                                    *ngFor="let s of sugerencias"
+                                    (mousedown)="seleccionarSugerencia(s)"
+                                >
+                                    <i class="pi pi-search suggestion-icon"></i>
+                                    <span>{{ s }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button
+                            pButton
+                            type="button"
+                            icon="pi pi-times"
+                            class="p-button-sm p-button-text"
+                            *ngIf="busquedaAplicada"
+                            pTooltip="Limpiar b&uacute;squeda"
+                            tooltipPosition="top"
+                            (click)="limpiarBusqueda()"
+                        ></button>
+
+                        <div class="orden-wrap">
+                            <div class="orden-backdrop" *ngIf="mostrarOrdenDropdown" (click)="cerrarOrdenDropdown()"></div>
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-sort-alt"
+                                [label]="ordenLabel"
+                                severity="secondary"
+                                [outlined]="true"
+                                (click)="alternarOrden()"
+                            ></button>
+                            <div class="orden-dropdown" *ngIf="mostrarOrdenDropdown">
+                                <div
+                                    class="orden-option"
+                                    *ngFor="let op of opcionesOrden"
+                                    [class.selected]="ordenActual === op.value"
+                                    (click)="seleccionarOrden(op.value)"
+                                >
+                                    <span class="orden-check">
+                                        <i class="pi pi-check" *ngIf="ordenActual === op.value"></i>
+                                    </span>
+                                    <i [class]="op.icon + ' orden-icon'"></i>
+                                    <span>{{ op.label }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            pButton
+                            type="button"
+                            icon="pi pi-filter-slash"
+                            label="Limpiar todo"
+                            class="p-button-sm"
+                            severity="secondary"
+                            [outlined]="true"
+                            [disabled]="!filtrosActivos"
+                            (click)="limpiarTodo()"
+                        ></button>
+
+                        <button
+                            pButton
+                            type="button"
+                            icon="pi pi-sliders-h"
+                            [label]="'Comparar (' + comparados.length + ')'"
+                            class="p-button-sm"
+                            severity="contrast"
+                            [outlined]="true"
+                            (click)="abrirComparador()"
+                        ></button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="grid" *ngIf="loading">
+                        <div class="col-12 sm:col-6 xl:col-4" *ngFor="let s of [1,2,3,4,5,6]">
+                            <div class="skeleton-card">
+                                <p-skeleton width="100%" height="180px" borderRadius="0.85rem 0.85rem 0 0"></p-skeleton>
+                                <div class="skeleton-body">
+                                    <p-skeleton width="40%" height="0.75rem"></p-skeleton>
+                                    <p-skeleton width="80%" height="1rem" styleClass="mt-2"></p-skeleton>
+                                    <p-skeleton width="50%" height="1.2rem" styleClass="mt-3"></p-skeleton>
+                                    <p-skeleton width="100%" height="2rem" styleClass="mt-3" borderRadius="0.5rem"></p-skeleton>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid" *ngIf="!loading && visibleProducts.length > 0">
+                        <div class="col-12 sm:col-6 xl:col-4 product-entry" *ngFor="let product of visibleProducts; let i = index" [style.animation-delay]="(i * 0.055) + 's'">
+
+                            <article class="producto-card"
+                                     [class.has-offer]="getHayOferta(product)"
+                                     [class.out-of-stock]="product.stock == 0 || product.stock === '0'">
+
+                                <!-- Image zone -->
+                                <div class="pc-img-zone" [routerLink]="['/producto', product.id]">
+                                    <img [src]="product.imagen"
+                                         [alt]="product.nombre"
+                                         loading="lazy"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/220x220?text=Sin+Imagen'"
+                                         [class.img-agotado]="product.stock === 0 || product.stock === '0'">
+
+                                    <div class="agotado-overlay" *ngIf="product.stock === 0 || product.stock === '0'">
+                                        <span>AGOTADO</span>
+                                    </div>
+
+                                    <div class="discount-badge" *ngIf="descuentoAproximado(product) > 0">
+                                        -{{ descuentoAproximado(product) }}%
+                                    </div>
+
+                                    <!-- Quick action buttons (appear on hover) -->
+                                    <div class="pc-quick-actions">
+                                        <button class="pc-fav-btn" type="button"
+                                            [class.active]="esFavorito(product.id)"
+                                            (click)="$event.stopPropagation(); toggleFavorito(product.id)"
+                                            [attr.aria-label]="esFavorito(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'">
+                                            <i class="pi" [ngClass]="esFavorito(product.id) ? 'pi-heart-fill' : 'pi-heart'"></i>
+                                        </button>
+                                        <button class="pc-compare-btn" type="button"
+                                            [class.active]="estaComparado(product.id)"
+                                            (click)="$event.stopPropagation(); toggleComparar(product)"
+                                            [attr.aria-label]="estaComparado(product.id) ? 'Quitar del comparador' : 'Comparar producto'">
+                                            <i class="pi pi-sliders-h"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Content zone -->
+                                <div class="pc-content">
+                                    <div class="pc-brand">{{ product.marca || product.categoria }}</div>
+
+                                    <h4 class="pc-name" [routerLink]="['/producto', product.id]">
+                                        {{ product.nombre }}
+                                    </h4>
+
+                                    <div class="pc-price">
+                                        <span class="pc-price-old" *ngIf="descuentoAproximado(product) > 0">
+                                            S/ {{ product.precio | number:'1.2-2' }}
+                                        </span>
+                                        <span class="pc-price-main">
+                                            S/ {{ getPrecioFinal(product) | number:'1.2-2' }}
+                                        </span>
+                                    </div>
+
+                                    <small class="pc-cuotas">
+                                        6x S/ {{ getCuotaReferencial(product) | number:'1.2-2' }} sin intereses
+                                    </small>
+
+                                    <!-- Solo mostrar cuando stock es crítico -->
+                                    <div class="pc-low-stock"
+                                         *ngIf="+product.stock > 0 && +product.stock <= 5 && product.stock !== '0'">
+                                        <i class="pi pi-exclamation-circle"></i>
+                                        Solo {{ product.stock }} disponibles
+                                    </div>
+
+                                    <button class="pc-add-btn"
+                                        type="button"
+                                        [disabled]="product.stock == 0 || product.stock === '0'"
+                                        [class.pc-add-btn--success]="isJustAdded(product.id)"
+                                        (click)="agregarAlCarrito(product)">
+                                        <i class="pi"
+                                           [ngClass]="isJustAdded(product.id) ? 'pi-check' : ((product.stock == 0 || product.stock === '0') ? 'pi-ban' : 'pi-shopping-cart')"
+                                           aria-hidden="true">
+                                        </i>
+                                        <span>{{ isJustAdded(product.id) ? '¡Agregado!' : ((product.stock == 0 || product.stock === '0') ? 'Sin stock' : 'Agregar') }}</span>
+                                    </button>
+                                </div>
+                            </article>
+
+                        </div>
+                    </div>
+
+                    <p-paginator 
+                        *ngIf="totalRegistros > 0 && !loading"
+                        (onPageChange)="onPageChange($event)" 
+                        [first]="(currentPage - 1) * limit" 
+                        [rows]="limit" 
+                        [totalRecords]="totalRegistros" 
+                        [rowsPerPageOptions]="[12, 24, 36]"
+                        styleClass="mt-4">
+                    </p-paginator>
+
+                    <div class="table-empty-state" *ngIf="!loading && visibleProducts.length === 0">
+                        <i class="pi pi-search"></i>
+                        <h3>No encontramos productos</h3>
+                        <p>Prueba con otra categor&iacute;a o ajusta los filtros.</p>
+                        <button pButton type="button" label="Mostrar todo" icon="pi pi-refresh" (click)="limpiarTodo()"></button>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<p-dialog
+    [(visible)]="comparadorVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: 'min(78rem, 96vw)' }"
+    [transitionOptions]="'200ms ease-out'"
+>
+    <ng-template pTemplate="header">
+        <div class="dlg-hero dlg-audit">
+            <div class="dlg-hero-icon"><i class="pi pi-sliders-h"></i></div>
+            <div>
+                <span class="dlg-hero-title">Comparador de productos</span>
+                <span class="dlg-hero-sub">Analiza caracter&iacute;sticas y precios lado a lado</span>
+            </div>
+        </div>
+    </ng-template>
+    <div class="compare-insights" *ngIf="comparados.length > 1">
+        <div class="insight-chip">
+            <i class="pi pi-bolt"></i>
+            Mejor precio: <strong>S/ {{ precioMinComparador | number:'1.2-2' }}</strong>
+        </div>
+        <div class="insight-chip">
+            <i class="pi pi-database"></i>
+            Stock maximo: <strong>{{ stockMaxComparador }}</strong>
+        </div>
+    </div>
+
+    <div class="compare-grid" *ngIf="comparados.length > 0">
+        <article class="compare-card" *ngFor="let product of comparados">
+            <div class="compare-image">
+                <img [src]="product.imagen" [alt]="product.nombre" onerror="this.onerror=null; this.src='https://placehold.co/140x140?text=Sin+Imagen'">
+            </div>
+
+            <div class="compare-copy">
+                <strong>{{ product.nombre }}</strong>
+                <small>{{ product.marca || 'Marca' }} | {{ product.categoria || 'Categoria' }}</small>
+                <div class="compare-metrics">
+                    <span class="price" [class.best]="isBestPrice(product)">
+                        S/ {{ product.precio | number:'1.2-2' }}
+                        <small *ngIf="isBestPrice(product)">Mejor precio</small>
+                    </span>
+
+                    <span class="delta" *ngIf="diferenciaVsMejorPrecio(product) > 0">
+                        +S/ {{ diferenciaVsMejorPrecio(product) | number:'1.2-2' }} vs mejor
+                    </span>
+                </div>
+
+                <span class="stock" [class.warning]="product.stock <= 5" [class.danger]="product.stock === 0">
+                    {{ product.stock === 0 ? 'Sin stock' : (product.stock + ' disponibles') }}
+                </span>
+                <small class="stock-best" *ngIf="isBestStock(product)">Mayor disponibilidad</small>
+            </div>
+
+            <button pButton type="button" icon="pi pi-times" class="p-button-rounded p-button-text" (click)="toggleComparar(product)"></button>
+        </article>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" (click)="limpiarComparador()">
+                <i class="pi pi-trash"></i>
+                <span>Limpiar</span>
+            </button>
+            <button class="btn-modal-guardar" (click)="comparadorVisible = false">
+                <i class="pi pi-check"></i>
+                <span>Cerrar</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+
+

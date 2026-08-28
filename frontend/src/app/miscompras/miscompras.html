@@ -1,0 +1,212 @@
+<section class="app-shell-page">
+
+    <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+    <header class="user-hero-header">
+        <div class="user-profile-info">
+            <div class="user-avatar-large">{{ getInitial(usuario?.nombre) }}</div>
+            <div class="user-text-meta">
+                <h2>Hola, {{ usuario?.nombre || 'Bienvenido' }}</h2>
+                <p class="hero-subtitle">Aquí tienes un resumen de tu actividad en NovaTech</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── KPI Cards ──────────────────────────────────────────────────────────── -->
+    <div class="stats-grid compras-kpi mb-5">
+        <article class="stat-card">
+            <div>
+                <div class="stat-label">Total pedidos</div>
+                <div class="stat-value counter-value">{{ displayTotalPedidos }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-shopping-bag text-xl"></i></div>
+        </article>
+        <article class="stat-card spending">
+            <div>
+                <div class="stat-label">Total gastado</div>
+                <div class="stat-value counter-value">S/ {{ displayTotalGastado | number:'1.2-2' }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-wallet text-xl"></i></div>
+        </article>
+        <article class="stat-card pending">
+            <div>
+                <div class="stat-label">Pendientes</div>
+                <div class="stat-value counter-value">{{ displayPedidosPendientes }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-clock text-xl"></i></div>
+        </article>
+        <article class="stat-card delivered">
+            <div>
+                <div class="stat-label">Entregados</div>
+                <div class="stat-value counter-value">{{ displayPedidosEntregados }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-check-circle text-xl"></i></div>
+        </article>
+    </div>
+
+    <!-- ── Order List ─────────────────────────────────────────────────────────── -->
+    <div class="orders-section">
+        <div class="orders-section-head">
+            <div>
+                <h3 class="orders-section-title">Historial de pedidos</h3>
+                <span class="orders-section-sub" *ngIf="!loading && compras.length > 0">
+                    {{ compras.length }} pedido{{ compras.length === 1 ? '' : 's' }} en total
+                </span>
+            </div>
+        </div>
+
+        <!-- Skeleton -->
+        <div class="orders-list" *ngIf="loading">
+            <div class="order-card-skeleton" *ngFor="let s of [1,2,3,4]">
+                <div class="ocs-row">
+                    <p-skeleton width="3rem" height="1rem"></p-skeleton>
+                    <p-skeleton width="6rem" height="1.4rem" borderRadius="1rem"></p-skeleton>
+                    <p-skeleton width="8rem" height="0.8rem" styleClass="ml-auto"></p-skeleton>
+                    <p-skeleton width="5rem" height="1rem"></p-skeleton>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty -->
+        <div class="orders-empty" *ngIf="!loading && compras.length === 0">
+            <div class="orders-empty-icon"><i class="pi pi-shopping-bag"></i></div>
+            <strong>Aún no tienes pedidos</strong>
+            <p>Explora el catálogo y realiza tu primera compra.</p>
+            <button pButton type="button" label="Ir a la tienda" icon="pi pi-shopping-cart" routerLink="/tienda"></button>
+        </div>
+
+        <!-- Order cards -->
+        <div class="orders-list" *ngIf="!loading && compras.length > 0">
+            <article class="order-card"
+                     *ngFor="let venta of comprasPaginadas; let i = index"
+                     [class.order-card--open]="isDetalleAbierto(venta)"
+                     [style.animation-delay]="(i * 0.04) + 's'">
+
+                <!-- ── Header row (siempre visible) ──────────────────────── -->
+                <div class="order-card-header" (click)="toggleDetalle(venta)" role="button"
+                     [attr.aria-expanded]="isDetalleAbierto(venta)">
+
+                    <div class="order-card-id">
+                        <span class="order-num">#{{ venta.id }}</span>
+                        <p-tag
+                            [severity]="getSeverity(venta.estado)"
+                            [value]="statusLabels[venta.estado] || venta.estado"
+                            [icon]="statusIcons[venta.estado] || 'pi pi-circle'">
+                        </p-tag>
+                    </div>
+
+                    <div class="order-card-date">
+                        <i class="pi pi-calendar-clock" aria-hidden="true"></i>
+                        {{ venta.fecha | date:'d MMM y · h:mm a' }}
+                    </div>
+
+                    <div class="order-card-products" *ngIf="venta.productos?.length">
+                        <i class="pi pi-box" aria-hidden="true"></i>
+                        {{ venta.productos.length }} producto{{ venta.productos.length === 1 ? '' : 's' }}
+                    </div>
+
+                    <div class="order-card-actions">
+                        <span class="order-total">S/ {{ venta.total | number:'1.2-2' }}</span>
+                        <button pButton type="button" icon="pi pi-file-pdf"
+                            class="p-button-rounded p-button-text p-button-secondary order-pdf-btn"
+                            pTooltip="Descargar comprobante" tooltipPosition="top"
+                            (click)="$event.stopPropagation(); descargarComprobante(venta)">
+                        </button>
+                        <i class="pi order-chevron"
+                           [class.pi-chevron-down]="isDetalleAbierto(venta)"
+                           [class.pi-chevron-right]="!isDetalleAbierto(venta)"
+                           aria-hidden="true">
+                        </i>
+                    </div>
+                </div>
+
+                <!-- ── Detalle expandible ─────────────────────────────────── -->
+                <div class="order-card-detail" *ngIf="isDetalleAbierto(venta)">
+
+                    <!-- Tracking -->
+                    <div class="order-detail-section" *ngIf="!isTerminalState(venta.estado)">
+                        <span class="order-detail-label">Seguimiento</span>
+                        <div class="tracking-timeline">
+                            <div class="tracking-step"
+                                 *ngFor="let step of statusFlow; let i = index"
+                                 [class.done]="i <= getTrackingStepIndex(venta.estado)"
+                                 [class.active]="i === getTrackingStepIndex(venta.estado)">
+                                <div class="step-bubble"><i [class]="statusIcons[step]"></i></div>
+                                <span class="step-label">{{ statusLabels[step] }}</span>
+                                <div class="step-connector" *ngIf="i < statusFlow.length - 1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-detail-section" *ngIf="isTerminalState(venta.estado)">
+                        <div class="tracking-terminal">
+                            <i [class]="statusIcons[venta.estado]"></i>
+                            <strong>{{ statusLabels[venta.estado] }}</strong>
+                            <span>Este pedido fue {{ venta.estado === 'cancelado' ? 'cancelado' : 'reembolsado' }}.</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment pills -->
+                    <div class="order-detail-section" *ngIf="venta.pago as pago">
+                        <span class="order-detail-label">Pago y envío</span>
+                        <div class="payment-summary">
+                            <div class="payment-pill">
+                                <i class="pi pi-credit-card"></i>
+                                <span>{{ pago.metodoLabel }}</span>
+                            </div>
+                            <div class="payment-pill">
+                                <i class="pi pi-wallet"></i>
+                                <span>S/ {{ pago.montoPagado | number:'1.2-2' }}</span>
+                            </div>
+                            <div class="payment-pill" *ngIf="venta.costo_envio > 0">
+                                <i class="pi pi-truck"></i>
+                                <span>Envío S/ {{ venta.costo_envio | number:'1.2-2' }}</span>
+                            </div>
+                            <div class="payment-pill" *ngIf="venta.impuesto > 0">
+                                <i class="pi pi-percentage"></i>
+                                <span>IGV S/ {{ venta.impuesto | number:'1.2-2' }}</span>
+                            </div>
+                            <div class="payment-pill" *ngIf="pago.referencia">
+                                <i class="pi pi-hashtag"></i>
+                                <span>{{ pago.referencia }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products -->
+                    <div class="order-detail-section">
+                        <span class="order-detail-label">Productos</span>
+                        <div class="order-products-grid" *ngIf="venta.productos?.length; else emptyProducts">
+                            <div class="product-mini-card" *ngFor="let item of venta.productos">
+                                <img [src]="item.imagen" [alt]="item.nombre"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/52x52?text=NT'">
+                                <div>
+                                    <div class="product-name">{{ item.nombre }}</div>
+                                    <div class="product-category">{{ item.categoria }}</div>
+                                    <div class="product-price">S/ {{ item.precio | number:'1.2-2' }} × {{ item.cantidad }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <ng-template #emptyProducts>
+                            <p class="expand-empty">Sin detalle de productos disponible.</p>
+                        </ng-template>
+                    </div>
+
+                </div>
+            </article>
+        </div>
+
+        <!-- Paginador -->
+        <div class="orders-paginator" *ngIf="!loading && compras.length > pageSize">
+            <p-paginator
+                [rows]="pageSize"
+                [totalRecords]="compras.length"
+                [first]="pageIndex * pageSize"
+                (onPageChange)="onPageChange($event)"
+                [rowsPerPageOptions]="[]"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="{first}–{last} de {totalRecords} pedidos">
+            </p-paginator>
+        </div>
+    </div>
+
+</section>

@@ -1,0 +1,359 @@
+<div class="sidebar-backdrop" *ngIf="mobileMenuOpen && isMobile" (click)="closeMobileMenu()"></div>
+
+<aside
+  id="shell-sidebar"
+  class="shell-sidebar"
+  role="navigation"
+  aria-label="Navegación principal"
+  [class.collapsed]="isCollapsedDesktop"
+  [class.mobile-open]="mobileMenuOpen && isMobile">
+    <div class="sidebar-head" routerLink="/tienda" (click)="closeMobileMenu()">
+        <div class="logo-mark">N</div>
+        <div class="logo-copy" *ngIf="!isCollapsedDesktop">
+            <span class="title">NovaTech</span>
+            <small>Commerce Suite</small>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <section class="menu-section" *ngFor="let section of menuSections">
+            <small class="menu-section-title" *ngIf="!isCollapsedDesktop">{{ section.label }}</small>
+
+            <a
+                *ngFor="let item of section.items"
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="nav-link"
+                [pTooltip]="isCollapsedDesktop ? item.label : ''"
+                tooltipPosition="right"
+                (click)="closeMobileMenu()"
+            >
+                <i [class]="item.icon"></i>
+                <span class="label" *ngIf="!isCollapsedDesktop">{{ item.label }}</span>
+                <span class="item-badge" *ngIf="getBadge(item) > 0">{{ getBadge(item) }}</span>
+            </a>
+        </section>
+
+        <div class="sidebar-status" *ngIf="!isCollapsedDesktop">
+            <span class="status-dot"></span>
+            <div>
+                <strong>{{ !isAuthenticated ? 'Modo Invitado' : (rol === 'admin' ? 'Modo Operativo' : 'Modo Cliente') }}</strong>
+                <small>{{ !isAuthenticated ? 'Exploracion de catalogo sin login' : (rol === 'admin' ? 'Panel empresarial activo' : 'Canal de compra activo') }}</small>
+            </div>
+        </div>
+    </nav>
+
+    <button
+        *ngIf="!isAuthenticated"
+        pButton
+        type="button"
+        icon="pi pi-sign-in"
+        class="logout-btn p-button-rounded p-button-help"
+        [label]="!isCollapsedDesktop ? 'Iniciar sesion' : ''"
+        [pTooltip]="isCollapsedDesktop ? 'Iniciar sesion' : ''"
+        tooltipPosition="right"
+        (click)="goToLogin()"
+    ></button>
+
+    <button
+        *ngIf="isAuthenticated"
+        pButton
+        type="button"
+        icon="pi pi-sign-out"
+        class="logout-btn p-button-rounded p-button-danger"
+        [label]="!isCollapsedDesktop ? 'Salir' : ''"
+        [pTooltip]="isCollapsedDesktop ? 'Cerrar sesion' : ''"
+        tooltipPosition="right"
+        (click)="logout()"
+    ></button>
+</aside>
+
+<header class="shell-topbar">
+    <div class="topbar-start">
+        <button
+            pButton
+            type="button"
+            class="p-button-rounded p-button-text topbar-icon"
+            [icon]="isMobile ? (mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars') : (isCollapsedDesktop ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left')"
+            pTooltip="Expandir o colapsar menu"
+            tooltipPosition="bottom"
+            aria-controls="shell-sidebar"
+            [attr.aria-expanded]="isMobile ? mobileMenuOpen : !isCollapsedDesktop"
+            [attr.aria-label]="isMobile
+              ? (mobileMenuOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación')
+              : (isCollapsedDesktop ? 'Expandir barra lateral' : 'Colapsar barra lateral')"
+            (click)="toggleSidebar()"
+        ></button>
+
+        <div class="brand-copy">
+            <span class="brand-title">NovaTech Operations</span>
+            <small>{{ !isAuthenticated ? 'Catalogo publico' : (rol === 'admin' ? 'Control central administrativo' : 'Portal de cliente') }}</small>
+        </div>
+
+        <div class="quick-nav-wrap">
+            <span class="quick-icon pi pi-search"></span>
+            <input
+                pInputText
+                type="text"
+                class="quick-input"
+                placeholder="Ir a modulo..."
+                [(ngModel)]="quickSearch"
+                (focus)="onQuickSearchFocus()"
+                (ngModelChange)="onQuickSearchInput($event)"
+            />
+
+            <button
+                *ngIf="quickSearch"
+                pButton
+                type="button"
+                icon="pi pi-times"
+                class="p-button-rounded p-button-text quick-clear"
+                (click)="clearQuickSearch()"
+            ></button>
+
+            <div class="quick-results" *ngIf="quickSearchOpen">
+                <ng-container *ngIf="quickResults.length > 0">
+                    <div class="quick-group-label" *ngIf="productQuickResults.length > 0 || quickSearch">Módulos</div>
+                    <button
+                        type="button"
+                        class="quick-result-item"
+                        *ngFor="let item of quickResults"
+                        (click)="navigateFromQuick(item)"
+                    >
+                        <i [class]="item.icon"></i>
+                        <span>{{ item.label }}</span>
+                        <small>{{ item.section === 'empresa' ? 'Empresa' : 'Comercial' }}</small>
+                    </button>
+                </ng-container>
+
+                <ng-container *ngIf="productQuickResults.length > 0">
+                    <div class="quick-group-label">Productos</div>
+                    <button
+                        type="button"
+                        class="quick-result-item quick-result-product"
+                        *ngFor="let product of productQuickResults"
+                        (click)="navigateToProductDetail(product)"
+                    >
+                        <img
+                            [src]="product.imagen || 'assets/placeholder.png'"
+                            [alt]="product.nombre"
+                            class="quick-product-img"
+                            onerror="this.src='assets/placeholder.png'"
+                        />
+                        <div class="quick-product-info">
+                            <span class="quick-product-name">{{ product.nombre }}</span>
+                            <small class="quick-product-cat">{{ product.categoria }}</small>
+                        </div>
+                        <span class="quick-product-price">S/ {{ getProductPrice(product) | number:'1.2-2' }}</span>
+                    </button>
+                </ng-container>
+
+                <div class="quick-empty" *ngIf="!quickResults.length && !productQuickResults.length">
+                    <i class="pi pi-search"></i>
+                    <span>Sin resultados para esta busqueda.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="topbar-actions">
+        <div class="theme-picker-wrap" *ngIf="usuario">
+            <button
+                pButton
+                type="button"
+                icon="pi pi-palette"
+                class="p-button-rounded p-button-text topbar-icon theme-trigger"
+                [label]="currentThemeLabel"
+                pTooltip="Cambiar apariencia"
+                tooltipPosition="bottom"
+                (click)="toggleThemeMenu($event)"
+            ></button>
+
+            <div class="theme-menu" *ngIf="themeMenuOpen">
+                <button
+                    type="button"
+                    class="theme-option"
+                    *ngFor="let theme of themeOptions"
+                    [class.active]="esTemaActivo(theme.key)"
+                    (click)="aplicarTema(theme.key)"
+                >
+                    <span class="theme-swatch" [ngClass]="'swatch-' + theme.key"></span>
+                    <span class="theme-copy">
+                        <strong>{{ theme.label }}</strong>
+                        <small>{{ theme.description }}</small>
+                    </span>
+                    <i class="pi pi-check" *ngIf="esTemaActivo(theme.key)"></i>
+                </button>
+            </div>
+        </div>
+
+        <button
+            *ngIf="rol === 'admin'"
+            pButton
+            type="button"
+            icon="pi pi-bell"
+            class="p-button-rounded p-button-text topbar-icon notification-trigger"
+            pTooltip="Notificaciones"
+            tooltipPosition="bottom"
+            (click)="toggleNotifications($event)"
+        >
+            <span class="notification-count" *ngIf="notificaciones > 0">{{ notificaciones }}</span>
+        </button>
+
+        <div class="notification-wrap" *ngIf="notificationsOpen">
+            <div class="notification-panel" (click)="$event.stopPropagation()">
+                <div class="panel-head">
+                    <div class="panel-head-copy">
+                        <strong>Notificaciones</strong>
+                        <small>{{ notificaciones }} pendientes</small>
+                    </div>
+                    <button
+                        pButton
+                        type="button"
+                        class="p-button-text p-button-sm"
+                        label="Marcar todo"
+                        *ngIf="notificaciones > 0"
+                        (click)="markAllAsRead()"
+                    ></button>
+                </div>
+
+                <div class="panel-filters">
+                    <button
+                        type="button"
+                        class="filter-chip"
+                        *ngFor="let filter of notificationFilters"
+                        [class.active]="activeNotificationFilter === filter.value"
+                        (click)="setNotificationFilter(filter.value)"
+                    >
+                        {{ filter.label }}
+                    </button>
+                </div>
+
+                <div class="panel-content" *ngIf="!loadingNotifications; else loadingNotificationsTpl">
+                    <button
+                        type="button"
+                        class="notification-item"
+                        *ngFor="let notification of filteredNotifications"
+                        [class.unread]="!notification.read"
+                        (click)="openNotification(notification)"
+                    >
+                        <span class="notification-icon">
+                            <i [class]="getNotificationIcon(notification.type)"></i>
+                        </span>
+
+                        <div class="notification-copy">
+                            <strong>{{ notification.title }}</strong>
+                            <p>{{ notification.description }}</p>
+                            <small>{{ getRelativeTime(notification.createdAt) }}</small>
+                        </div>
+
+                        <i class="pi pi-circle-fill unread-dot" *ngIf="!notification.read"></i>
+                    </button>
+
+                    <div class="notifications-empty" *ngIf="!filteredNotifications.length">
+                        <i class="pi pi-inbox"></i>
+                        <strong>No hay notificaciones para este filtro</strong>
+                        <small>Cuando haya actividad, aparecera aqui automaticamente.</small>
+                    </div>
+                </div>
+
+                <ng-template #loadingNotificationsTpl>
+                    <div class="loading-block">
+                        <i class="pi pi-spin pi-spinner"></i>
+                        <span>Cargando actividad...</span>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+
+        <button
+            pButton
+            type="button"
+            icon="pi pi-shopping-cart"
+            class="p-button-rounded p-button-text topbar-icon minicart-trigger"
+            pTooltip="Ver carrito"
+            tooltipPosition="bottom"
+            (click)="toggleCart()"
+        >
+            <span class="minicart-count" *ngIf="cantidadCarrito > 0">{{ cantidadCarrito }}</span>
+        </button>
+
+        <div class="profile-pill" *ngIf="usuario">
+            <span class="avatar">{{ getInitial(usuario.nombre) }}</span>
+            <div class="profile-meta">
+                <strong>{{ usuario.nombre }}</strong>
+                <small>{{ rol === 'admin' ? 'Administrador' : 'Cliente' }}</small>
+            </div>
+        </div>
+    </div>
+</header>
+
+<p-drawer
+    [(visible)]="cartSidebarOpen"
+    position="right"
+    [style]="{ width: 'min(26rem, 96vw)' }"
+    styleClass="minicart-sidebar"
+>
+    <ng-template pTemplate="header">
+        <div class="minicart-header">
+            <i class="pi pi-shopping-cart"></i>
+            <span>Mi Carrito</span>
+            <span class="minicart-badge" *ngIf="cantidadCarrito > 0">{{ cantidadCarrito }}</span>
+        </div>
+    </ng-template>
+
+    <div class="minicart-body" *ngIf="cartItems.length > 0; else emptyMiniCart">
+        <div class="minicart-items">
+            <div class="minicart-item" *ngFor="let item of cartItems; let i = index" [style.animation-delay]="(i * 60) + 'ms'">
+                <img [src]="item.producto.imagen" [alt]="item.producto.nombre" class="minicart-item-img" />
+                <div class="minicart-item-info">
+                    <strong class="minicart-item-name">{{ item.producto.nombre }}</strong>
+                    <small class="minicart-item-cat">{{ item.producto.categoria }}</small>
+                    <div class="minicart-item-row">
+                        <span class="minicart-item-qty">x{{ item.cantidad }}</span>
+                        <span class="minicart-item-price">S/ {{ (getPrecioFinal(item.producto) * item.cantidad) | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+                <button
+                    pButton
+                    type="button"
+                    icon="pi pi-times"
+                    class="p-button-rounded p-button-text p-button-sm p-button-danger minicart-item-remove"
+                    pTooltip="Quitar"
+                    tooltipPosition="left"
+                    (click)="removerDelCarrito(item.producto.id)"
+                ></button>
+            </div>
+        </div>
+
+        <div class="minicart-totals">
+            <div class="minicart-total-row">
+                <span>Subtotal</span>
+                <span>S/ {{ cartSubtotal | number:'1.2-2' }}</span>
+            </div>
+            <div class="minicart-total-row muted">
+                <span>IGV (18%)</span>
+                <span>+ S/ {{ cartIgv | number:'1.2-2' }}</span>
+            </div>
+            <div class="minicart-total-row grand">
+                <span>Total</span>
+                <span>S/ {{ cartTotal | number:'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <div class="minicart-actions">
+            <button pButton type="button" label="Ir al Checkout" icon="pi pi-credit-card" class="p-button-lg w-full minicart-checkout-btn" (click)="irAlCheckout()"></button>
+            <button pButton type="button" label="Seguir comprando" icon="pi pi-arrow-left" class="p-button-outlined p-button-secondary w-full mt-2" (click)="cartSidebarOpen = false"></button>
+        </div>
+    </div>
+
+    <ng-template #emptyMiniCart>
+        <div class="minicart-empty">
+            <i class="pi pi-shopping-cart"></i>
+            <h4>Tu carrito est&aacute; vac&iacute;o</h4>
+            <p>Explora el cat&aacute;logo y agrega productos.</p>
+            <button pButton type="button" label="Ir a la tienda" icon="pi pi-shop" class="p-button-outlined" routerLink="/tienda" (click)="cartSidebarOpen = false"></button>
+        </div>
+    </ng-template>
+</p-drawer>
+
