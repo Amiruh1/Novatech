@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only index.ts",
+    "build": "tsc -p tsconfig.json",
+    "db:apply-schema": "node scripts/apply-schema.js sql/novatech_erp_full.sql",
+    "db:validate-schema": "node scripts/validate-schema.js",
+    "reset:demo-passwords": "node scripts/reset-demo-passwords.js",
+    "migrate:passwords": "ts-node --transpile-only src/scripts/migrate-passwords.ts",
+    "migrate:passwords:dry": "ts-node --transpile-only src/scripts/migrate-passwords.ts --dry-run"
+  },
+  "dependencies": {
+    "@types/pdfkit": "^0.17.6",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
+    "google-auth-library": "^9.15.1",
+    "helmet": "^8.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.9.7",
+    "nodemailer": "^8.0.5",
+    "pdfkit": "^0.18.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/helmet": "^0.0.48",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.5.0",
+    "@types/nodemailer": "^8.0.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^6.0.2"
+  }
+}
