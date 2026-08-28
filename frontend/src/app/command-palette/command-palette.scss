@@ -1,0 +1,285 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  Command Palette 2026 — Linear · Raycast · Vercel style     ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+.cp-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  animation: cpBackdropIn var(--dur-base) var(--ease-smooth) both;
+}
+
+@keyframes cpBackdropIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(8px); }
+}
+
+// ── Panel ─────────────────────────────────────────────────────────────────────
+.cp-panel {
+  width: min(640px, 96vw);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-2xl);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 4px 24px rgba(15, 23, 42, 0.12),
+    0 24px 64px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+  animation: cpPanelIn var(--dur-enter) var(--ease-out) both;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes cpPanelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-16px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+// ── Search row ────────────────────────────────────────────────────────────────
+.cp-search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--app-border-subtle);
+  flex-shrink: 0;
+}
+
+.cp-search-icon {
+  font-size: 1.1rem;
+  color: var(--app-muted);
+  flex-shrink: 0;
+}
+
+.cp-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--app-text);
+  font-family: inherit;
+
+  &::placeholder { color: var(--app-muted); }
+}
+
+.cp-spinner {
+  color: var(--app-primary);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.cp-esc-key {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--app-muted);
+  background: var(--app-surface-muted);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-sm);
+  padding: 0.15rem 0.45rem;
+  flex-shrink: 0;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+}
+
+// ── Results ───────────────────────────────────────────────────────────────────
+.cp-results {
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-border) transparent;
+  padding: var(--sp-2) 0;
+}
+
+.cp-group { margin-bottom: var(--sp-2); }
+
+.cp-group-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--app-muted);
+  padding: var(--sp-2) var(--sp-5) var(--sp-1);
+}
+
+// ── Command Item ──────────────────────────────────────────────────────────────
+.cp-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  border-radius: 0;
+  transition: background var(--dur-fast) var(--ease-smooth);
+  position: relative;
+
+  &.active {
+    background: rgba(13, 148, 136, 0.07);
+
+    .cp-item-icon {
+      background: var(--app-primary);
+      color: #fff;
+      border-color: var(--app-primary);
+    }
+
+    .cp-item-label { color: var(--app-primary); }
+    .cp-item-arrow { opacity: 1; transform: translateX(0); color: var(--app-primary); }
+  }
+
+  &:hover:not(.active) { background: var(--app-surface-muted); }
+}
+
+.cp-item-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: var(--app-text-2);
+  transition: background var(--dur-fast) var(--ease-smooth), color var(--dur-fast) var(--ease-smooth), border-color var(--dur-fast) var(--ease-smooth);
+}
+
+.cp-item-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cp-item-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--dur-fast) var(--ease-smooth);
+}
+
+.cp-item-desc {
+  font-size: 0.75rem;
+  color: var(--app-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-item-category {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--app-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.cp-item-arrow {
+  font-size: 0.75rem;
+  color: var(--app-muted);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--dur-fast) var(--ease-smooth), transform var(--dur-fast) var(--ease-spring);
+}
+
+// ── Product Item ──────────────────────────────────────────────────────────────
+.cp-product-img {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  img { width: 85%; height: 85%; object-fit: contain; }
+}
+
+.cp-product-price {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--app-primary);
+  font-family: 'Sora', system-ui, sans-serif;
+  flex-shrink: 0;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.cp-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-8) var(--sp-5);
+  color: var(--app-muted);
+  font-size: 0.875rem;
+
+  i { font-size: 1.2rem; color: #b8c4d8; }
+}
+
+.cp-hint { color: var(--app-muted); font-style: italic; }
+
+// ── Footer shortcuts ─────────────────────────────────────────────────────────
+.cp-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-muted);
+  flex-shrink: 0;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: 0.68rem;
+    color: var(--app-muted);
+  }
+
+  kbd {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--app-text-2);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: var(--r-sm);
+    padding: 0.15rem 0.4rem;
+    font-family: inherit;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+}
+
+// ── prefers-reduced-motion ────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .cp-backdrop, .cp-panel { animation: none !important; }
+}

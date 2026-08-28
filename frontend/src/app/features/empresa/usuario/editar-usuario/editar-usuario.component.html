@@ -1,0 +1,89 @@
+<p-dialog
+  [visible]="visible"
+  (visibleChange)="actualizarVisibilidad($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(42rem, 96vw)' }"
+  [closable]="!guardando"
+  [dismissableMask]="!guardando"
+  [transitionOptions]="'200ms ease-out'"
+>
+  <ng-template pTemplate="header">
+    <div class="dlg-hero dlg-user">
+      <div class="dlg-hero-icon"><i class="pi pi-user-edit"></i></div>
+      <div>
+        <span class="dlg-hero-title">Editar usuario</span>
+        <span class="dlg-hero-sub">Modifica los datos de la cuenta</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <form class="form-grid pt-2" [formGroup]="form">
+    <div class="form-field">
+      <label>Nombre completo</label>
+      <input pInputText formControlName="nombre" placeholder="Ej. Juan P&eacute;rez" class="w-full" />
+      <small class="error" *ngIf="nombreControl?.touched && nombreControl?.hasError('required')">El nombre es obligatorio.</small>
+      <small class="error" *ngIf="nombreControl?.touched && nombreControl?.hasError('maxlength')">M&aacute;ximo 100 caracteres.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Email</label>
+      <input pInputText formControlName="email" placeholder="juan@gmail.com" class="w-full" />
+      <small class="error" *ngIf="emailControl?.touched && emailControl?.hasError('required')">El email es obligatorio.</small>
+      <small class="error" *ngIf="emailControl?.touched && emailControl?.hasError('email')">Formato de email inv&aacute;lido.</small>
+      <small class="error" *ngIf="emailControl?.touched && emailControl?.hasError('maxlength')">M&aacute;ximo 100 caracteres.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Nueva contrase&ntilde;a</label>
+      <input pInputText type="password" formControlName="password" placeholder="Dejar en blanco para mantener la actual" class="w-full" maxlength="255" autocomplete="new-password" />
+      <small class="error" *ngIf="passwordControl?.touched && passwordControl?.hasError('minlength')">La contrase&ntilde;a debe tener al menos 8 caracteres.</small>
+      <small class="error" *ngIf="passwordControl?.touched && passwordControl?.hasError('maxlength')">M&aacute;ximo 255 caracteres.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Rol</label>
+      <p-select
+        [options]="roles"
+        formControlName="rol"
+        optionLabel="label"
+        optionValue="value"
+        [filter]="true"
+        [showClear]="true"
+        [style]="{ 'width': '100%' }"
+        appendTo="body"
+      >
+        <ng-template pTemplate="selectedItem" let-selected>
+          <div class="role-option" *ngIf="selected">
+            <i [class]="selected.icon"></i>
+            <span>{{ selected.label }}</span>
+          </div>
+          <span *ngIf="!selected">Selecciona rol</span>
+        </ng-template>
+
+        <ng-template pTemplate="item" let-option>
+          <div class="role-option">
+            <i [class]="option.icon"></i>
+            <span>{{ option.label }}</span>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="btn-modal-footer">
+      <button class="btn-modal-cancelar" [disabled]="guardando" (click)="cerrarDialogo()">
+        <i class="pi pi-times"></i>
+        <span>Cancelar</span>
+      </button>
+      <button class="btn-modal-guardar" [disabled]="guardando" (click)="guardar()">
+        <i class="pi pi-spin pi-spinner" *ngIf="guardando"></i>
+        <i class="pi pi-check" *ngIf="!guardando"></i>
+        <span>{{ guardando ? 'Guardando...' : 'Guardar cambios' }}</span>
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+

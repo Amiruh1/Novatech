@@ -1,0 +1,98 @@
+<div class="cp-backdrop" *ngIf="isOpen" (click)="closeOnBackdrop($event)" role="dialog"
+     aria-modal="true" aria-label="Command Palette — busca y navega">
+
+    <div class="cp-panel">
+
+        <!-- Search input -->
+        <div class="cp-search-row">
+            <i class="pi pi-search cp-search-icon" aria-hidden="true"></i>
+            <input #searchInput
+                   class="cp-input"
+                   type="text"
+                   [value]="query"
+                   (input)="onQueryChange($any($event.target).value)"
+                   placeholder="Buscar productos, ir a secciones…"
+                   autocomplete="off"
+                   role="combobox"
+                   aria-autocomplete="list"
+                   [attr.aria-expanded]="totalResults > 0"
+                   aria-controls="cp-results">
+            <div class="cp-spinner" *ngIf="searching" aria-label="Buscando...">
+                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+            </div>
+            <kbd class="cp-esc-key" aria-label="Presiona Escape para cerrar">esc</kbd>
+        </div>
+
+        <!-- Results -->
+        <div class="cp-results" #resultsList id="cp-results" role="listbox" *ngIf="totalResults > 0">
+
+            <!-- Navigation / Account commands -->
+            <div *ngIf="filteredCommands.length > 0" class="cp-group">
+                <div class="cp-group-label">Acciones</div>
+
+                <button class="cp-item"
+                        *ngFor="let cmd of filteredCommands; let i = index"
+                        role="option"
+                        [attr.aria-selected]="activeIndex === i"
+                        [attr.data-active]="activeIndex === i"
+                        [class.active]="activeIndex === i"
+                        (click)="execute({ type: 'command', item: cmd })"
+                        (mouseenter)="activeIndex = i">
+                    <div class="cp-item-icon">
+                        <i [class]="'pi ' + cmd.icon" aria-hidden="true"></i>
+                    </div>
+                    <div class="cp-item-text">
+                        <span class="cp-item-label">{{ cmd.label }}</span>
+                        <span class="cp-item-desc" *ngIf="cmd.description">{{ cmd.description }}</span>
+                    </div>
+                    <div class="cp-item-category">{{ categoryLabel(cmd.category) }}</div>
+                    <i class="pi pi-angle-right cp-item-arrow" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <!-- Product results -->
+            <div *ngIf="productResults.length > 0" class="cp-group">
+                <div class="cp-group-label">Productos</div>
+
+                <button class="cp-item cp-product-item"
+                        *ngFor="let product of productResults; let i = index"
+                        role="option"
+                        [attr.aria-selected]="activeIndex === filteredCommands.length + i"
+                        [attr.data-active]="activeIndex === filteredCommands.length + i"
+                        [class.active]="activeIndex === filteredCommands.length + i"
+                        (click)="execute({ type: 'product', item: product })"
+                        (mouseenter)="activeIndex = filteredCommands.length + i">
+                    <div class="cp-product-img">
+                        <img [src]="product.imagen" [alt]="product.nombre" loading="lazy"
+                             onerror="this.onerror=null; this.src='https://placehold.co/40x40?text=NT'">
+                    </div>
+                    <div class="cp-item-text">
+                        <span class="cp-item-label">{{ product.nombre }}</span>
+                        <span class="cp-item-desc" *ngIf="product.categoria">{{ product.categoria }}</span>
+                    </div>
+                    <div class="cp-product-price">S/ {{ product.precio | number:'1.2-2' }}</div>
+                    <i class="pi pi-angle-right cp-item-arrow" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Empty state when query has results nowhere -->
+        <div class="cp-empty" *ngIf="!totalResults && query.trim() && !searching">
+            <i class="pi pi-search-minus" aria-hidden="true"></i>
+            <span>Sin resultados para "<strong>{{ query }}</strong>"</span>
+        </div>
+
+        <!-- Default — no query -->
+        <div class="cp-empty cp-hint" *ngIf="!query.trim() && totalResults === 0 && filteredCommands.length === 0">
+            <i class="pi pi-bolt" aria-hidden="true"></i>
+            <span>Escribe para buscar o usar ↑↓ para navegar</span>
+        </div>
+
+        <!-- Footer shortcuts -->
+        <div class="cp-footer">
+            <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
+            <span><kbd>↵</kbd> ejecutar</span>
+            <span><kbd>Esc</kbd> cerrar</span>
+        </div>
+    </div>
+</div>

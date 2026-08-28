@@ -1,0 +1,137 @@
+<section class="app-shell-page favoritos-shell">
+
+    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <div class="fav-page-header">
+        <div>
+            <h1 class="page-title">Mis favoritos</h1>
+            <p class="fav-count" *ngIf="!loading && productos.length > 0">
+                <span class="count-pill">{{ productos.length }}</span>
+                producto{{ productos.length === 1 ? '' : 's' }} guardado{{ productos.length === 1 ? '' : 's' }}
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Filter / Sort toolbar ────────────────────────────────────────────── -->
+    <div class="fav-toolbar" *ngIf="!loading && productos.length > 0">
+        <div class="fav-filter-group">
+            <button class="fav-filter-btn" [class.active]="filtroActivo === 'todos'" (click)="setFiltro('todos')">
+                Todos
+            </button>
+            <button class="fav-filter-btn" [class.active]="filtroActivo === 'disponible'" (click)="setFiltro('disponible')">
+                <i class="pi pi-check-circle"></i> En stock
+            </button>
+            <button class="fav-filter-btn" [class.active]="filtroActivo === 'oferta'" (click)="setFiltro('oferta')">
+                <i class="pi pi-tag"></i> Con oferta
+            </button>
+        </div>
+        <div class="fav-sort-group">
+            <button class="fav-sort-btn" [class.active]="ordenActivo === 'reciente'" (click)="setOrden('reciente')" pTooltip="Más recientes primero" tooltipPosition="top">
+                <i class="pi pi-clock"></i>
+            </button>
+            <button class="fav-sort-btn" [class.active]="ordenActivo === 'precio-asc'" (click)="setOrden('precio-asc')" pTooltip="Precio: menor a mayor" tooltipPosition="top">
+                <i class="pi pi-sort-amount-up-alt"></i>
+            </button>
+            <button class="fav-sort-btn" [class.active]="ordenActivo === 'precio-desc'" (click)="setOrden('precio-desc')" pTooltip="Precio: mayor a menor" tooltipPosition="top">
+                <i class="pi pi-sort-amount-down"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Skeleton ─────────────────────────────────────────────────────────── -->
+    <div class="fav-grid" *ngIf="loading">
+        <div class="fav-skeleton" *ngFor="let s of [1,2,3,4,5,6]">
+            <p-skeleton height="210px" borderRadius="1.25rem 1.25rem 0 0"></p-skeleton>
+            <div style="padding: 1rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <p-skeleton width="40%" height="0.7rem"></p-skeleton>
+                <p-skeleton width="80%" height="0.9rem"></p-skeleton>
+                <p-skeleton width="55%" height="1.3rem"></p-skeleton>
+                <p-skeleton height="2.3rem" borderRadius="0.75rem"></p-skeleton>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Grid ─────────────────────────────────────────────────────────────── -->
+    <div class="fav-grid" *ngIf="!loading && productosFiltrados.length > 0">
+        <article class="fav-card" *ngFor="let product of productosFiltrados; let i = index"
+                 [style.animation-delay]="(i * 0.05) + 's'">
+
+            <!-- Imagen -->
+            <div class="fav-img-zone" [routerLink]="['/producto', product.id]" role="link" tabindex="0"
+                 [attr.aria-label]="'Ver detalle de ' + product.nombre">
+                <img [src]="product.imagen" [alt]="product.nombre" loading="lazy"
+                     onerror="this.onerror=null; this.src='https://placehold.co/220x220?text=NT'"
+                     [class.img-agotado]="product.stock == 0">
+
+                <div class="fav-overlay"></div>
+
+                <div class="fav-agotado" *ngIf="product.stock == 0" aria-label="Agotado">
+                    <span>AGOTADO</span>
+                </div>
+                <div class="fav-discount" *ngIf="getDescuento(product) > 0"
+                     [attr.aria-label]="getDescuento(product) + '% de descuento'">
+                    -{{ getDescuento(product) }}%
+                </div>
+
+                <button class="fav-remove-btn" type="button"
+                    (click)="$event.stopPropagation(); quitarFavorito(product.id)"
+                    aria-label="Quitar de favoritos">
+                    <i class="pi pi-heart-fill" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <!-- Contenido -->
+            <div class="fav-content">
+                <div class="fav-brand">{{ product.marca || product.categoria }}</div>
+                <h3 class="fav-name" [routerLink]="['/producto', product.id]">{{ product.nombre }}</h3>
+
+                <div class="fav-price">
+                    <span class="fav-price-old" *ngIf="getDescuento(product) > 0">
+                        S/ {{ product.precio | number:'1.2-2' }}
+                    </span>
+                    <span class="fav-price-main">
+                        S/ {{ getPrecioFinal(product) | number:'1.2-2' }}
+                    </span>
+                </div>
+
+                <div class="fav-stock-warn" *ngIf="+product.stock > 0 && +product.stock <= 5">
+                    <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+                    Solo {{ product.stock }} disponibles
+                </div>
+
+                <div class="fav-actions">
+                    <button class="fav-add-btn" type="button"
+                        [disabled]="product.stock == 0"
+                        (click)="agregarAlCarrito(product)"
+                        [attr.aria-label]="'Agregar ' + product.nombre + ' al carrito'">
+                        <i class="pi" [ngClass]="product.stock == 0 ? 'pi-ban' : 'pi-shopping-cart'" aria-hidden="true"></i>
+                        <span>{{ product.stock == 0 ? 'Sin stock' : 'Agregar' }}</span>
+                    </button>
+                    <button class="fav-share-btn" type="button"
+                        (click)="compartir(product)"
+                        [attr.aria-label]="'Compartir ' + product.nombre">
+                        <i class="pi pi-share-alt" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- Sin resultados del filtro -->
+    <div class="fav-no-results" *ngIf="!loading && productos.length > 0 && productosFiltrados.length === 0">
+        <i class="pi pi-filter-slash"></i>
+        <p>Ningún favorito coincide con este filtro.</p>
+        <button pButton type="button" label="Ver todos" icon="pi pi-list" class="p-button-sm p-button-outlined" (click)="setFiltro('todos')"></button>
+    </div>
+
+    <!-- Empty state -->
+    <div class="fav-empty" *ngIf="!loading && productos.length === 0">
+        <div class="fav-empty-icon">
+            <i class="pi pi-heart" aria-hidden="true"></i>
+        </div>
+        <h3>Aún no tienes favoritos</h3>
+        <p>Guarda los productos que te interesan para verlos cuando quieras.<br>
+           Toca el ícono <i class="pi pi-heart" aria-hidden="true"></i> en cualquier producto del catálogo.</p>
+        <button pButton type="button" label="Explorar catálogo" icon="pi pi-shopping-bag" routerLink="/tienda"></button>
+    </div>
+
+</section>

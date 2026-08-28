@@ -1,0 +1,421 @@
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  NovaTech 2026 — Detalle de Producto                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<!-- Skeleton loading state -->
+<section class="app-shell-page detalle-shell" *ngIf="loading">
+    <div class="detalle-skeleton">
+        <p-skeleton width="260px" height="1.2rem" styleClass="mb-5"></p-skeleton>
+        <div class="detalle-layout">
+            <div class="detalle-gallery-col">
+                <p-skeleton width="100%" height="400px" borderRadius="1.25rem"></p-skeleton>
+            </div>
+            <div class="detalle-info-col">
+                <p-skeleton width="80px" height="0.8rem" styleClass="mb-3"></p-skeleton>
+                <p-skeleton width="90%" height="2rem" styleClass="mb-2"></p-skeleton>
+                <p-skeleton width="60%" height="1.8rem" styleClass="mb-5"></p-skeleton>
+                <p-skeleton width="40%" height="2.8rem" styleClass="mb-3"></p-skeleton>
+                <p-skeleton width="100%" height="3rem" styleClass="mb-3" borderRadius="1rem"></p-skeleton>
+                <p-skeleton width="100%" height="3rem" borderRadius="1rem"></p-skeleton>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product content -->
+<section class="app-shell-page detalle-shell" *ngIf="!loading && product" aria-label="Detalle de producto">
+
+    <!-- ── Breadcrumb ─────────────────────────────────────────── -->
+    <nav class="detalle-breadcrumb" aria-label="Ruta de navegación">
+        <a routerLink="/tienda" class="bc-link">Tienda</a>
+        <i class="pi pi-angle-right bc-sep" aria-hidden="true"></i>
+        <a [routerLink]="['/tienda']" class="bc-link">{{ product.categoria || 'General' }}</a>
+        <i class="pi pi-angle-right bc-sep" aria-hidden="true"></i>
+        <span class="bc-current" aria-current="page">{{ product.nombre }}</span>
+    </nav>
+
+    <!-- ── Main layout ────────────────────────────────────────── -->
+    <div class="detalle-layout">
+
+        <!-- LEFT: Gallery -->
+        <div class="detalle-gallery-col">
+
+            <!-- Main image -->
+            <div class="gallery-main" (click)="abrirZoomImagen()" role="button" tabindex="0"
+                 (keydown.enter)="abrirZoomImagen()" aria-label="Ampliar imagen del producto">
+
+                <!-- Agotado overlay -->
+                <div class="gallery-agotado" *ngIf="product.stock === 0 || product.stock === '0'" aria-label="Producto agotado">
+                    <span>AGOTADO</span>
+                </div>
+
+                <!-- Discount badge -->
+                <div class="gallery-discount" *ngIf="hayOferta" aria-label="{{ descuentoAproximado }}% de descuento">
+                    -{{ descuentoAproximado }}%
+                </div>
+
+                <img [src]="product.imagen"
+                     [alt]="product.nombre + ' — imagen del producto'"
+                     loading="lazy"
+                     onerror="this.onerror=null; this.src='https://placehold.co/480x480?text=Sin+Imagen'"
+                     [class.img-agotado]="product.stock === 0 || product.stock === '0'">
+
+                <button class="gallery-zoom-btn" type="button" aria-label="Ampliar imagen">
+                    <i class="pi pi-search-plus" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <!-- Social actions under image (desktop) -->
+            <div class="gallery-actions">
+                <button class="gallery-action-btn" type="button"
+                    [class.active]="esFavorito"
+                    (click)="toggleFavorito()"
+                    [attr.aria-label]="esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+                    [attr.aria-pressed]="esFavorito">
+                    <i class="pi" [ngClass]="esFavorito ? 'pi-heart-fill' : 'pi-heart'" aria-hidden="true"></i>
+                    <span>{{ esFavorito ? 'En favoritos' : 'Favoritos' }}</span>
+                </button>
+
+                <button class="gallery-action-btn" type="button"
+                    (click)="compartirProducto()"
+                    aria-label="Compartir producto">
+                    <i class="pi pi-share-alt" aria-hidden="true"></i>
+                    <span>Compartir</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT: Product info -->
+        <div class="detalle-info-col">
+
+            <!-- Brand + badges -->
+            <div class="detalle-brand-row">
+                <span class="detalle-brand">{{ product.marca || 'NovaTech' }}</span>
+                <span class="detalle-sku" *ngIf="product.sku">SKU: {{ product.sku }}</span>
+            </div>
+
+            <!-- Product name -->
+            <h1 class="detalle-nombre">{{ product.nombre }}</h1>
+
+            <!-- Rating (if has reviews) -->
+            <div class="detalle-rating" *ngIf="totalResenas > 0">
+                <p-rating [ngModel]="calificacionPromedio" [readonly]="true"                          aria-label="Calificación: {{ calificacionPromedio }} de 5"></p-rating>
+                <a href="#reviews-section" class="rating-link">
+                    {{ calificacionPromedio }}/5 · {{ totalResenas }} opinión(es)
+                </a>
+            </div>
+
+            <div class="detalle-divider" role="separator"></div>
+
+            <!-- Price block -->
+            <div class="detalle-precio-block">
+                <div class="detalle-precio-row">
+                    <span class="precio-original" *ngIf="hayOferta" aria-label="Precio original">
+                        S/ {{ precioLista | number:'1.2-2' }}
+                    </span>
+                    <span class="precio-main" aria-label="Precio: {{ precioFinalCalc | number:'1.2-2' }} soles">
+                        S/ {{ precioFinalCalc | number:'1.2-2' }}
+                    </span>
+                </div>
+                <div class="precio-ahorro" *ngIf="hayOferta">
+                    <i class="pi pi-tag" aria-hidden="true"></i>
+                    Ahorras {{ descuentoAproximado }}% — ¡Oferta limitada!
+                </div>
+                <div class="precio-cuotas">
+                    <i class="pi pi-credit-card" aria-hidden="true"></i>
+                    6 cuotas de S/ {{ cuotaReferencial | number:'1.2-2' }} sin intereses
+                </div>
+            </div>
+
+            <!-- Stock indicator -->
+            <div class="detalle-stock" role="status" aria-live="polite">
+                <span class="stock-pill out" *ngIf="product.stock === 0 || product.stock === '0'">
+                    <i class="pi pi-times-circle" aria-hidden="true"></i> Agotado
+                </span>
+                <span class="stock-pill low" *ngIf="+product.stock > 0 && +product.stock <= 5 && product.stock !== '0'">
+                    <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+                    Últimas {{ product.stock }} unidades
+                </span>
+                <span class="stock-pill ok" *ngIf="+product.stock > 5">
+                    <i class="pi pi-check-circle" aria-hidden="true"></i>
+                    En stock ({{ product.stock }} disponibles)
+                </span>
+            </div>
+
+            <!-- Quantity + Add to cart -->
+            <div class="detalle-add-block" *ngIf="puedeAgregar">
+                <div class="detalle-qty" role="group" aria-label="Cantidad a agregar">
+                    <span class="qty-label">Cantidad</span>
+                    <div class="qty-controls">
+                        <button class="qty-btn" type="button"
+                            [disabled]="cantidad <= 1"
+                            (click)="reducirCantidad()"
+                            aria-label="Reducir cantidad">
+                            <i class="pi pi-minus" aria-hidden="true"></i>
+                        </button>
+                        <span class="qty-display" aria-live="polite" aria-label="Cantidad: {{ cantidad }}">
+                            {{ cantidad }}
+                        </span>
+                        <button class="qty-btn" type="button"
+                            [disabled]="cantidad >= product.stock"
+                            (click)="aumentarCantidad()"
+                            aria-label="Aumentar cantidad">
+                            <i class="pi pi-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-add-cart" type="button" (click)="agregarAlCarro()">
+                    <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                    <span>Agregar al carrito</span>
+                </button>
+            </div>
+
+            <div class="btn-out-of-stock" *ngIf="!puedeAgregar" role="alert">
+                <i class="pi pi-ban" aria-hidden="true"></i>
+                <span>Producto agotado — ¡Te avisamos cuando llegue!</span>
+            </div>
+
+            <!-- Guarantees -->
+            <div class="detalle-guarantees" aria-label="Beneficios de compra">
+                <div class="guarantee-item">
+                    <i class="pi pi-shield" aria-hidden="true"></i>
+                    <span>Garantía de 1 año</span>
+                </div>
+                <div class="guarantee-item">
+                    <i class="pi pi-truck" aria-hidden="true"></i>
+                    <span>Envío gratis a todo el país</span>
+                </div>
+                <div class="guarantee-item">
+                    <i class="pi pi-lock" aria-hidden="true"></i>
+                    <span>Pago 100% protegido</span>
+                </div>
+                <div class="guarantee-item">
+                    <i class="pi pi-refresh" aria-hidden="true"></i>
+                    <span>Devolución en 30 días</span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="detalle-desc" *ngIf="product.descripcion">
+                <h2 class="detalle-section-label">Descripción</h2>
+                <p class="detalle-desc-text">{{ product.descripcion }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Related Products ───────────────────────────────────── -->
+    <section class="detalle-section" *ngIf="sugeridos.length > 0" aria-label="Productos relacionados">
+        <div class="page-intro">
+            <h2 class="page-title">También te puede interesar</h2>
+            <p class="page-subtitle">Productos de la misma categoría que podrían gustarte.</p>
+        </div>
+        <div class="sugeridos-grid">
+            <article class="sug-card" *ngFor="let item of sugeridos">
+                <div class="sug-img" [routerLink]="['/producto', item.id]" role="link" tabindex="0"
+                     [attr.aria-label]="'Ver detalle de ' + item.nombre">
+                    <img [src]="item.imagen" [alt]="item.nombre" loading="lazy"
+                         onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=NT'">
+                    <div class="sug-discount" *ngIf="getPrecioFinal(item) < item.precio">
+                        -{{ (((item.precio - getPrecioFinal(item)) / item.precio) * 100) | number:'1.0-0' }}%
+                    </div>
+                </div>
+                <div class="sug-body">
+                    <div class="sug-brand">{{ item.marca || item.categoria }}</div>
+                    <h3 class="sug-name" [routerLink]="['/producto', item.id]">{{ item.nombre }}</h3>
+                    <div class="sug-price">S/ {{ getPrecioFinal(item) | number:'1.2-2' }}</div>
+                    <button class="sug-btn" type="button"
+                        [disabled]="item.stock == 0"
+                        (click)="agregarSugeridoAlCarro(item)"
+                        [attr.aria-label]="'Agregar ' + item.nombre + ' al carrito'">
+                        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                        <span>{{ item.stock == 0 ? 'Agotado' : 'Agregar' }}</span>
+                    </button>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Sugeridos skeleton -->
+    <section class="detalle-section" *ngIf="loadingSugeridos && !sugeridos.length">
+        <div class="page-intro">
+            <p-skeleton width="220px" height="1.5rem"></p-skeleton>
+        </div>
+        <div class="sugeridos-grid">
+            <p-skeleton *ngFor="let s of [1,2,3,4]" height="280px" borderRadius="1.25rem"></p-skeleton>
+        </div>
+    </section>
+
+    <!-- ── Reviews ────────────────────────────────────────────── -->
+    <section class="detalle-section" id="reviews-section" aria-label="Opiniones del producto">
+        <div class="page-intro">
+            <h2 class="page-title">Opiniones del producto</h2>
+            <p class="page-subtitle" *ngIf="totalResenas > 0">
+                {{ totalResenas }} opinión(es) · Calificación promedio: {{ calificacionPromedio }}/5
+            </p>
+        </div>
+
+        <div class="reviews-layout">
+
+            <!-- Review form -->
+            <article class="app-surface-card review-form-card">
+                <div class="card-head">
+                    <div class="review-form-icon"><i class="pi pi-star" aria-hidden="true"></i></div>
+                    <div>
+                        <h3 class="card-title">Deja tu opinión</h3>
+                        <span class="card-subtitle">Tu experiencia ayuda a otros compradores</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="review-stars-row">
+                        <label id="rating-label" class="review-stars-label">Tu calificación:</label>
+                        <p-rating [(ngModel)]="nuevaResena.stars"                                  aria-labelledby="rating-label"></p-rating>
+                    </div>
+                    <div class="review-comment-field">
+                        <label for="review-comment" class="review-field-label">Tu comentario</label>
+                        <textarea pTextarea id="review-comment" rows="3"
+                                  [(ngModel)]="nuevaResena.comment"
+                                  placeholder="Comparte tu experiencia con este producto (mín. 6 caracteres)"
+                                  maxlength="500" class="w-full" aria-required="true"></textarea>
+                    </div>
+                    <button class="btn-review-submit" type="button" (click)="registrarResena()">
+                        <i class="pi pi-send" aria-hidden="true"></i>
+                        <span>Publicar reseña</span>
+                    </button>
+                </div>
+            </article>
+
+            <!-- Reviews list -->
+            <div class="reviews-list-col" role="feed" aria-label="Lista de opiniones">
+
+                <!-- Empty state -->
+                <div class="table-empty-state" *ngIf="reviews.length === 0">
+                    <div class="empty-icon-wrap">
+                        <i class="pi pi-star" aria-hidden="true"></i>
+                    </div>
+                    <h3>Sin opiniones todavía</h3>
+                    <p>Sé el primero en comentar este producto.</p>
+                </div>
+
+                <!-- Review items -->
+                <article class="review-item" *ngFor="let review of reviews"
+                         [attr.aria-label]="'Reseña de ' + review.author">
+                    <div class="review-head">
+                        <div class="reviewer-avatar" aria-hidden="true">
+                            {{ review.author ? review.author.charAt(0).toUpperCase() : '?' }}
+                        </div>
+                        <div class="reviewer-meta">
+                            <strong class="reviewer-name">{{ review.author }}</strong>
+                            <time class="review-date" [attr.datetime]="review.createdAt">
+                                {{ getRelativeDate(review.createdAt) }}
+                            </time>
+                        </div>
+                    </div>
+                    <p-rating [ngModel]="review.stars" [readonly]="true"                              [attr.aria-label]="review.stars + ' de 5 estrellas'"></p-rating>
+                    <p class="review-text">{{ review.comment }}</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+</section>
+
+<!-- ── Dialog: "Producto agregado" ──────────────────────────────── -->
+<p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
+    [style]="{ width: 'min(48rem, 96vw)' }" [transitionOptions]="'200ms ease-out'"
+    aria-labelledby="modal-added-title">
+    <ng-template pTemplate="header">
+        <div class="dlg-hero">
+            <div class="dlg-hero-icon"><i class="pi pi-check-circle" aria-hidden="true"></i></div>
+            <div>
+                <span class="dlg-hero-title" id="modal-added-title">¡Producto agregado!</span>
+                <span class="dlg-hero-sub">{{ product?.nombre }}</span>
+            </div>
+        </div>
+    </ng-template>
+
+    <div class="modal-added-body" *ngIf="product">
+        <div class="modal-product-row">
+            <img [src]="product.imagen" [alt]="product.nombre" class="modal-product-img" loading="lazy">
+            <div class="modal-product-info">
+                <div class="modal-product-name">{{ product.nombre }}</div>
+                <div class="modal-product-price">S/ {{ precioFinalCalc | number:'1.2-2' }}</div>
+                <div class="modal-product-qty">Cantidad: <strong>{{ cantidad }}</strong></div>
+            </div>
+        </div>
+
+        <!-- Suggested cross-sell -->
+        <div class="modal-sugeridos" *ngIf="sugeridos.length > 0">
+            <p class="modal-sugeridos-label">¿Y si le sumas esto?</p>
+            <div class="modal-sugeridos-row">
+                <div class="modal-sug-item" *ngFor="let item of sugeridos.slice(0, 3)"
+                     [routerLink]="['/producto', item.id]" (click)="displayModal = false"
+                     role="link" tabindex="0" [attr.aria-label]="'Ver ' + item.nombre">
+                    <img [src]="item.imagen" [alt]="item.nombre" loading="lazy"
+                         onerror="this.onerror=null; this.src='https://placehold.co/80x80?text=NT'">
+                    <div class="modal-sug-name">{{ item.nombre }}</div>
+                    <div class="modal-sug-price">S/ {{ getPrecioFinal(item) | number:'1.2-2' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" (click)="seguirComprando()">
+                <i class="pi pi-arrow-left" aria-hidden="true"></i>
+                <span>Seguir comprando</span>
+            </button>
+            <button class="btn-modal-guardar" (click)="irAlCarro()">
+                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                <span>Ver carrito</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- ── Dialog: Zoom de imagen ─────────────────────────────────────── -->
+<p-dialog [(visible)]="displayImageZoom" [modal]="true" [draggable]="false" [resizable]="false"
+    [style]="{ width: 'min(70rem, 98vw)' }" [transitionOptions]="'200ms ease-out'"
+    aria-labelledby="modal-zoom-title">
+    <ng-template pTemplate="header">
+        <div class="dlg-hero">
+            <div class="dlg-hero-icon"><i class="pi pi-image" aria-hidden="true"></i></div>
+            <div>
+                <span class="dlg-hero-title" id="modal-zoom-title">Vista ampliada</span>
+                <span class="dlg-hero-sub">{{ product?.nombre }}</span>
+            </div>
+        </div>
+    </ng-template>
+    <div class="zoom-container" *ngIf="product">
+        <img [src]="product?.imagen" [alt]="product?.nombre + ' — vista ampliada'" class="zoom-image">
+    </div>
+</p-dialog>
+
+<!-- ── Mobile sticky buy bar ──────────────────────────────────────── -->
+<div class="mobile-sticky-buy" *ngIf="product && !loading" role="region" aria-label="Compra rápida">
+    <div class="mobile-price-block">
+        <small class="mobile-stock-label" [class.out]="!puedeAgregar">
+            {{ puedeAgregar ? 'Disponible' : 'Sin stock' }}
+        </small>
+        <strong class="mobile-price">S/ {{ precioFinalCalc | number:'1.2-2' }}</strong>
+    </div>
+
+    <div class="mobile-qty-block" *ngIf="puedeAgregar">
+        <button type="button" class="mobile-qty-btn" [disabled]="cantidad <= 1" (click)="reducirCantidad()" aria-label="Reducir cantidad">
+            <i class="pi pi-minus" aria-hidden="true"></i>
+        </button>
+        <span aria-live="polite" aria-label="Cantidad: {{ cantidad }}">{{ cantidad }}</span>
+        <button type="button" class="mobile-qty-btn" [disabled]="cantidad >= product.stock" (click)="aumentarCantidad()" aria-label="Aumentar cantidad">
+            <i class="pi pi-plus" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <button class="mobile-buy-btn" type="button"
+        [disabled]="!puedeAgregar"
+        (click)="agregarAlCarro()"
+        [attr.aria-label]="puedeAgregar ? 'Agregar al carrito' : 'Sin stock'">
+        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+        <span>{{ puedeAgregar ? 'Agregar' : 'Sin stock' }}</span>
+    </button>
+</div>

@@ -1,0 +1,168 @@
+<p-dialog
+  [visible]="visible"
+  (visibleChange)="actualizarVisibilidad($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(52rem, 96vw)' }"
+  [closable]="!guardando"
+  [dismissableMask]="!guardando"
+  [transitionOptions]="'200ms ease-out'"
+>
+  <ng-template pTemplate="header">
+    <div class="dlg-hero dlg-product">
+      <div class="dlg-hero-icon"><i class="pi pi-box"></i></div>
+      <div>
+        <span class="dlg-hero-title">Nuevo producto</span>
+        <span class="dlg-hero-sub">Completa los datos del catálogo</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <form class="form-grid pt-2" [formGroup]="form">
+    <div class="form-section">
+      <i class="pi pi-info-circle"></i>
+      <span>Informaci&oacute;n principal</span>
+    </div>
+
+    <div class="form-field">
+      <label>Nombre del producto</label>
+      <input pInputText formControlName="nombre" class="w-full" />
+      <small class="error" *ngIf="nombreControl?.touched && nombreControl?.hasError('required')">El nombre es obligatorio.</small>
+      <small class="error" *ngIf="nombreControl?.touched && nombreControl?.hasError('maxlength')">M&aacute;ximo 100 caracteres.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Categor&iacute;a</label>
+      <ng-container *ngTemplateOutlet="selectTemplate; context: { options: categoryOptions, controlName: 'categoria', placeholder: 'Selecciona categor&iacute;a' }"></ng-container>
+    </div>
+
+    <div class="form-field">
+      <label>Subcategor&iacute;a</label>
+      <input pInputText formControlName="subcategoria" class="w-full" placeholder="Ej. Laptops Gamer" />
+      <small class="help">Opcional. Categor&iacute;a secundaria.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Marca</label>
+      <ng-container *ngTemplateOutlet="selectTemplate; context: { options: brandOptions, controlName: 'marca', placeholder: 'Selecciona marca' }"></ng-container>
+    </div>
+
+    <div class="form-field">
+      <label>C&oacute;digo SKU</label>
+      <input pInputText formControlName="sku" class="w-full" />
+    </div>
+
+    <div class="form-field full">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+        <label style="margin-bottom: 0;">Descripci&oacute;n</label>
+        <small class="char-counter" style="color: #64748b; font-size: 0.72rem;">{{ form.get('descripcion')?.value?.length || 0 }} / 255</small>
+      </div>
+      <textarea pInputTextarea formControlName="descripcion" rows="2" class="w-full" maxlength="255"></textarea>
+    </div>
+
+    <div class="form-section">
+      <i class="pi pi-dollar"></i>
+      <span>Precios</span>
+    </div>
+
+    <div class="form-field">
+      <label>Precio de venta (PEN) <span style="color:#ef4444">*</span></label>
+      <p-inputNumber formControlName="precio" mode="currency" currency="PEN" locale="es-PE" [min]="0" [max]="99999999.99" [minFractionDigits]="2" [maxFractionDigits]="2" [useGrouping]="false"></p-inputNumber>
+      <small class="help">Precio que ve el cliente en el catalogo (incluye IGV).</small>
+      <small class="error" *ngIf="precioControl?.touched && precioControl?.hasError('required')">El precio es obligatorio.</small>
+      <small class="error" *ngIf="precioControl?.touched && (precioControl?.hasError('min') || precioControl?.hasError('max'))">Precio fuera de rango permitido.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Precio de compra (PEN)</label>
+      <p-inputNumber formControlName="precio_compra" mode="currency" currency="PEN" locale="es-PE" [min]="0" [max]="99999999.99" [minFractionDigits]="2" [maxFractionDigits]="2" [useGrouping]="false" placeholder="Opcional"></p-inputNumber>
+      <small class="help">Costo de adquisicion (solo visible en admin).</small>
+    </div>
+
+    <div class="form-field">
+      <label>Precio de oferta (PEN)</label>
+      <p-inputNumber formControlName="precio_oferta" mode="currency" currency="PEN" locale="es-PE" [min]="0" [max]="99999999.99" [minFractionDigits]="2" [maxFractionDigits]="2" [useGrouping]="false" placeholder="Opcional"></p-inputNumber>
+      <small class="help">Dejar vacio si no hay oferta.</small>
+      <small class="error" *ngIf="form.errors?.['ofertaMayorQuePrecio'] && form.get('precio_oferta')?.value">
+        El precio de oferta debe ser menor que el precio de venta.
+      </small>
+    </div>
+
+    <div class="form-section">
+      <i class="pi pi-box"></i>
+      <span>Inventario e imagen</span>
+    </div>
+
+    <div class="form-field">
+      <label>Stock</label>
+      <p-inputNumber
+        formControlName="stock"
+        [min]="0"
+        [max]="2147483647"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="0"
+        [useGrouping]="false"
+      ></p-inputNumber>
+      <small class="error" *ngIf="stockControl?.touched && (stockControl?.hasError('min') || stockControl?.hasError('max'))">Stock fuera de rango permitido.</small>
+    </div>
+
+    <div class="form-field full">
+      <label>URL de imagen</label>
+      <input pInputText formControlName="imagen" placeholder="https://..." class="w-full" />
+      <small class="help">Usa una URL pública (https://...) para previsualización del producto.</small>
+      <!-- Image preview -->
+      <div class="img-preview-wrap" *ngIf="form.get('imagen')?.value?.startsWith('http')">
+        <img [src]="form.get('imagen')?.value"
+             alt="Vista previa del producto"
+             class="img-preview"
+             (error)="$any($event.target).style.display='none'"
+             (load)="$any($event.target).style.display='block'">
+        <small class="help">Vista previa</small>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="btn-modal-footer">
+      <button class="btn-modal-cancelar" [disabled]="guardando" (click)="cerrarDialogo()">
+        <i class="pi pi-times"></i>
+        <span>Cancelar</span>
+      </button>
+      <button class="btn-modal-guardar" [disabled]="guardando || form.errors?.['ofertaMayorQuePrecio']" (click)="guardar()">
+        <i class="pi pi-spin pi-spinner" *ngIf="guardando"></i>
+        <i class="pi pi-check" *ngIf="!guardando"></i>
+        <span>{{ guardando ? 'Guardando...' : 'Guardar producto' }}</span>
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Template reutilizable para selectores con iconos -->
+<ng-template #selectTemplate let-options="options" let-controlName="controlName" let-placeholder="placeholder">
+  <p-select
+    [options]="options"
+    [formControlName]="controlName"
+    optionLabel="label"
+    optionValue="value"
+    [filter]="true"
+    [showClear]="true"
+    [editable]="true"
+    appendTo="body"
+  >
+    <ng-template pTemplate="selectedItem" let-selected>
+      <div class="dropdown-option" *ngIf="selected">
+        <i [class]="selected.icon"></i>
+        <span>{{ selected.label }}</span>
+      </div>
+      <span *ngIf="!selected">{{ placeholder }}</span>
+    </ng-template>
+
+    <ng-template pTemplate="item" let-option>
+      <div class="dropdown-option">
+        <i [class]="option.icon"></i>
+        <span>{{ option.label }}</span>
+      </div>
+    </ng-template>
+  </p-select>
+</ng-template>

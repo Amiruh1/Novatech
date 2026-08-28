@@ -1,0 +1,98 @@
+﻿<div class="card-body table-shell">
+  <p-table
+    #dt
+    [value]="users"
+    [tableStyle]="{ 'min-width': '54rem' }"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="8"
+    [rowsPerPageOptions]="[8, 16, 24]"
+    [globalFilterFields]="globalFilterFields"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-user>
+      <tr [class.inactive-row]="!isActivo(user)">
+        <td>
+          <div class="user-name-cell">
+            <span class="user-avatar">{{ user.nombre?.charAt(0)?.toUpperCase() }}</span>
+            <div class="user-name-info">
+              <strong [title]="user.nombre">{{ user.nombre }}</strong>
+              <small *ngIf="user.telefono">{{ user.telefono }}</small>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="user-email-cell" [title]="user.email">{{ user.email }}</span>
+        </td>
+        <td>
+          <p-tag
+            [severity]="user.rol === 'admin' ? 'warn' : 'info'"
+            [value]="user.rol === 'admin' ? 'Admin' : 'Cliente'"
+          ></p-tag>
+        </td>
+        <td>
+          <p-tag
+            [severity]="isActivo(user) ? 'success' : 'secondary'"
+            [value]="isActivo(user) ? 'Activo' : 'Inactivo'"
+          ></p-tag>
+        </td>
+        <td>
+          <div class="action-cell">
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              severity="warn"
+              pTooltip="Editar usuario"
+              tooltipPosition="top"
+              *ngIf="canEdit"
+              (onClick)="solicitarEdicion(user)"
+            ></p-button>
+
+            <p-button
+              [icon]="isActivo(user) ? 'pi pi-ban' : 'pi pi-check-circle'"
+              [rounded]="true"
+              [text]="true"
+              [severity]="isActivo(user) ? 'danger' : 'success'"
+              [pTooltip]="isActivo(user) ? 'Desactivar cuenta' : 'Reactivar cuenta'"
+              tooltipPosition="top"
+              *ngIf="canDelete"
+              (onClick)="solicitarEliminacion(user)"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5">
+          <div class="table-empty-state">
+            <i class="pi pi-users"></i>
+            <h3>No hay usuarios registrados</h3>
+            <p>Crea la primera cuenta para comenzar a operar.</p>
+            <button
+              pButton
+              type="button"
+              label="Crear usuario"
+              icon="pi pi-user-plus"
+              *ngIf="canCreate"
+              (click)="solicitarCreacion()"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+

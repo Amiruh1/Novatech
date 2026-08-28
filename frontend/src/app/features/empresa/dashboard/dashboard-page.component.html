@@ -1,0 +1,277 @@
+<section class="app-shell-page">
+
+    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <div class="page-intro page-intro-actions">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Indicadores operativos · NovaTech</p>
+        </div>
+        <div class="dash-header-actions">
+            <!-- Period selector -->
+            <div class="period-tabs" role="group" aria-label="Filtrar por período">
+                <button *ngFor="let p of periods"
+                        type="button"
+                        class="period-tab"
+                        [class.active]="period === p.value"
+                        (click)="setPeriod(p.value)"
+                        [attr.aria-pressed]="period === p.value">
+                    {{ p.label }}
+                </button>
+            </div>
+            <button pButton type="button" icon="pi pi-refresh" label="Actualizar"
+                class="p-button-outlined p-button-sm"
+                [loading]="loading" [disabled]="loading"
+                (click)="cargarDatos()">
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Alert Banner — pagos manuales pendientes ────────────────────────── -->
+    <div class="dash-alert-banner" *ngIf="!loading && alertasPago > 0" role="alert">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <div class="dash-alert-body">
+            <strong>{{ alertasPago }} pago{{ alertasPago > 1 ? 's' : '' }} pendiente{{ alertasPago > 1 ? 's' : '' }} de validación</strong>
+            <span>Revisa los pedidos con Yape/Plin o Transferencia sin confirmar.</span>
+        </div>
+        <a class="dash-alert-cta" routerLink="/empresa/ventas">Ver pedidos →</a>
+    </div>
+
+    <!-- ── Skeleton KPI ─────────────────────────────────────────────────────── -->
+    <div class="stats-grid dashboard-stats mb-5" *ngIf="loading">
+        <p-skeleton *ngFor="let s of [1,2,3,4,5,6,7]" height="7rem" borderRadius="1.25rem"></p-skeleton>
+    </div>
+
+    <!-- ── KPI Cards ────────────────────────────────────────────────────────── -->
+    <div class="stats-grid dashboard-stats mb-5" *ngIf="!loading" role="region" aria-label="Indicadores clave del período">
+
+        <!-- PRIMARY: Ingresos — card grande con sparkline -->
+        <article class="stat-card income stat-primary" aria-label="Ingresos del período">
+            <div class="stat-primary-left">
+                <div class="stat-label">Ingresos</div>
+                <div class="stat-value counter-value income-val">
+                    S/ {{ displayTotalIngresos | number:'1.2-2' }}
+                </div>
+                <div class="stat-trend" [class.positive]="trendIngresos >= 0" [class.negative]="trendIngresos < 0"
+                     *ngIf="trendIngresos !== 0; else ingresosNeutral">
+                    <i class="pi" [class.pi-trending-up]="trendIngresos >= 0" [class.pi-trending-down]="trendIngresos < 0" aria-hidden="true"></i>
+                    {{ trendIngresosLabel }}
+                </div>
+                <ng-template #ingresosNeutral>
+                    <div class="stat-trend neutral"><i class="pi pi-wallet" aria-hidden="true"></i> acumulado del período</div>
+                </ng-template>
+            </div>
+            <!-- Sparkline SVG -->
+            <div class="sparkline-wrap" aria-hidden="true">
+                <svg class="sparkline" viewBox="0 0 72 24" preserveAspectRatio="none">
+                    <path [attr.d]="sparkPath(sparkIngresos)" class="spark-line income-spark" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="icon income"><i class="pi pi-wallet" aria-hidden="true"></i></div>
+        </article>
+
+        <!-- Pedidos totales -->
+        <article class="stat-card orders" aria-label="Pedidos del período">
+            <div>
+                <div class="stat-label">Pedidos</div>
+                <div class="stat-value counter-value">{{ displayTotalPedidos }}</div>
+                <div class="stat-trend" [class.positive]="trendPedidos >= 0" [class.negative]="trendPedidos < 0"
+                     *ngIf="trendPedidos !== 0; else pedidosNeutral">
+                    <i class="pi" [class.pi-trending-up]="trendPedidos >= 0" [class.pi-trending-down]="trendPedidos < 0" aria-hidden="true"></i>
+                    {{ trendPedidosLabel }}
+                </div>
+                <ng-template #pedidosNeutral>
+                    <div class="stat-trend positive" *ngIf="pctEntregados > 0">
+                        <i class="pi pi-check-circle" aria-hidden="true"></i> {{ pctEntregados }}% entregados
+                    </div>
+                </ng-template>
+                <!-- Mini sparkline -->
+                <svg class="sparkline-mini" viewBox="0 0 72 18" preserveAspectRatio="none" aria-hidden="true">
+                    <path [attr.d]="sparkPath(sparkPedidos, 72, 18)" class="spark-line orders-spark" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="icon orders"><i class="pi pi-shopping-bag" aria-hidden="true"></i></div>
+        </article>
+
+        <!-- Pendientes -->
+        <article class="stat-card pending" aria-label="Pedidos pendientes">
+            <div>
+                <div class="stat-label">Pendientes</div>
+                <div class="stat-value counter-value">{{ displayPedidosPendientes }}</div>
+                <div class="stat-trend" [class.warn]="tasaPendiente > 30" [class.neutral]="tasaPendiente <= 30">
+                    <i class="pi pi-clock" aria-hidden="true"></i> {{ tasaPendiente }}% del total
+                </div>
+                <svg class="sparkline-mini" viewBox="0 0 72 18" preserveAspectRatio="none" aria-hidden="true">
+                    <path [attr.d]="sparkPath(sparkPendientes, 72, 18)" class="spark-line pending-spark" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="icon pending"><i class="pi pi-clock" aria-hidden="true"></i></div>
+        </article>
+
+        <!-- Entregados -->
+        <article class="stat-card delivered" aria-label="Pedidos entregados">
+            <div>
+                <div class="stat-label">Entregados</div>
+                <div class="stat-value counter-value">{{ displayPedidosEntregados }}</div>
+                <div class="stat-trend positive" *ngIf="pedidosEntregados > 0">
+                    <i class="pi pi-check-circle" aria-hidden="true"></i> completados
+                </div>
+            </div>
+            <div class="icon delivered"><i class="pi pi-check-circle" aria-hidden="true"></i></div>
+        </article>
+
+        <!-- Total productos -->
+        <article class="stat-card" aria-label="Total de productos">
+            <div>
+                <div class="stat-label">Total productos</div>
+                <div class="stat-value counter-value">{{ displayTotalProductos }}</div>
+                <div class="stat-trend neutral"><i class="pi pi-box" aria-hidden="true"></i> catálogo activo</div>
+            </div>
+            <div class="icon"><i class="pi pi-box" aria-hidden="true"></i></div>
+        </article>
+
+        <!-- Stock total -->
+        <article class="stat-card stock" aria-label="Stock total disponible">
+            <div>
+                <div class="stat-label">Stock total</div>
+                <div class="stat-value counter-value">{{ displayTotalStock }}</div>
+                <div class="stat-trend neutral"><i class="pi pi-database" aria-hidden="true"></i> unidades</div>
+            </div>
+            <div class="icon stock"><i class="pi pi-database" aria-hidden="true"></i></div>
+        </article>
+
+        <!-- Valor inventario -->
+        <article class="stat-card value" aria-label="Valor del inventario">
+            <div>
+                <div class="stat-label">Valor inventario</div>
+                <div class="stat-value counter-value income-val">S/ {{ displayValorInventario | number:'1.2-2' }}</div>
+                <div class="stat-trend neutral"><i class="pi pi-chart-bar" aria-hidden="true"></i> capital invertido</div>
+            </div>
+            <div class="icon value"><i class="pi pi-chart-bar" aria-hidden="true"></i></div>
+        </article>
+
+    </div>
+
+    <!-- ── Charts & Tables ──────────────────────────────────────────────────── -->
+    <div class="grid" *ngIf="!loading && totalProductos > 0; else emptyDashboard">
+        <div class="col-12 xl:col-8 dash-charts-col">
+            <article class="app-surface-card chart-card">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title">Riesgo de inventario</h3>
+                        <span class="card-subtitle">Productos con menor stock — acción temprana recomendada</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p-chart type="bar" [data]="chartDataStock" [options]="chartOptionsStock"></p-chart>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 xl:col-4 dash-charts-col">
+            <article class="app-surface-card chart-card">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title">Estado de pedidos</h3>
+                        <span class="card-subtitle">Distribución operativa</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p-chart type="doughnut" [data]="chartDataEstado" [options]="chartOptionsEstado"></p-chart>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 xl:col-4 dash-charts-col">
+            <article class="app-surface-card chart-card">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title">Por categorías</h3>
+                        <span class="card-subtitle">Distribución del catálogo</span>
+                    </div>
+                </div>
+                <div class="card-body flex justify-content-center">
+                    <p-chart type="pie" [data]="chartDataCategoria" [options]="chartOptionsCategoria" height="230px"></p-chart>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 xl:col-6">
+            <article class="app-surface-card table-card">
+                <div class="card-head">
+                    <h3 class="card-title">Alerta de stock bajo</h3>
+                    <span class="card-subtitle" *ngIf="lowStockProducts.length > 0">
+                        {{ lowStockProducts.length }} producto(s) con ≤ 8 unidades
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <p-table [value]="lowStockProducts" responsiveLayout="scroll">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Stock</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-item>
+                            <tr>
+                                <td class="font-semibold">{{ item.nombre }}</td>
+                                <td>{{ item.categoria || 'Sin categoría' }}</td>
+                                <td><p-tag [severity]="getStockSeverity(item.stock)" [value]="item.stock + ' unid'"></p-tag></td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr><td colspan="3" class="text-center py-4" style="color:var(--app-success)">
+                                <i class="pi pi-check-circle mr-2"></i> Sin alertas de inventario crítico.
+                            </td></tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 xl:col-6">
+            <article class="app-surface-card table-card">
+                <div class="card-head">
+                    <h3 class="card-title">Últimos pedidos</h3>
+                    <span class="card-subtitle">Seguimiento rápido del flujo comercial</span>
+                    <a class="card-link" routerLink="/empresa/ventas" aria-label="Ver todos los pedidos">Ver todos →</a>
+                </div>
+                <div class="card-body p-0">
+                    <p-table [value]="recentSales" responsiveLayout="scroll">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-sale>
+                            <tr>
+                                <td class="font-semibold text-primary">#{{ sale.id }}</td>
+                                <td>{{ sale.nombre_cliente || sale.nombre_usuario || 'Cliente' }}</td>
+                                <td><p-tag [severity]="getSaleSeverity(sale.estado)" [value]="(sale.estado || 'pendiente').toUpperCase()"></p-tag></td>
+                                <td class="font-semibold">S/ {{ sale.total | number:'1.2-2' }}</td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr><td colspan="4">Sin pedidos recientes.</td></tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <!-- ── Empty dashboard ──────────────────────────────────────────────────── -->
+    <ng-template #emptyDashboard>
+        <article class="app-surface-card">
+            <div class="table-empty-state">
+                <div class="empty-icon-wrap"><i class="pi pi-chart-bar" aria-hidden="true"></i></div>
+                <h3>Aún no hay datos para el dashboard</h3>
+                <p>Registra productos y ventas para activar los indicadores operativos.</p>
+            </div>
+        </article>
+    </ng-template>
+
+</section>

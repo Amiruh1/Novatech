@@ -1,0 +1,23 @@
+.app-surface-card {
+  background: var(--app-surface, #fff);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--app-border, #f1f5f9);
+  overflow: hidden;
+}
+
+:host ::ng-deep {
+  .p-datatable .p-datatable-thead > tr > th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+}

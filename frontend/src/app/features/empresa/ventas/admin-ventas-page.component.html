@@ -1,0 +1,396 @@
+<section class="app-shell-page">
+    <div class="page-intro page-intro-actions">
+        <div>
+            <h1 class="page-title">Gestión de ventas</h1>
+            <p class="page-subtitle">Monitorea pedidos y actualiza su estado en tiempo real.</p>
+        </div>
+        <div class="ventas-header-actions">
+            <button pButton type="button" icon="pi pi-download" label="Exportar CSV"
+                class="p-button-outlined p-button-sm"
+                pTooltip="Exportar todos los pedidos visibles"
+                tooltipPosition="bottom"
+                [disabled]="loadingVentas || !ventasFiltradas.length"
+                (click)="exportarCSV()">
+            </button>
+            <button pButton type="button" icon="pi pi-refresh" label="Actualizar"
+                class="p-button-outlined p-button-sm"
+                [loading]="loadingVentas" [disabled]="loadingVentas"
+                (click)="cargarVentas()">
+            </button>
+        </div>
+    </div>
+
+    <!-- ── KPI Mini Cards ────────────────────────────────────────────────────── -->
+    <div class="stats-grid ventas-kpi mb-4">
+        <article class="stat-card">
+            <div><div class="stat-label">Pedidos visibles</div>
+                 <div class="stat-value">{{ totalPedidosVista }}</div></div>
+            <div class="icon"><i class="pi pi-shopping-bag text-xl"></i></div>
+        </article>
+        <article class="stat-card revenue">
+            <div><div class="stat-label">Facturación visible</div>
+                 <div class="stat-value">S/ {{ totalMontoVista | number:'1.2-2' }}</div></div>
+            <div class="icon"><i class="pi pi-wallet text-xl"></i></div>
+        </article>
+        <article class="stat-card ticket">
+            <div><div class="stat-label">Ticket promedio</div>
+                 <div class="stat-value">S/ {{ ticketPromedioVista | number:'1.2-2' }}</div></div>
+            <div class="icon"><i class="pi pi-chart-line text-xl"></i></div>
+        </article>
+        <article class="stat-card pending">
+            <div><div class="stat-label">Pendientes</div>
+                 <div class="stat-value">{{ pedidosPendientesVista }}</div></div>
+            <div class="icon"><i class="pi pi-clock text-xl"></i></div>
+        </article>
+        <article class="stat-card delivered">
+            <div><div class="stat-label">Entregados</div>
+                 <div class="stat-value">{{ pedidosEntregadosVista }}</div></div>
+            <div class="icon"><i class="pi pi-check-circle text-xl"></i></div>
+        </article>
+    </div>
+
+    <article class="app-surface-card">
+        <div class="card-head">
+            <div>
+                <h3 class="card-title">Pedidos registrados</h3>
+                <span class="card-subtitle">Expande cada fila para revisar el detalle del carrito.</span>
+            </div>
+            <button pButton type="button" icon="pi pi-filter-slash" class="p-button-text" label="Limpiar" (click)="limpiarFiltros()"></button>
+        </div>
+
+        <!-- ── Filtros ──────────────────────────────────────────────────────── -->
+        <div class="card-body filters-bar">
+            <div class="grid">
+                <div class="col-12 md:col-4">
+                    <label class="filter-label">Buscar cliente</label>
+                    <p-autoComplete
+                        [(ngModel)]="clienteSeleccionado"
+                        [suggestions]="clientesSugeridos"
+                        field="label" [dropdown]="true" [showClear]="true" [forceSelection]="false"
+                        placeholder="Nombre o código" appendTo="body"
+                        (completeMethod)="buscarClientes($event)"
+                        (onSelect)="aplicarFiltros()" (ngModelChange)="aplicarFiltros()">
+                        <ng-template let-item pTemplate="item">
+                            <div class="auto-option"><i [class]="item.icon"></i>
+                                <div><strong>{{ item.label }}</strong><small>{{ item.code }}</small></div></div>
+                        </ng-template>
+                    </p-autoComplete>
+                </div>
+
+                <div class="col-12 md:col-4">
+                    <label class="filter-label">Buscar producto</label>
+                    <p-autoComplete
+                        [(ngModel)]="productoSeleccionado"
+                        [suggestions]="productosSugeridos"
+                        field="label" [dropdown]="true" [showClear]="true" [forceSelection]="false"
+                        placeholder="Producto o código" appendTo="body"
+                        (completeMethod)="buscarProductos($event)"
+                        (onSelect)="aplicarFiltros()" (ngModelChange)="aplicarFiltros()">
+                        <ng-template let-item pTemplate="item">
+                            <div class="auto-option"><i [class]="item.icon"></i>
+                                <div><strong>{{ item.label }}</strong><small>{{ item.code }}</small></div></div>
+                        </ng-template>
+                    </p-autoComplete>
+                </div>
+
+                <div class="col-12 md:col-4">
+                    <label class="filter-label">Estado de pedido</label>
+                    <p-select [options]="estados" [(ngModel)]="estadoFiltro"
+                        optionLabel="label" optionValue="value"
+                        [filter]="false" [showClear]="true"
+                        [styleClass]="'w-full estado-filtro-select'"
+                        appendTo="body" placeholder="Todos los estados"
+                        (onChange)="aplicarFiltros()">
+                        <ng-template pTemplate="selectedItem" let-sel>
+                            <div class="estado-option" *ngIf="sel"><i [class]="sel.icon"></i><span>{{ sel.label }}</span></div>
+                            <span *ngIf="!sel">Todos los estados</span>
+                        </ng-template>
+                        <ng-template pTemplate="item" let-opt>
+                            <div class="estado-option"><i [class]="opt.icon"></i><span>{{ opt.label }}</span></div>
+                        </ng-template>
+                    </p-select>
+                </div>
+            </div>
+
+            <!-- ── Date Range Filter ─────────────────────────────────────── -->
+            <div class="date-filter-row">
+                <div class="quick-range-chips">
+                    <button *ngFor="let r of quickRanges" type="button"
+                            class="quick-chip"
+                            (click)="setQuickRange(r.value)">
+                        {{ r.label }}
+                    </button>
+                </div>
+                <p-datePicker
+                    [(ngModel)]="fechaRango"
+                    selectionMode="range"
+                    [readonlyInput]="true"
+                    dateFormat="dd/mm/yy"
+                    placeholder="Rango personalizado"
+                    appendTo="body"
+                    [showClear]="true"
+                    (ngModelChange)="aplicarFiltros()"
+                    styleClass="date-range-picker">
+                </p-datePicker>
+            </div>
+        </div>
+
+        <!-- ── Bulk Action Toolbar ───────────────────────────────────────── -->
+        <div class="bulk-toolbar" *ngIf="selectedCount > 0" role="toolbar" aria-label="Acciones masivas">
+            <span class="bulk-count">
+                <i class="pi pi-check-square"></i>
+                {{ selectedCount }} seleccionado{{ selectedCount > 1 ? 's' : '' }}
+            </span>
+            <div class="bulk-actions">
+                <button pButton type="button" icon="pi pi-tag" label="Cambiar estado"
+                    class="p-button-sm p-button-outlined"
+                    (click)="abrirBulkDialog()">
+                </button>
+                <button pButton type="button" icon="pi pi-download" label="Exportar seleccionados"
+                    class="p-button-sm p-button-outlined"
+                    (click)="exportarCSV(true)">
+                </button>
+                <button pButton type="button" icon="pi pi-times" class="p-button-sm p-button-text"
+                    (click)="selectedVentas = []" aria-label="Deseleccionar todo">
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Table ─────────────────────────────────────────────────────── -->
+        <div class="card-body table-shell">
+            <p-table [value]="ventasFiltradas" dataKey="id"
+                [(selection)]="selectedVentas"
+                [tableStyle]="{ 'min-width': '64rem' }"
+                [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 50]"
+                responsiveLayout="scroll"
+                [loading]="loadingVentas">
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:3rem">
+                            <p-tableHeaderCheckbox aria-label="Seleccionar todos"></p-tableHeaderCheckbox>
+                        </th>
+                        <th style="width:3rem"></th>
+                        <th>Pedido</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th style="width:4rem"></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-venta>
+                    <tr [class.row-selected]="selectedVentas.includes(venta)">
+                        <td>
+                            <p-tableCheckbox [value]="venta" [attr.aria-label]="'Seleccionar pedido #' + venta.id"></p-tableCheckbox>
+                        </td>
+                        <td>
+                            <button type="button" pButton pRipple
+                                class="p-button-text p-button-rounded p-button-plain"
+                                [icon]="isDetalleAbierto(venta) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                                [attr.aria-label]="isDetalleAbierto(venta) ? 'Colapsar detalle' : 'Expandir detalle'"
+                                (click)="toggleDetalle(venta, $event)">
+                            </button>
+                        </td>
+                        <td class="font-bold">#{{ venta.id }}</td>
+                        <td>
+                            <div class="client-cell">
+                                <i class="pi pi-user"></i>
+                                <span>{{ venta.nombre_cliente || 'Usuario #' + venta.id_usuario }}</span>
+                            </div>
+                        </td>
+                        <td>{{ venta.fecha | date:'dd/MM/yy HH:mm' }}</td>
+                        <td>
+                            <div class="estado-cell">
+                                <p-select [options]="estados" [(ngModel)]="venta.estado"
+                                    (onChange)="cambiarEstado(venta)"
+                                    optionLabel="label" optionValue="value"
+                                    [styleClass]="'w-full estado-select'"
+                                    appendTo="body"
+                                    [disabled]="updatingEstadoId === venta.id || esEstadoTerminal(venta.estado)"
+                                    [filter]="false" [showClear]="false">
+                                    <ng-template pTemplate="selectedItem">
+                                        <div class="estado-option">
+                                            <i [class]="getEstadoIcon(venta.estado)"></i>
+                                            <p-tag [severity]="getSeverity(venta.estado)" [value]="venta.estado.toUpperCase()"></p-tag>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template let-opt pTemplate="item">
+                                        <div class="estado-option">
+                                            <i [class]="opt.icon"></i>
+                                            <p-tag [severity]="getSeverity(opt.value)" [value]="opt.label"></p-tag>
+                                        </div>
+                                    </ng-template>
+                                </p-select>
+                                <i *ngIf="updatingEstadoId === venta.id" class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                            </div>
+                        </td>
+                        <td class="amount">S/ {{ venta.total | number:'1.2-2' }}</td>
+                        <td>
+                            <button pButton type="button" icon="pi pi-eye" class="p-button-text p-button-sm p-button-rounded"
+                                pTooltip="Ver detalle completo" tooltipPosition="left"
+                                [attr.aria-label]="'Ver detalle del pedido #' + venta.id"
+                                (click)="abrirDrawer(venta)">
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Expand row -->
+                    <tr class="expand-row" *ngIf="isDetalleAbierto(venta)">
+                        <td colspan="8">
+                            <div class="expand-box">
+                                <div class="expand-head">
+                                    <span class="expand-title">Productos del pedido #{{ venta.id }}</span>
+                                    <div class="expand-head-actions">
+                                        <button *ngIf="pagoPendiente(venta)"
+                                            pButton type="button" icon="pi pi-check-circle"
+                                            label="Confirmar Pago" class="p-button-success p-button-sm"
+                                            [loading]="confirmandoPagoId === venta.id"
+                                            pTooltip="Validar que el pago fue recibido" tooltipPosition="top"
+                                            (click)="$event.stopPropagation(); confirmarPago(venta)">
+                                        </button>
+                                        <button pButton type="button" icon="pi pi-eye" class="p-button-text p-button-sm"
+                                            label="Ver detalle completo"
+                                            (click)="$event.stopPropagation(); abrirDrawer(venta)">
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="pago-pendiente-alert" *ngIf="pagoPendiente(venta)">
+                                    <i class="pi pi-exclamation-triangle"></i>
+                                    <span>Pago manual pendiente de validación — Ref: <strong>{{ venta.pago?.referencia || 'Sin referencia' }}</strong></span>
+                                </div>
+
+                                <div class="payment-summary" *ngIf="venta.pago as pago">
+                                    <div class="payment-pill"><i class="pi pi-credit-card"></i><span>Método: <strong>{{ pago.metodoLabel }}</strong></span></div>
+                                    <div class="payment-pill"><i class="pi pi-wallet"></i><span>Monto: <strong>S/ {{ pago.montoPagado | number:'1.2-2' }}</strong></span></div>
+                                    <div class="payment-pill" *ngIf="pago.vuelto !== null"><i class="pi pi-money-bill"></i><span>Vuelto: <strong>S/ {{ pago.vuelto | number:'1.2-2' }}</strong></span></div>
+                                    <div class="payment-pill" *ngIf="pago.referencia"><i class="pi pi-hashtag"></i><span>{{ pago.referencia }}</span></div>
+                                </div>
+
+                                <div class="grid mt-2" *ngIf="venta.productos?.length; else sinDetalle">
+                                    <div class="col-12 md:col-6 lg:col-4" *ngFor="let item of venta.productos">
+                                        <div class="product-mini-card">
+                                            <img [src]="item.imagen" width="42" loading="lazy" class="border-round" style="height:42px;object-fit:contain">
+                                            <div>
+                                                <div class="product-name">{{ item.nombre }}</div>
+                                                <div class="product-meta">S/ {{ item.precio }} × {{ item.cantidad }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ng-template #sinDetalle><div class="expand-empty">Sin detalle de ítems.</div></ng-template>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr><td colspan="8">
+                        <div class="table-empty-state">
+                            <div class="empty-icon-wrap"><i class="pi pi-inbox" aria-hidden="true"></i></div>
+                            <h3>Aún no hay pedidos registrados</h3>
+                            <p>Cuando entren ventas, aparecerán aquí para que puedas gestionarlas.</p>
+                        </div>
+                    </td></tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </article>
+</section>
+
+<!-- ── DRAWER: Detalle completo del pedido ──────────────────────────────────── -->
+<p-drawer
+    [(visible)]="drawerVisible"
+    position="right"
+    [style]="{ width: 'min(480px, 100vw)' }"
+    [modal]="true"
+    [showCloseIcon]="true">
+
+    <ng-template pTemplate="header">
+        <div class="dlg-hero dlg-stock" *ngIf="ventaDrawer">
+            <div class="dlg-hero-icon"><i class="pi pi-receipt"></i></div>
+            <div>
+                <span class="dlg-hero-title">Detalle del pedido</span>
+                <span class="dlg-hero-sub">#{{ ventaDrawer.id }} — {{ ventaDrawer.nombre_cliente || 'Usuario #' + ventaDrawer.id_usuario }}</span>
+            </div>
+        </div>
+    </ng-template>
+
+    <div *ngIf="ventaDrawer as venta" class="drawer-body">
+        <!-- Meta grid -->
+        <div class="drawer-meta-grid">
+            <div class="meta-row"><span class="meta-key">Pedido</span><span class="meta-val font-bold">#{{ venta.id }}</span></div>
+            <div class="meta-row"><span class="meta-key">Fecha</span><span class="meta-val">{{ venta.fecha | date:'dd/MM/yyyy HH:mm' }}</span></div>
+            <div class="meta-row"><span class="meta-key">Estado</span>
+                <p-tag [severity]="getSeverity(venta.estado)" [value]="(venta.estado || 'pendiente').toUpperCase()"></p-tag>
+            </div>
+            <div class="meta-row"><span class="meta-key">Total</span><span class="meta-val font-bold primary">S/ {{ venta.total | number:'1.2-2' }}</span></div>
+            <div class="meta-row"><span class="meta-key">Método</span><span class="meta-val">{{ venta.pago?.metodoLabel || 'N/E' }}</span></div>
+            <div class="meta-row"><span class="meta-key">Monto pagado</span><span class="meta-val">S/ {{ venta.pago?.montoPagado | number:'1.2-2' }}</span></div>
+            <div class="meta-row" *ngIf="venta.pago?.vuelto !== null"><span class="meta-key">Vuelto</span><span class="meta-val">S/ {{ venta.pago?.vuelto | number:'1.2-2' }}</span></div>
+            <div class="meta-row" *ngIf="venta.pago?.referencia"><span class="meta-key">Referencia</span><span class="meta-val small">{{ venta.pago?.referencia }}</span></div>
+            <div class="meta-row" *ngIf="venta.pago?.comentario"><span class="meta-key">Comentario</span><span class="meta-val small">{{ venta.pago?.comentario }}</span></div>
+        </div>
+
+        <div class="drawer-section-label">Productos del pedido</div>
+        <div class="drawer-items" *ngIf="venta.productos?.length; else emptyDrawer">
+            <div class="drawer-item" *ngFor="let item of venta.productos">
+                <img [src]="item.imagen" [alt]="item.nombre" width="48" height="48" loading="lazy" class="border-round" style="object-fit:contain">
+                <div class="drawer-item-info">
+                    <div class="product-name">{{ item.nombre }}</div>
+                    <div class="product-meta">{{ item.cantidad }} × S/ {{ item.precio | number:'1.2-2' }}</div>
+                </div>
+                <div class="drawer-item-sub">S/ {{ item.subtotal | number:'1.2-2' }}</div>
+            </div>
+        </div>
+        <ng-template #emptyDrawer><p class="expand-empty">Sin detalle disponible.</p></ng-template>
+
+        <!-- Confirmar pago si aplica -->
+        <div class="drawer-pago-alert" *ngIf="pagoPendiente(venta)">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>Pago manual pendiente — Ref: <strong>{{ venta.pago?.referencia || 'Sin referencia' }}</strong></span>
+            <button pButton type="button" icon="pi pi-check-circle" label="Confirmar Pago"
+                class="p-button-success p-button-sm"
+                [loading]="confirmandoPagoId === venta.id"
+                (click)="confirmarPago(venta)">
+            </button>
+        </div>
+    </div>
+</p-drawer>
+
+<!-- ── DIALOG: Cambio de estado masivo ──────────────────────────────────────── -->
+<p-dialog [(visible)]="showBulkDialog" [modal]="true" [draggable]="false" [resizable]="false"
+    [style]="{ width: 'min(28rem, 96vw)' }" [transitionOptions]="'200ms ease-out'">
+    <ng-template pTemplate="header">
+        <div class="dlg-hero dlg-stock">
+            <div class="dlg-hero-icon"><i class="pi pi-tag"></i></div>
+            <div>
+                <span class="dlg-hero-title">Cambio masivo de estado</span>
+                <span class="dlg-hero-sub">{{ selectedCount }} pedido{{ selectedCount > 1 ? 's' : '' }} seleccionado{{ selectedCount > 1 ? 's' : '' }}</span>
+            </div>
+        </div>
+    </ng-template>
+    <div class="bulk-dialog-body">
+        <label class="filter-label">Nuevo estado para todos los seleccionados</label>
+        <p-select [options]="estados" [(ngModel)]="bulkEstado"
+            optionLabel="label" optionValue="value"
+            placeholder="Selecciona un estado"
+            [showClear]="false" styleClass="w-full">
+        </p-select>
+        <small class="help mt-2 d-block">Solo se pueden cambiar pedidos que no estén en estado terminal (Cancelado / Reembolsado).</small>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" [disabled]="procesandoBulk" (click)="showBulkDialog = false">
+                <i class="pi pi-times"></i><span>Cancelar</span>
+            </button>
+            <button class="btn-modal-guardar" [disabled]="!bulkEstado || procesandoBulk" (click)="aplicarBulkEstado()">
+                <i class="pi pi-spin pi-spinner" *ngIf="procesandoBulk"></i>
+                <i class="pi pi-check" *ngIf="!procesandoBulk"></i>
+                <span>{{ procesandoBulk ? 'Actualizando...' : 'Aplicar a ' + selectedCount + ' pedidos' }}</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

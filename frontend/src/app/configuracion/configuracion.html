@@ -1,0 +1,381 @@
+<section class="app-shell-page config-page">
+
+    <div class="page-intro">
+        <h1 class="page-title">Configuración</h1>
+        <p class="page-subtitle">Perfil, seguridad y direcciones de envío</p>
+    </div>
+
+    <div class="config-grid">
+
+        <!-- ── Perfil personal — ocupa las 2 columnas ─────────────────────── -->
+        <article class="cfg-card cfg-card--wide">
+            <div class="cfg-card-header">
+                <div class="cfg-icon cfg-icon--profile"><i class="pi pi-user"></i></div>
+                <div>
+                    <h3 class="cfg-card-title">Perfil personal</h3>
+                    <span class="cfg-card-sub">Nombre y datos de contacto</span>
+                </div>
+            </div>
+
+            <!-- Banner de usuario -->
+            <div class="cfg-profile-banner" *ngIf="usuario">
+                <div class="cfg-avatar">{{ getInitial(usuario?.nombre) }}</div>
+                <div class="cfg-profile-info">
+                    <strong>{{ usuario?.nombre }}</strong>
+                    <span>{{ usuario?.email }}</span>
+                </div>
+                <div class="cfg-profile-badge">
+                    <i class="pi pi-verified"></i> Verificado
+                </div>
+            </div>
+
+            <div class="cfg-body cfg-body--grid">
+                <div class="form-group">
+                    <label>Nombre completo *</label>
+                    <input pInputText [(ngModel)]="inputNombre" placeholder="Tu nombre completo" maxlength="120" class="w-full" />
+                    <small class="field-req req-error" *ngIf="inputNombre.length > 0 && inputNombre.length < 3">
+                        Mínimo 3 caracteres
+                    </small>
+                    <small class="char-counter" *ngIf="inputNombre.length > 95" [class.char-warn]="inputNombre.length > 100">
+                        {{ inputNombre.length }}/120
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Correo electrónico</label>
+                    <input pInputText [(ngModel)]="inputEmail" type="email" placeholder="correo@ejemplo.com" maxlength="320" class="w-full" />
+                    <small class="field-hint">Cambiar el correo actualiza tu acceso.</small>
+                </div>
+
+                <div class="form-row" *ngIf="!usuario?.numero_documento">
+                    <div class="form-group">
+                        <label>Tipo de Documento</label>
+                        <p-select [options]="tiposDocumento" [(ngModel)]="inputTipoDoc" styleClass="w-full" appendTo="body"></p-select>
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Documento *</label>
+                        <input pInputText [(ngModel)]="inputDni" [placeholder]="docPlaceholder" [maxlength]="docMaxLength" (input)="onDocInput($event)" class="w-full" />
+                    </div>
+                </div>
+
+                <div class="form-row" *ngIf="usuario?.numero_documento">
+                    <div class="form-group">
+                        <label>Documento de identidad</label>
+                        <div class="field-readonly" pTooltip="No es posible modificar el documento una vez registrado" tooltipPosition="top">
+                            <span class="readonly-tipo">{{ usuario.tipo_documento || 'DOC' }}</span>
+                            <span class="readonly-value">{{ usuario.numero_documento }}</span>
+                            <i class="pi pi-lock readonly-lock"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono de contacto</label>
+                        <input pInputText [(ngModel)]="inputTelefono" placeholder="Ej. 999888777" maxlength="9" (input)="onTelefonoInput($event)" class="w-full" />
+                        <small class="field-hint">Solo 9 dígitos.</small>
+                    </div>
+                </div>
+
+                <div class="form-row" *ngIf="!usuario?.numero_documento">
+                    <div class="form-group" style="grid-column: 1/-1">
+                        <label>Teléfono de contacto</label>
+                        <input pInputText [(ngModel)]="inputTelefono" placeholder="Ej. 999888777" maxlength="9" (input)="onTelefonoInput($event)" class="w-full" />
+                        <small class="field-hint">Solo 9 dígitos.</small>
+                    </div>
+                </div>
+
+                <button pButton type="button"
+                    [label]="savedPerfil ? '¡Guardado!' : 'Guardar perfil'"
+                    [icon]="savedPerfil ? 'pi pi-check' : 'pi pi-save'"
+                    class="cfg-btn-primary w-full"
+                    [class.cfg-btn-saved]="savedPerfil"
+                    [loading]="guardandoPerfil"
+                    [disabled]="!inputNombre.trim() || guardandoPerfil"
+                    (click)="guardarPerfil()">
+                </button>
+            </div>
+        </article>
+
+        <!-- ── Seguridad ───────────────────────────────────────────────────── -->
+        <article class="cfg-card">
+            <div class="cfg-card-header">
+                <div class="cfg-icon cfg-icon--security"><i class="pi pi-shield"></i></div>
+                <div>
+                    <h3 class="cfg-card-title">Seguridad</h3>
+                    <span class="cfg-card-sub">Actualiza tu contraseña</span>
+                </div>
+            </div>
+            <div class="cfg-body">
+                <div class="form-group">
+                    <label>Contraseña actual</label>
+                    <p-password
+                        [(ngModel)]="passActual"
+                        [feedback]="false"
+                        [toggleMask]="true"
+                        styleClass="w-full"
+                        inputStyleClass="w-full"
+                        placeholder="Contraseña actual">
+                    </p-password>
+                </div>
+
+                <div class="form-group">
+                    <label>Nueva contraseña</label>
+                    <p-password
+                        [(ngModel)]="passNueva"
+                        [feedback]="false"
+                        [toggleMask]="true"
+                        styleClass="w-full"
+                        inputStyleClass="w-full"
+                        placeholder="Mínimo 8 caracteres"
+                        [maxlength]="64">
+                    </p-password>
+                    <small class="field-req req-error" *ngIf="passNueva.length > 0 && passNueva.length < 8">
+                        Faltan {{ 8 - passNueva.length }} caracter{{ 8 - passNueva.length === 1 ? '' : 'es' }} para el mínimo
+                    </small>
+                    <small class="char-counter" *ngIf="passNueva.length > 50" [class.char-warn]="passNueva.length > 56">
+                        {{ passNueva.length }}/64
+                    </small>
+                </div>
+
+                <!-- Barra de fuerza — solo aparece cuando se escribe -->
+                <div class="pass-strength-wrap" *ngIf="passNueva.length > 0">
+                    <div class="pass-strength-bar">
+                        <div class="pass-strength-fill"
+                             [style.width]="passNueva.length >= 12 ? '100%' : passNueva.length >= 8 ? '60%' : '30%'"
+                             [class.weak]="passNueva.length < 8"
+                             [class.ok]="passNueva.length >= 8 && passNueva.length < 12"
+                             [class.strong]="passNueva.length >= 12">
+                        </div>
+                    </div>
+                    <small class="pass-strength-label"
+                           [class.ok]="passNueva.length >= 8 && passNueva.length < 12"
+                           [class.strong]="passNueva.length >= 12">
+                        {{ passNueva.length >= 12 ? '✓ Fuerte' : passNueva.length >= 8 ? '~ Aceptable' : '✗ Muy corta' }}
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirmar nueva contraseña</label>
+                    <p-password
+                        [(ngModel)]="passConfirm"
+                        [feedback]="false"
+                        [toggleMask]="true"
+                        styleClass="w-full"
+                        inputStyleClass="w-full"
+                        placeholder="Repite la nueva contraseña">
+                    </p-password>
+                    <small class="field-req req-error" *ngIf="passConfirm.length > 0 && passConfirm !== passNueva">
+                        Las contraseñas no coinciden
+                    </small>
+                </div>
+
+                <button pButton type="button"
+                    [label]="savedPass ? '¡Contraseña guardada!' : 'Cambiar contraseña'"
+                    [icon]="savedPass ? 'pi pi-check' : 'pi pi-lock'"
+                    class="cfg-btn-primary w-full"
+                    [class.cfg-btn-saved]="savedPass"
+                    [loading]="guardandoPass"
+                    [disabled]="!passActual || !passNueva || !passConfirm"
+                    (click)="cambiarPassword()">
+                </button>
+            </div>
+        </article>
+
+        <!-- ── Libreta de direcciones — comparte fila con Seguridad ─────── -->
+        <article class="cfg-card">
+            <div class="cfg-card-header">
+                <div class="cfg-icon cfg-icon--address"><i class="pi pi-map-marker"></i></div>
+                <div>
+                    <h3 class="cfg-card-title">Libreta de direcciones</h3>
+                    <span class="cfg-card-sub">Gestiona tus direcciones de envío</span>
+                </div>
+                <button pButton type="button" icon="pi pi-plus" label="Agregar"
+                    class="p-button-outlined p-button-sm ml-auto"
+                    (click)="abrirDirDialog()">
+                </button>
+            </div>
+            <div class="cfg-body">
+
+                <div class="dir-loading" *ngIf="loadingDirs">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    <span>Cargando direcciones...</span>
+                </div>
+
+                <div class="dir-grid" *ngIf="!loadingDirs && direcciones.length > 0">
+                    <div class="dir-card" *ngFor="let dir of direcciones" [class.dir-card--default]="dir.predeterminada">
+                        <div class="dir-card-top">
+                            <div class="dir-card-icon" [class.dir-card-icon--default]="dir.predeterminada">
+                                <i class="pi" [ngClass]="dir.predeterminada ? 'pi-home' : 'pi-map-marker'"></i>
+                            </div>
+                            <span class="dir-alias">{{ dir.alias }}</span>
+                            <p-tag *ngIf="dir.predeterminada" value="Principal" severity="success"></p-tag>
+                        </div>
+                        <div class="dir-card-body">
+                            <div class="dir-row"><i class="pi pi-user"></i><span>{{ dir.destinatario }}</span></div>
+                            <div class="dir-row"><i class="pi pi-map"></i><span>{{ dir.direccion_detallada }}</span></div>
+                            <div class="dir-district">{{ dir.distrito }}, {{ dir.provincia }}</div>
+                        </div>
+                        <div class="dir-card-actions">
+                            <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm p-button-secondary" pTooltip="Editar" (click)="abrirDirDialog(dir)"></button>
+                            <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" pTooltip="Eliminar" (click)="eliminarDireccion(dir.id)"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dir-empty" *ngIf="!loadingDirs && !direcciones.length">
+                    <div class="dir-empty-icon"><i class="pi pi-map"></i></div>
+                    <strong>Sin direcciones guardadas</strong>
+                    <p>Agrega una dirección para agilizar tu checkout.</p>
+                    <button pButton type="button" label="Agregar primera dirección" icon="pi pi-plus"
+                        class="p-button-sm p-button-outlined" (click)="abrirDirDialog()">
+                    </button>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- ── Dialog Dirección ──────────────────────────────────────────────────── -->
+<p-dialog
+    [(visible)]="mostrarDirDialog"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: 'min(34rem, 96vw)' }"
+    [transitionOptions]="'220ms cubic-bezier(0.16,1,0.3,1)'">
+    <ng-template pTemplate="header">
+        <div class="dlg-hero dlg-address">
+            <div class="dlg-hero-icon"><i class="pi pi-map-marker"></i></div>
+            <div>
+                <span class="dlg-hero-title">{{ dirActual.id ? 'Editar dirección' : 'Nueva dirección' }}</span>
+                <span class="dlg-hero-sub">Datos de entrega para tus pedidos</span>
+            </div>
+        </div>
+    </ng-template>
+    <div class="dir-form">
+
+        <!-- Alias -->
+        <div class="form-group">
+            <label>Alias *</label>
+            <input pInputText
+                [(ngModel)]="dirActual.alias"
+                placeholder="Ej. Casa, Trabajo, Oficina"
+                maxlength="80"
+                class="w-full" />
+            <div class="dir-field-meta">
+                <small class="field-req req-error"
+                    *ngIf="dirActual.alias && dirActual.alias.trim().length > 0 && dirActual.alias.trim().length < 2">
+                    Mínimo 2 caracteres
+                </small>
+                <small class="char-counter"
+                    *ngIf="(dirActual.alias?.length || 0) > 60"
+                    [class.char-warn]="(dirActual.alias?.length || 0) > 68">
+                    {{ dirActual.alias?.length || 0 }}/80
+                </small>
+            </div>
+        </div>
+
+        <!-- Destinatario — solo letras (handler bloquea números en tiempo real) -->
+        <div class="form-group">
+            <label>Destinatario *</label>
+            <input pInputText
+                [(ngModel)]="dirActual.destinatario"
+                placeholder="Nombre y apellido de quien recibe"
+                maxlength="120"
+                class="w-full"
+                (input)="onSoloLetrasInput($event, 'destinatario')" />
+            <small class="field-hint">Solo letras · nombre y apellido obligatorio</small>
+            <small class="field-req req-error"
+                *ngIf="dirActual.destinatario && dirActual.destinatario.trim().length > 0 && dirActual.destinatario.trim().length < 5">
+                Ingresa el nombre completo (mínimo 5 caracteres)
+            </small>
+            <small class="field-req req-error"
+                *ngIf="dirActual.destinatario && dirActual.destinatario.trim().length >= 5 && !dirActual.destinatario.trim().includes(' ')">
+                Agrega el apellido (ej. Juan García)
+            </small>
+        </div>
+
+        <!-- Dirección detallada — debe incluir número de calle -->
+        <div class="form-group">
+            <label>Dirección detallada *</label>
+            <input pInputText
+                [(ngModel)]="dirActual.direccion_detallada"
+                placeholder="Av. Javier Prado Este 1234, Piso 2"
+                maxlength="220"
+                class="w-full" />
+            <small class="field-hint">Incluye nombre de vía y número de inmueble</small>
+            <small class="field-req req-error"
+                *ngIf="dirActual.direccion_detallada && dirActual.direccion_detallada.trim().length > 0
+                       && dirActual.direccion_detallada.trim().length < 8">
+                Dirección muy corta — agrega calle y número
+            </small>
+            <small class="field-req req-error"
+                *ngIf="dirActual.direccion_detallada && dirActual.direccion_detallada.trim().length >= 8
+                       && !/\d/.test(dirActual.direccion_detallada)">
+                Falta el número de calle (ej. Av. Lima 456)
+            </small>
+        </div>
+
+        <!-- Distrito y Provincia -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Distrito *</label>
+                <input pInputText
+                    [(ngModel)]="dirActual.distrito"
+                    placeholder="Ej. Miraflores, San Isidro"
+                    maxlength="80"
+                    class="w-full"
+                    (input)="onSoloLetrasInput($event, 'distrito')" />
+                <small class="field-req req-error"
+                    *ngIf="dirActual.distrito && dirActual.distrito.trim().length > 0 && dirActual.distrito.trim().length < 3">
+                    Mínimo 3 letras
+                </small>
+            </div>
+            <div class="form-group">
+                <label>Provincia *</label>
+                <input pInputText
+                    [(ngModel)]="dirActual.provincia"
+                    placeholder="Ej. Lima, Arequipa"
+                    maxlength="80"
+                    class="w-full"
+                    (input)="onSoloLetrasInput($event, 'provincia')" />
+                <small class="field-req req-error"
+                    *ngIf="dirActual.provincia && dirActual.provincia.trim().length > 0 && dirActual.provincia.trim().length < 3">
+                    Mínimo 3 letras
+                </small>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Código Postal (opcional)</label>
+                <input pInputText
+                    [(ngModel)]="dirActual.codigo_postal"
+                    placeholder="Ej. 15001"
+                    maxlength="5"
+                    (input)="onCodigoPostalInput($event)"
+                    class="w-full" />
+                <small class="field-hint">5 dígitos · formato Perú</small>
+                <small class="field-req req-error"
+                    *ngIf="dirActual.codigo_postal && dirActual.codigo_postal.toString().length > 0
+                           && !/^\d{5}$/.test(dirActual.codigo_postal.toString())">
+                    Exactamente 5 dígitos (ej. 15001)
+                </small>
+            </div>
+            <div class="form-group">
+                <label>Referencias (opcional)</label>
+                <input pInputText [(ngModel)]="dirActual.referencias" placeholder="Cerca de..." class="w-full" />
+            </div>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" [disabled]="guardandoDir" (click)="mostrarDirDialog = false">
+                <i class="pi pi-times"></i><span>Cancelar</span>
+            </button>
+            <button class="btn-modal-guardar" [disabled]="guardandoDir" (click)="guardarDireccion()">
+                <i class="pi pi-spin pi-spinner" *ngIf="guardandoDir"></i>
+                <i class="pi pi-check" *ngIf="!guardandoDir"></i>
+                <span>{{ guardandoDir ? 'Guardando...' : 'Guardar dirección' }}</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

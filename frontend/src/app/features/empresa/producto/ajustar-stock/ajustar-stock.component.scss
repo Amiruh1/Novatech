@@ -1,0 +1,14 @@
+:host ::ng-deep .p-select,
+:host ::ng-deep .p-inputnumber {
+  width: 100%;
+}
+
+// Los estilos de p-inputtext/select/etc usan CSS variables del global (styles.scss).
+// Sin hardcode de colores.
+
+.operation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  i { color: var(--app-muted); }
+}

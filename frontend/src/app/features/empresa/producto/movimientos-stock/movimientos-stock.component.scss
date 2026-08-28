@@ -1,0 +1,10 @@
+:host ::ng-deep .p-datatable .p-datatable-header,
+:host ::ng-deep .p-datatable .p-datatable-wrapper {
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-datatable .p-paginator {
+  border-bottom-left-radius: 0.8rem;
+  border-bottom-right-radius: 0.8rem;
+}

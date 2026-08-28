@@ -1,0 +1,466 @@
+﻿.page-intro-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ventas-kpi {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ventas-kpi .stat-card.revenue {
+  background: linear-gradient(135deg, var(--app-info-soft), var(--app-surface-muted));
+}
+
+.ventas-kpi .stat-card.ticket {
+  background: linear-gradient(135deg, var(--app-primary-glow), var(--app-info-soft));
+}
+
+.ventas-kpi .stat-card.pending {
+  background: linear-gradient(135deg, var(--app-warning-soft), var(--app-surface-muted));
+}
+
+.ventas-kpi .stat-card.delivered {
+  background: linear-gradient(135deg, var(--app-success-soft), var(--app-primary-glow));
+}
+
+.table-shell {
+  padding-top: 0.8rem;
+}
+
+.filters-bar {
+  border-bottom: 1px solid var(--app-border);
+  padding-top: 0.95rem;
+  padding-bottom: 0.3rem;
+}
+
+.filter-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--app-muted);
+}
+
+:host ::ng-deep .p-select {
+  width: 100%;
+  min-width: 10rem;
+}
+
+:host ::ng-deep .p-autocomplete,
+:host ::ng-deep .p-autocomplete .p-inputtext {
+  width: 100%;
+}
+
+.auto-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.auto-option i {
+  color: var(--app-muted);
+}
+
+.auto-option strong {
+  display: block;
+  font-size: 0.8rem;
+}
+
+.auto-option small {
+  color: var(--app-muted);
+  font-size: 0.68rem;
+}
+
+.estado-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.estado-option i {
+  color: var(--app-muted);
+  font-size: 0.85rem;
+}
+
+:host ::ng-deep .estado-select .p-select-label,
+:host ::ng-deep .estado-filtro-select .p-select-label {
+  font-weight: 700;
+}
+
+:host ::ng-deep .estado-select {
+  border-radius: 0.8rem;
+  border: 1px solid #dbe3f1;
+  background: #f8fbff;
+}
+
+:host ::ng-deep .estado-select:not(.p-disabled).p-focus,
+:host ::ng-deep .estado-filtro-select:not(.p-disabled).p-focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+  border-color: #60a5fa;
+}
+
+:host ::ng-deep .estado-select .p-select-trigger,
+:host ::ng-deep .estado-filtro-select .p-select-trigger {
+  color: var(--app-muted);
+}
+
+.estado-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.estado-cell .pi-spinner {
+  color: var(--app-primary);
+}
+
+.client-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.client-cell i {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--app-accent-soft);
+  color: var(--app-text-2);
+}
+
+.amount {
+  color: var(--app-success);
+  font-weight: 800;
+}
+
+.expand-box {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: var(--r-xl);
+  background: var(--app-surface-muted);
+  padding: var(--sp-4) var(--sp-5);
+  animation: fadeSlideUp 200ms var(--ease-out) both;
+}
+
+.expand-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.expand-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.pago-pendiente-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--app-warning-soft);
+  border: 1px solid var(--app-warning-glow);
+  border-radius: 0.65rem;
+  padding: 0.6rem 1rem;
+  margin: 0.75rem 0 0;
+  color: var(--app-warning);
+  font-size: 0.82rem;
+  line-height: 1.4;
+
+  i { color: var(--app-warning); font-size: 1rem; flex-shrink: 0; }
+  strong { color: var(--app-warning); }
+}
+
+.expand-title {
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.payment-summary {
+  margin-top: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.payment-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--app-info-glow);
+  border-radius: 999px;
+  background: var(--app-info-soft);
+  color: var(--app-accent-strong);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+}
+
+.payment-pill i {
+  color: var(--app-accent);
+}
+
+.payment-pill strong {
+  color: var(--app-text);
+}
+
+.product-mini-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.8rem;
+  background: var(--app-surface);
+  padding: 0.55rem;
+}
+
+.product-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.product-meta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--app-primary);
+}
+
+.expand-empty {
+  border: 1px dashed var(--app-border);
+  border-radius: 0.7rem;
+  background: var(--app-surface);
+  color: var(--app-muted);
+  padding: 0.8rem;
+  margin-top: 0.65rem;
+}
+
+.detalle-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.detalle-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-lg);
+  background: var(--app-surface);
+  padding: var(--sp-3);
+  font-size: 0.86rem;
+}
+
+.detalle-items {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.detalle-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.75rem;
+  background: var(--app-surface);
+  padding: 0.55rem;
+}
+
+.detalle-item img {
+  border-radius: 0.6rem;
+  object-fit: contain;
+  border: 1px solid #e2e8f0;
+}
+
+.table-empty-state h3 { margin: 0; }
+.table-empty-state p  { margin: 0.35rem 0 0; }
+
+// ── Header actions ────────────────────────────────────────────────────────────
+.ventas-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+// ── Date Range Filter ──────────────────────────────────────────────────────────
+.date-filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.quick-range-chips {
+  display: flex;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+}
+
+.quick-chip {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-pill);
+  background: var(--app-surface-muted);
+  color: var(--app-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--app-primary);
+    color: var(--app-primary);
+    background: var(--app-primary-glow);
+  }
+}
+
+:host ::ng-deep .date-range-picker {
+  .p-inputtext { font-size: 0.82rem; }
+}
+
+// ── Bulk Toolbar ───────────────────────────────────────────────────────────────
+.bulk-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  background: linear-gradient(135deg, var(--app-info-soft), var(--app-info-glow));
+  border-top: 1px solid #bfdbfe;
+  padding: var(--sp-2) var(--sp-5);
+  animation: bulkSlideIn 180ms var(--ease-out) both;
+}
+
+@keyframes bulkSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bulk-count {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e40af;
+  white-space: nowrap;
+
+  i { font-size: 0.9rem; }
+}
+
+.bulk-actions {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+// ── Row selected highlight ─────────────────────────────────────────────────────
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr.row-selected {
+  background: var(--app-info-soft) !important;
+}
+
+// ── Drawer body ───────────────────────────────────────────────────────────────
+.drawer-body {
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.drawer-meta-grid {
+  display: grid;
+  gap: var(--sp-2);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-xl);
+  background: var(--app-surface-muted);
+  padding: var(--sp-4);
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.84rem;
+  gap: var(--sp-3);
+
+  .meta-key  { color: var(--app-muted); font-weight: 600; flex-shrink: 0; }
+  .meta-val  { font-weight: 700; text-align: right; }
+  .meta-val.primary { color: var(--app-primary); }
+  .meta-val.small   { font-size: 0.78rem; font-weight: 600; }
+}
+
+.drawer-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--app-muted);
+  margin-bottom: calc(var(--sp-2) * -1);
+}
+
+.drawer-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-lg);
+  background: var(--app-surface);
+  padding: var(--sp-3);
+
+  img { border-radius: var(--r-md); border: 1px solid var(--app-border-subtle); flex-shrink: 0; }
+}
+
+.drawer-item-info { flex: 1; min-width: 0; }
+.drawer-item-sub  { font-weight: 800; font-size: 0.88rem; color: var(--app-success); flex-shrink: 0; }
+
+.drawer-pago-alert {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  background: var(--app-warning-soft);
+  border: 1px solid var(--app-warning-glow);
+  border-radius: var(--r-lg);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: 0.82rem;
+  color: var(--app-warning);
+
+  i { color: var(--app-warning); flex-shrink: 0; }
+  strong { color: var(--app-warning); }
+}
+
+// ── Bulk dialog body ──────────────────────────────────────────────────────────
+.bulk-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+}
+
+.help { color: var(--app-muted); font-size: 0.75rem; }
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 1300px) {
+  .ventas-kpi { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .ventas-kpi         { grid-template-columns: 1fr; }
+  .date-filter-row    { flex-direction: column; align-items: stretch; }
+  .bulk-toolbar       { flex-direction: column; align-items: flex-start; }
+  .ventas-header-actions { width: 100%; justify-content: flex-end; }
+}
+

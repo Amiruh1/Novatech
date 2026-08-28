@@ -1,0 +1,104 @@
+<section class="app-shell-page notif-page">
+
+  <div class="notif-header">
+    <div class="notif-header-left">
+      <div class="notif-header-icon"><i class="pi pi-bell"></i></div>
+      <div>
+        <h1 class="page-title" style="margin:0">Centro de Notificaciones</h1>
+        <p class="page-subtitle" style="margin:0">
+          {{ totalNoLeidas > 0 ? (totalNoLeidas + ' sin leer') : 'Todo al día' }}
+        </p>
+      </div>
+    </div>
+    <div class="notif-header-actions">
+      <button pButton type="button" icon="pi pi-refresh" label="Actualizar"
+        class="p-button-outlined p-button-sm" [loading]="loading" (click)="cargar()"></button>
+      <button pButton type="button" icon="pi pi-check-circle" label="Marcar todo leído"
+        class="p-button-outlined p-button-sm" [disabled]="totalNoLeidas === 0"
+        (click)="marcarTodasLeidas()"></button>
+    </div>
+  </div>
+
+  <div class="notif-filtros">
+    <button
+      *ngFor="let f of filtros"
+      type="button"
+      class="filtro-pill"
+      [class.active]="filtro === f.value"
+      (click)="setFiltro(f.value)"
+    >
+      <i [class]="f.icon"></i>
+      <span>{{ f.label }}</span>
+      <span class="filtro-count" *ngIf="f.value === 'no-leidas' && totalNoLeidas > 0">{{ totalNoLeidas }}</span>
+    </button>
+  </div>
+
+  <div class="notif-skeleton" *ngIf="loading">
+    <div class="notif-skeleton-row" *ngFor="let i of [1,2,3,4,5]">
+      <div class="sk-icon"></div>
+      <div class="sk-body">
+        <div class="sk-line sk-title"></div>
+        <div class="sk-line sk-desc"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notif-lista" *ngIf="!loading">
+
+    <div
+      class="notif-card"
+      *ngFor="let n of listaPaginada"
+      [class.no-leida]="!n.read"
+      [class.leida]="n.read"
+      (click)="irA(n)"
+    >
+      <div class="notif-icon-wrap" [ngClass]="getIconBg(n.type)">
+        <i [class]="getIconClass(n.type)"></i>
+      </div>
+
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-title">{{ n.title }}</span>
+          <span class="notif-time">{{ getTimeAgo(n.createdAt) }}</span>
+        </div>
+        <p class="notif-desc">{{ n.description }}</p>
+        <div class="notif-meta">
+          <p-tag
+            [value]="n.type | titlecase"
+            [severity]="getSeverity(n.type)"
+            styleClass="notif-tag"
+          ></p-tag>
+          <span class="badge-nuevo" *ngIf="!n.read">NUEVO</span>
+        </div>
+      </div>
+
+      <div class="notif-actions">
+        <button
+          *ngIf="!n.read"
+          pButton
+          type="button"
+          icon="pi pi-check"
+          class="p-button-rounded p-button-text p-button-sm mark-read-btn"
+          pTooltip="Marcar como leída"
+          tooltipPosition="left"
+          (click)="marcarLeida(n, $event)"
+        ></button>
+      </div>
+    </div>
+
+    <div class="notif-empty" *ngIf="listaFiltrada.length === 0">
+      <i class="pi pi-inbox"></i>
+      <p>No hay notificaciones en esta categoría.</p>
+    </div>
+  </div>
+
+  <p-paginator
+    *ngIf="listaFiltrada.length > itemsPorPagina"
+    [rows]="itemsPorPagina"
+    [totalRecords]="listaFiltrada.length"
+    [first]="paginaActual * itemsPorPagina"
+    (onPageChange)="onPageChange($event)"
+    styleClass="notif-paginator"
+  ></p-paginator>
+
+</section>

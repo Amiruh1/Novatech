@@ -1,0 +1,105 @@
+<section class="app-shell-page">
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="page-intro page-intro-actions">
+    <div>
+      <h1 class="page-title">Módulo de Marcas</h1>
+      <p class="page-subtitle">Gestiona las marcas disponibles para los productos del catálogo.</p>
+    </div>
+    <div class="header-actions">
+      <button pButton type="button" label="Nueva Marca" icon="pi pi-plus" (click)="abrirDialog()"></button>
+    </div>
+  </div>
+
+  <article class="app-surface-card" style="padding: 1.5rem">
+    <p-table [value]="marcas" [loading]="loading" [rowHover]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Marca</th>
+          <th>Slug</th>
+          <th style="text-align: center;">Estado</th>
+          <th style="width: 120px; text-align: center;">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-marca>
+        <tr>
+          <td>
+            <div class="font-bold text-900">{{ marca.nombre }}</div>
+          </td>
+          <td>
+            <span class="text-sm text-500">{{ marca.slug }}</span>
+          </td>
+          <td style="text-align: center;">
+            @if (marca.activo == 1 || marca.activo == true) {
+              <p-tag value="Activo" severity="success"></p-tag>
+            } @else {
+              <p-tag value="Inactivo" severity="secondary"></p-tag>
+            }
+          </td>
+          <td style="text-align: center;">
+            <button pButton type="button" icon="pi pi-pencil"
+              class="p-button-rounded p-button-text p-button-sm mr-2"
+              pTooltip="Editar" (click)="abrirDialog(marca)">
+            </button>
+            <button pButton type="button" icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-sm p-button-danger"
+              pTooltip="Eliminar" (click)="eliminar(marca)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" style="text-align: center; padding: 2rem;">No hay marcas registradas.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </article>
+</section>
+
+<p-dialog
+  [(visible)]="mostrarDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(28rem, 96vw)' }"
+>
+  <ng-template pTemplate="header">
+    <div class="dlg-hero">
+      <div class="dlg-hero-icon"><i class="pi pi-bookmark"></i></div>
+      <div>
+        <span class="dlg-hero-title">{{ marcaActual.id ? 'Editar marca' : 'Nueva marca' }}</span>
+        <span class="dlg-hero-sub">Catálogo de marcas NovaTech</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="dlg-form">
+    <div class="form-field w-full mb-4">
+      <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom: 1rem;">
+        <p-toggleswitch [(ngModel)]="marcaActual.activo" inputId="marcaActivo"></p-toggleswitch>
+        <label for="marcaActivo" style="margin-bottom:0; cursor:pointer;" class="font-medium text-900">
+          {{ marcaActual.activo ? 'Activa — aparece en tienda y al crear productos' : 'Inactiva — oculta en tienda y formularios' }}
+        </label>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Nombre de Marca *</label>
+      <input pInputText [(ngModel)]="marcaActual.nombre" placeholder="Ej. Samsung, Apple, Sony" class="w-full" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="btn-modal-footer">
+      <button class="btn-modal-cancelar" [disabled]="guardando" (click)="mostrarDialog = false">
+        <i class="pi pi-times"></i>
+        <span>Cancelar</span>
+      </button>
+      <button class="btn-modal-guardar" [disabled]="guardando" (click)="guardar()">
+        @if (guardando) { <i class="pi pi-spin pi-spinner"></i> }
+        @else { <i class="pi pi-check"></i> }
+        <span>{{ guardando ? 'Guardando...' : 'Aplicar' }}</span>
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

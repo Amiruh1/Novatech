@@ -1,0 +1,126 @@
+<div class="card-body table-shell">
+  <p-table
+    #dt
+    [value]="products"
+    [tableStyle]="{ 'min-width': '44rem' }"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="8"
+    [rowsPerPageOptions]="[8, 16, 24]"
+    [globalFilterFields]="globalFilterFields"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="min-width: 20rem">Producto</th>
+        <th style="min-width: 9rem">Precio</th>
+        <th style="min-width: 8rem">Stock</th>
+        <th style="min-width: 10rem; text-align: right">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-prod>
+      <tr class="prod-row">
+
+        <!-- ── Bloque producto unificado ───────────────────────────────── -->
+        <td>
+          <div class="prod-block">
+            <img
+              [src]="prod.imagen"
+              [alt]="prod.nombre"
+              class="prod-thumb"
+              onerror="this.src='https://placehold.co/52x52?text=NT'"
+            />
+            <div>
+              <div class="prod-name">{{ prod.nombre }}</div>
+              <div class="prod-meta">
+                <span class="prod-sku" *ngIf="prod.sku">{{ prod.sku }}</span>
+                <span class="prod-cat" *ngIf="prod.categoria">{{ prod.categoria }}</span>
+                <span class="prod-brand" *ngIf="prod.marca">{{ prod.marca }}</span>
+              </div>
+            </div>
+          </div>
+        </td>
+
+        <!-- ── Precio ──────────────────────────────────────────────────── -->
+        <td>
+          <div class="prod-price" *ngIf="!prod.precio_oferta">
+            S/ {{ prod.precio | number:'1.2-2' }}
+          </div>
+          <div *ngIf="prod.precio_oferta">
+            <div class="prod-price-old">S/ {{ prod.precio | number:'1.2-2' }}</div>
+            <div class="prod-price prod-price--offer">S/ {{ prod.precio_oferta | number:'1.2-2' }}</div>
+          </div>
+        </td>
+
+        <!-- ── Stock ──────────────────────────────────────────────────── -->
+        <td>
+          <p-tag
+            [severity]="getStockSeverity(prod.stock)"
+            [value]="getStockLabel(prod.stock)"
+            [styleClass]="'stock-chip ' + getStockClass(prod.stock)"
+          ></p-tag>
+        </td>
+
+        <!-- ── Acciones ───────────────────────────────────────────────── -->
+        <td>
+          <div class="action-cell">
+            <p-button
+              icon="pi pi-list"
+              [rounded]="true" [text]="true"
+              severity="secondary"
+              pTooltip="Ver movimientos"
+              tooltipPosition="top"
+              (onClick)="solicitarVerMovimientos(prod)"
+            ></p-button>
+
+            <p-button
+              icon="pi pi-sliders-h"
+              [rounded]="true" [text]="true"
+              severity="info"
+              pTooltip="Ajustar stock"
+              tooltipPosition="top"
+              *ngIf="canAdjustStock"
+              (onClick)="solicitarAjusteStock(prod)"
+            ></p-button>
+
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true" [text]="true"
+              severity="warn"
+              pTooltip="Editar"
+              tooltipPosition="top"
+              *ngIf="canEdit"
+              (onClick)="solicitarEdicion(prod)"
+            ></p-button>
+
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true" [text]="true"
+              severity="danger"
+              pTooltip="Eliminar"
+              tooltipPosition="top"
+              *ngIf="canDelete"
+              (onClick)="solicitarEliminacion(prod)"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4">
+          <div class="table-empty-state">
+            <i class="pi pi-box"></i>
+            <h3>A&uacute;n no hay productos en cat&aacute;logo</h3>
+            <p>Crea el primer producto para comenzar a vender.</p>
+            <button pButton type="button" icon="pi pi-plus" label="Crear producto"
+              *ngIf="canCreate" (click)="solicitarCreacion()">
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

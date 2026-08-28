@@ -1,0 +1,547 @@
+// ── Configuración — layout modular, premium, adaptable a temas ────────────────
+
+.config-page { padding-bottom: var(--sp-10); }
+
+// ── Grid — 2 columnas: izquierda estrecha (seguridad), derecha amplia ────────
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: var(--sp-5);
+}
+
+.cfg-card--wide { grid-column: 1 / -1; }
+
+// ── Card base — usa tokens de tema ───────────────────────────────────────────
+.cfg-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    box-shadow var(--dur-base) var(--ease-smooth),
+    border-color var(--dur-base) var(--ease-smooth);
+
+  &:hover {
+    box-shadow: var(--shadow-medium);
+    border-color: var(--app-primary-glow);
+  }
+}
+
+// ── Card header — franja superior con icono + título ─────────────────────────
+.cfg-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--app-border-subtle);
+  background: linear-gradient(to right, var(--app-surface-muted), var(--app-surface));
+  position: relative;
+
+  // línea de acento izquierda como indicador de módulo
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+    border-radius: 0 var(--r-xs) var(--r-xs) 0;
+    background: var(--app-primary);
+    opacity: 0.7;
+  }
+}
+
+.cfg-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+
+  &--profile  { background: linear-gradient(135deg, var(--app-accent), var(--app-accent-strong)); }
+  &--security { background: linear-gradient(135deg, var(--app-warning), var(--app-danger)); }
+  &--address  { background: linear-gradient(135deg, var(--app-info), var(--app-primary)); }
+}
+
+.cfg-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.cfg-card-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--app-muted);
+  margin-top: 0.1rem;
+}
+
+// ── Profile banner ────────────────────────────────────────────────────────────
+.cfg-profile-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  background: linear-gradient(to right, var(--app-accent-soft), transparent 70%);
+  border-bottom: 1px solid var(--app-border-subtle);
+  padding: var(--sp-4) var(--sp-5);
+}
+
+.cfg-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--app-accent), var(--app-accent-strong));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  font-family: 'Sora', system-ui, sans-serif;
+  box-shadow: 0 4px 14px var(--app-accent-glow);
+}
+
+.cfg-profile-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+
+  strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--app-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  span {
+    font-size: 0.78rem;
+    color: var(--app-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.cfg-profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--app-success);
+  background: var(--app-success-soft);
+  border: 1px solid var(--app-success-glow);
+  border-radius: var(--r-pill);
+  padding: 0.25rem 0.65rem;
+  white-space: nowrap;
+
+  i { font-size: 0.65rem; }
+}
+
+// ── Card body ─────────────────────────────────────────────────────────────────
+.cfg-body {
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  flex: 1;
+}
+
+// ── p-password: input full-width + ojo pegado al borde ────────────────────────
+// PrimeNG 21 renderiza: <p-password> > <p-iconfield> > <input> + <p-inputicon>
+:host ::ng-deep .cfg-body {
+
+  // 1. host element del componente
+  p-password { display: block !important; width: 100% !important; }
+
+  // 2. wrapper con clase .p-password
+  .p-password {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+  }
+
+  // 3. p-iconfield — contenedor interno que agrupa input + icono
+  p-iconfield,
+  .p-iconfield {
+    display: flex !important;
+    flex: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    position: relative !important;
+    align-items: center !important;
+  }
+
+  // 4. el <input> dentro — padding derecho para que el ojo no lo tape
+  .p-password .p-inputtext {
+    flex: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-right: 2.8rem !important;
+  }
+
+  // 5. icono del ojo — posicionado sobre el input, NO sobre el card
+  .p-inputicon,
+  .p-icon-wrapper,
+  .p-password-toggle-mask-icon {
+    position: absolute !important;
+    right: 0.75rem !important;
+    left: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--app-muted) !important;
+    cursor: pointer !important;
+    z-index: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    &:hover { color: var(--app-text) !important; }
+
+    svg, .pi { pointer-events: none; }
+  }
+}
+
+.cfg-body--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4) var(--sp-5);
+
+  .form-row,
+  button {
+    grid-column: 1 / -1;
+  }
+
+  .form-group:nth-child(1) { grid-column: 1; }
+  .form-group:nth-child(2) { grid-column: 2; }
+}
+
+// ── Forms ─────────────────────────────────────────────────────────────────────
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--app-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// Hint / error / counter — solo aparecen cuando hay contenido relevante
+.field-req {
+  font-size: 0.72rem;
+  color: var(--app-muted);
+  transition: color var(--dur-base);
+  &.req-error {
+    color: var(--app-danger);
+    font-weight: 600;
+    animation: fadeSlideUp var(--dur-base) var(--ease-out) both;
+  }
+  &.req-ok { color: var(--app-success); font-weight: 600; }
+}
+
+.char-counter {
+  font-size: 0.7rem;
+  color: var(--app-muted);
+  align-self: flex-end;
+  animation: fadeSlideUp var(--dur-base) var(--ease-out) both;
+  &.char-warn { color: var(--app-warning); font-weight: 600; }
+}
+
+.field-hint {
+  font-size: 0.72rem;
+  color: var(--app-muted);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+
+.field-readonly {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  background: var(--app-surface-muted);
+  border: 1.5px solid var(--app-border);
+  border-radius: var(--r-md);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  cursor: not-allowed;
+  min-height: 2.5rem;
+  transition: border-color var(--dur-fast);
+
+  &:hover {
+    border-color: var(--app-muted);
+    .readonly-lock { opacity: 1; }
+  }
+
+  .readonly-tipo {
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--app-border);
+    color: var(--app-muted);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--r-xs);
+    flex-shrink: 0;
+  }
+
+  .readonly-value { flex: 1; font-weight: 600; color: var(--app-text-2); }
+
+  .readonly-lock {
+    opacity: 0;
+    color: var(--app-muted);
+    font-size: 0.8rem;
+    transition: opacity var(--dur-fast);
+  }
+}
+
+// ── Botones ───────────────────────────────────────────────────────────────────
+.cfg-btn-primary {
+  justify-content: center;
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong)) !important;
+  border: none !important;
+  border-radius: var(--r-lg) !important;
+  padding: 0.78rem 1.5rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 16px -4px var(--app-primary-glow);
+  transition: box-shadow var(--dur-fast), transform var(--dur-fast) !important;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 22px -4px var(--app-primary-glow) !important;
+    transform: translateY(-1px);
+  }
+}
+
+.cfg-btn-secondary {
+  justify-content: center;
+  border-radius: var(--r-lg) !important;
+  padding: 0.78rem 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.cfg-btn-saved {
+  background: linear-gradient(135deg, var(--app-success), var(--app-primary)) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px -4px var(--app-success-glow) !important;
+  pointer-events: none;
+}
+
+// ── Password strength ─────────────────────────────────────────────────────────
+.pass-strength-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  animation: fadeSlideUp var(--dur-base) var(--ease-out) both;
+}
+
+.pass-strength-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--app-border);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.pass-strength-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--app-danger);
+  transition: width var(--dur-base) var(--ease-spring), background var(--dur-base);
+  &.weak   { background: var(--app-danger); }
+  &.ok     { background: var(--app-warning); }
+  &.strong { background: var(--app-success); }
+}
+
+.pass-strength-label {
+  font-size: 0.72rem;
+  color: var(--app-danger);
+  font-weight: 600;
+  white-space: nowrap;
+  &.ok     { color: var(--app-warning); }
+  &.strong { color: var(--app-success); }
+}
+
+// ── Direction grid ────────────────────────────────────────────────────────────
+.dir-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--sp-4);
+}
+
+.dir-card {
+  border: 1.5px solid var(--app-border);
+  border-radius: var(--r-xl);
+  background: var(--app-surface);
+  overflow: hidden;
+  transition:
+    box-shadow var(--dur-base) var(--ease-smooth),
+    transform var(--dur-base),
+    border-color var(--dur-base);
+
+  &:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-3px);
+    border-color: var(--app-primary-glow);
+  }
+
+  &--default {
+    border-color: var(--app-success-glow);
+    background: linear-gradient(to bottom, var(--app-success-soft), var(--app-surface));
+  }
+}
+
+.dir-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
+}
+
+.dir-card-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-md);
+  background: var(--app-info-soft);
+  border: 1px solid var(--app-info-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-info);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+
+  &--default {
+    background: var(--app-success-soft);
+    border-color: var(--app-success-glow);
+    color: var(--app-success);
+  }
+}
+
+.dir-alias {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dir-card-body {
+  padding: 0 var(--sp-4) var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.dir-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  font-size: 0.81rem;
+  color: var(--app-text-2);
+
+  i { color: var(--app-muted); font-size: 0.72rem; margin-top: 0.15rem; flex-shrink: 0; }
+}
+
+.dir-district {
+  font-size: 0.73rem;
+  color: var(--app-muted);
+  padding-left: calc(0.72rem + var(--sp-2));
+}
+
+.dir-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3);
+  border-top: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-muted);
+}
+
+.dir-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--app-muted);
+  font-size: 0.85rem;
+  padding: var(--sp-2) 0;
+}
+
+.dir-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-10) var(--sp-4);
+  color: var(--app-muted);
+  text-align: center;
+
+  strong { font-size: 1rem; color: var(--app-text-2); }
+  p      { margin: 0; font-size: 0.84rem; }
+}
+
+.dir-empty-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--app-info-soft);
+  border: 1px solid var(--app-info-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--app-primary);
+}
+
+.dir-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+// Meta-row dentro de form-group del dialog dirección
+.dir-field-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  min-height: 1rem; // evita que el layout salte cuando aparece/desaparece el error
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .config-grid    { grid-template-columns: 1fr; }
+  .cfg-card--wide { grid-column: auto; }
+  .cfg-body--grid { grid-template-columns: 1fr; }
+  .cfg-body--grid .form-group:nth-child(1),
+  .cfg-body--grid .form-group:nth-child(2) { grid-column: auto; }
+}
+
+@media (max-width: 560px) {
+  .form-row          { grid-template-columns: 1fr; }
+  .cfg-profile-badge { display: none; }
+  .cfg-body--grid    { grid-template-columns: 1fr; }
+}

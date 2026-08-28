@@ -1,0 +1,150 @@
+﻿<section class="app-shell-page">
+    <div class="page-intro page-intro-actions">
+        <div>
+            <h1 class="page-title">Gesti&oacute;n de usuarios</h1>
+            <p class="page-subtitle">Administra accesos y roles del equipo desde un solo m&oacute;dulo.</p>
+        </div>
+
+        <button
+            pButton
+            type="button"
+            label="Nuevo usuario"
+            icon="pi pi-plus"
+            *ngIf="tienePermiso(PERMISOS.CREAR_USUARIO)"
+            (click)="abrirDialogoCrear()"
+        ></button>
+    </div>
+
+    <div class="stats-grid users-kpi mb-4">
+        <article class="stat-card">
+            <div>
+                <div class="stat-label">Usuarios visibles</div>
+                <div class="stat-value">{{ totalUsuarios }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-users"></i></div>
+        </article>
+
+        <article class="stat-card admin">
+            <div>
+                <div class="stat-label">Administradores</div>
+                <div class="stat-value">{{ totalAdministradores }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-shield"></i></div>
+        </article>
+
+        <article class="stat-card client">
+            <div>
+                <div class="stat-label">Clientes</div>
+                <div class="stat-value">{{ totalClientes }}</div>
+            </div>
+            <div class="icon"><i class="pi pi-user"></i></div>
+        </article>
+    </div>
+
+    <article class="app-surface-card">
+        <div class="card-head">
+            <div>
+                <h3 class="card-title">Usuarios del sistema</h3>
+                <span class="card-subtitle">Control de cuentas con permisos administrativos y cliente.</span>
+            </div>
+
+            <span class="search-wrap">
+                <i class="pi pi-search"></i>
+                <input
+                    pInputText
+                    type="text"
+                    [(ngModel)]="searchText"
+                    placeholder="Buscar por nombre, email o rol"
+                />
+            </span>
+        </div>
+
+        <app-lista-usuarios
+            [users]="usersView"
+            [loading]="loading"
+            [globalFilterFields]="globalFilterFields"
+            [canCreate]="tienePermiso(PERMISOS.CREAR_USUARIO)"
+            [canEdit]="tienePermiso(PERMISOS.EDITAR_USUARIO)"
+            [canDelete]="tienePermiso(PERMISOS.ELIMINAR_USUARIO)"
+            (createRequested)="abrirDialogoCrear()"
+            (editRequested)="abrirDialogoEditar($event)"
+            (deleteRequested)="eliminarUsuario($event)"
+        ></app-lista-usuarios>
+    </article>
+</section>
+
+<app-crear-usuario
+    [visible]="visibleCrear"
+    [form]="usuarioForm"
+    [roles]="roles"
+    [guardando]="guardandoUsuario"
+    (visibleChange)="visibleCrear = $event"
+    (saveRequested)="guardarCreacionUsuario()"
+>
+</app-crear-usuario>
+
+<app-editar-usuario
+    [visible]="visibleEditar"
+    [form]="usuarioForm"
+    [roles]="roles"
+    [guardando]="guardandoUsuario"
+    (visibleChange)="visibleEditar = $event"
+    (saveRequested)="guardarEdicionUsuario()"
+>
+</app-editar-usuario>
+
+<p-dialog
+    [(visible)]="toggleDialog"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [closable]="!toggleLoading"
+    [dismissableMask]="!toggleLoading"
+    [style]="{ width: 'min(26rem, 96vw)' }"
+    [transitionOptions]="'200ms ease-out'"
+>
+    <ng-template pTemplate="header">
+        <div class="dlg-hero" [class.dlg-danger]="toggleIsActivo" [class.dlg-product]="!toggleIsActivo">
+            <div class="dlg-hero-icon">
+                <i [class]="toggleIsActivo ? 'pi pi-user-minus' : 'pi pi-user-plus'"></i>
+            </div>
+            <div>
+                <span class="dlg-hero-title">{{ toggleIsActivo ? 'Desactivar cuenta' : 'Reactivar cuenta' }}</span>
+                <span class="dlg-hero-sub">{{ toggleTarget?.nombre }}</span>
+            </div>
+        </div>
+    </ng-template>
+
+    <div class="toggle-confirm-body" *ngIf="toggleTarget">
+        <div class="toggle-confirm-icon" [class.desactivar]="toggleIsActivo" [class.reactivar]="!toggleIsActivo">
+            <i [class]="toggleIsActivo ? 'pi pi-exclamation-triangle' : 'pi pi-check-circle'"></i>
+        </div>
+        <p class="toggle-confirm-msg">
+            <ng-container *ngIf="toggleIsActivo">
+                El usuario <strong>{{ toggleTarget.nombre }}</strong> no podr&aacute; iniciar sesi&oacute;n mientras su cuenta est&eacute; desactivada.
+            </ng-container>
+            <ng-container *ngIf="!toggleIsActivo">
+                El usuario <strong>{{ toggleTarget.nombre }}</strong> recuperar&aacute; el acceso completo a la plataforma.
+            </ng-container>
+        </p>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" [disabled]="toggleLoading" (click)="toggleDialog = false">
+                <i class="pi pi-times"></i>
+                <span>Cancelar</span>
+            </button>
+            <button
+                [class]="toggleIsActivo ? 'btn-modal-danger' : 'btn-modal-success'"
+                [disabled]="toggleLoading"
+                (click)="confirmarToggleActivo()"
+            >
+                <i class="pi pi-spin pi-spinner" *ngIf="toggleLoading"></i>
+                <i [class]="toggleIsActivo ? 'pi pi-user-minus' : 'pi pi-user-plus'" *ngIf="!toggleLoading"></i>
+                <span>{{ toggleIsActivo ? 'Sí, desactivar' : 'Sí, reactivar' }}</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
+

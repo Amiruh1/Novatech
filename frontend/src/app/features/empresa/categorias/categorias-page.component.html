@@ -1,0 +1,137 @@
+<section class="app-shell-page">
+<p-confirmDialog></p-confirmDialog>
+    <div class="page-intro page-intro-actions">
+        <div>
+            <h1 class="page-title">Módulo de Categorías</h1>
+            <p class="page-subtitle">Gestiona las agrupaciones de productos y sus enlaces de imagen que se ven en la Tienda.</p>
+        </div>
+
+        <div class="header-actions">
+            <button
+                pButton
+                type="button"
+                label="Nueva Categoría"
+                icon="pi pi-plus"
+                (click)="abrirDialog()"
+            ></button>
+        </div>
+    </div>
+
+    <article class="app-surface-card" style="padding: 1.5rem">
+        <p-table [value]="categorias" [loading]="loading" [rowHover]="true" styleClass="p-datatable-sm" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 80px; text-align: center;">Orden</th>
+                    <th>Imagen</th>
+                    <th>Categoría</th>
+                    <th>Descripción</th>
+                    <th style="text-align: center;">Estado</th>
+                    <th style="width: 120px; text-align: center;">Acciones</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-cat>
+                <tr>
+                    <td style="text-align: center;">
+                        <span class="font-bold text-600">{{ cat.orden }}</span>
+                    </td>
+                    <td>
+                        <img [src]="cat.imagen || 'https://placehold.co/100x100?text=S/IMG'" [alt]="cat.nombre" style="width: 48px; border-radius: 8px; border: 1px solid var(--app-border, #e2e8f0);" onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=Error'">
+                    </td>
+                    <td>
+                        <div class="font-bold text-900">{{ cat.nombre }}</div>
+                        <div class="text-sm text-500">{{ cat.slug }}</div>
+                    </td>
+                    <td style="color: var(--p-text-color-secondary)">{{ cat.descripcion || 'Sin descripción' }}</td>
+                    <td style="text-align: center;">
+                        <p-tag *ngIf="cat.activo == 1 || cat.activo == true" value="Activo" severity="success"></p-tag>
+                        <p-tag *ngIf="cat.activo != 1 && cat.activo != true" value="Inactivo" severity="secondary"></p-tag>
+                    </td>
+                    <td style="text-align: center;">
+                        <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm mr-2" pTooltip="Editar" (click)="abrirDialog(cat)"></button>
+                        <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-text p-button-sm p-button-danger" pTooltip="Eliminar" (click)="eliminar(cat.id)"></button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">No hay categorías registradas en el sistema.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </article>
+</section>
+
+<p-dialog
+    [(visible)]="mostrarDialog"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: 'min(36rem, 96vw)' }"
+    [transitionOptions]="'200ms ease-out'"
+    styleClass="dlg-product"
+>
+  <ng-template pTemplate="header">
+    <div class="dlg-hero">
+      <div class="dlg-hero-icon"><i class="pi pi-tags"></i></div>
+      <div>
+        <span class="dlg-hero-title">{{ catActual.id ? 'Editar categoría' : 'Nueva categoría' }}</span>
+        <span class="dlg-hero-sub">Publicidad del catálogo Oechsle/NovaTech</span>
+      </div>
+    </div>
+  </ng-template>
+    
+    <div class="dlg-form">
+        <div class="form-field w-full mb-4">
+            <div class="flex items-center gap-2" style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 1rem;">
+                <p-checkbox [(ngModel)]="catActual.activo" [binary]="true" inputId="catActivo"></p-checkbox>
+                <label for="catActivo" style="margin-bottom:0; cursor:pointer;" class="font-medium text-900">Mantener activa (Visible en tienda)</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Nombre de Categoría *</label>
+                <input pInputText [(ngModel)]="catActual.nombre" placeholder="Ej. Laptops Gamer" class="w-full" />
+            </div>
+            <div class="form-field">
+                <label>Orden</label>
+                <input pInputText type="number" [(ngModel)]="catActual.orden" placeholder="Prioridad" class="w-full" />
+            </div>
+        </div>
+
+        <div class="form-field mt-3">
+            <label>Descripción</label>
+            <input pInputText [(ngModel)]="catActual.descripcion" placeholder="Opcional..." class="w-full" />
+        </div>
+
+        <div class="form-field w-full mt-3">
+            <label>URL de Imagen</label>
+            <div class="p-inputgroup">
+                <span class="p-inputgroup-addon" pTooltip="Imagen para visualización" tooltipPosition="top"><i class="pi pi-image"></i></span>
+                <input pInputText [(ngModel)]="catActual.imagen" placeholder="https://unsplash..." class="w-full" />
+                 <p-button 
+                    label="Limpiar"
+                    icon="pi pi-times" 
+                    severity="secondary" 
+                    (onClick)="catActual.imagen = ''"></p-button>
+            </div>
+            <small class="help text-500 mt-1 block">
+                <b>Tip:</b> Busca imágenes referenciales cuadradas.
+            </small>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="btn-modal-footer">
+            <button class="btn-modal-cancelar" [disabled]="guardando" (click)="mostrarDialog = false">
+                <i class="pi pi-times"></i>
+                <span>Cancelar</span>
+            </button>
+            <button class="btn-modal-guardar" [disabled]="guardando" (click)="guardar()">
+                <i class="pi pi-spin pi-spinner" *ngIf="guardando"></i>
+                <i class="pi pi-check" *ngIf="!guardando"></i>
+                <span>{{ guardando ? 'Guardando...' : 'Aplicar' }}</span>
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

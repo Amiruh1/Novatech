@@ -1,0 +1,101 @@
+﻿<div class="login-shell" [class.elevated]="modoAcceso === 'elevado'">
+    <section class="login-brand-panel">
+        <div class="brand-badge">
+            <span>N</span>
+        </div>
+
+        <h1>NovaTech Commerce</h1>
+        <p>Plataforma unificada para ventas, inventario y operacion del negocio.</p>
+
+        <ul class="brand-points">
+            <li>
+                <i class="pi pi-shield"></i>
+                Seguridad de acceso y control por rol
+            </li>
+            <li>
+                <i class="pi pi-chart-line"></i>
+                Seguimiento de ventas en tiempo real
+            </li>
+            <li>
+                <i class="pi pi-box"></i>
+                Inventario centralizado de productos
+            </li>
+        </ul>
+    </section>
+
+    <section class="login-form-panel">
+        <p-card styleClass="login-card shadow-4">
+            <ng-template pTemplate="header">
+                <div class="card-top">
+                    <div>
+                        <h2>Iniciar sesion</h2>
+                        <p>
+                            {{ modoAcceso === 'elevado' ? 'Acceso administrativo de alta prioridad' : 'Acceso cliente para compras y seguimiento' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mode-switch">
+                    <button
+                        type="button"
+                        class="mode-btn"
+                        [class.active]="modoAcceso === 'cliente'"
+                        (click)="seleccionarModo('cliente')"
+                    >
+                        Modo Cliente
+                    </button>
+                    <button
+                        type="button"
+                        class="mode-btn mode-elevated"
+                        [class.active]="modoAcceso === 'elevado'"
+                        (click)="seleccionarModo('elevado')"
+                    >
+                        Modo Elevado
+                    </button>
+                </div>
+            </ng-template>
+
+            <div class="form-wrap">
+                <div class="field-wrap">
+                    <label for="email">Correo electronico</label>
+                    <input
+                        pInputText
+                        id="email"
+                        [(ngModel)]="email"
+                        [placeholder]="emailPlaceholder"
+                        class="w-full"
+                    />
+                </div>
+
+                <div class="field-wrap">
+                    <label for="password">Contrasena</label>
+                    <p-password
+                        id="password"
+                        [(ngModel)]="password"
+                        [feedback]="false"
+                        [toggleMask]="true"
+                        placeholder="********"
+                        styleClass="w-full"
+                        inputStyleClass="w-full"
+                    >
+                    </p-password>
+                </div>
+
+                <div class="elevated-warning" *ngIf="modoAcceso === 'elevado'">
+                    <i class="pi pi-lock"></i>
+                    Solo cuentas admin pueden ingresar en modo elevado.
+                </div>
+
+                <p-button
+                    [label]="ctaLabel"
+                    icon="pi pi-sign-in"
+                    (onClick)="onLogin()"
+                    [loading]="loading"
+                    styleClass="w-full mt-2"
+                >
+                </p-button>
+            </div>
+        </p-card>
+    </section>
+</div>
+

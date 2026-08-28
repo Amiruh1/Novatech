@@ -1,0 +1,269 @@
+<section class="app-shell-page">
+    <div class="page-intro page-intro-actions">
+        <div>
+            <h1 class="page-title">Cat&aacute;logo administrativo</h1>
+            <p class="page-subtitle">Gestiona productos, stock y datos comerciales desde un panel centralizado.</p>
+        </div>
+
+        <div class="header-actions">
+            <button
+                pButton
+                type="button"
+                label="Nuevo producto"
+                icon="pi pi-plus"
+                *ngIf="tienePermiso(PERMISOS.CREAR_PRODUCTO)"
+                (click)="abrirDialogoCrear()"
+            ></button>
+        </div>
+    </div>
+
+
+
+    <article class="app-surface-card">
+        <div class="card-head">
+            <div>
+                <h3 class="card-title">Inventario de productos</h3>
+                <span class="card-subtitle">Vista operativa con edici&oacute;n r&aacute;pida por fila.</span>
+            </div>
+
+            <div class="table-filters-inline">
+                <span class="search-wrap">
+                    <i class="pi pi-search"></i>
+                    <input
+                        pInputText
+                        type="text"
+                        [(ngModel)]="searchText"
+                        placeholder="Buscar producto, SKU, categor&iacute;a o marca"
+                    />
+                </span>
+
+                    <button
+                        *ngIf="searchText"
+                        pButton
+                        type="button"
+                        icon="pi pi-times"
+                        class="p-button-text p-button-sm"
+                        (click)="searchText = ''"
+                    ></button>
+
+                <p-select
+                    [options]="categoryOptions"
+                    [(ngModel)]="categoryFilter"
+                    optionLabel="label"
+                    optionValue="value"
+                    [filter]="true"
+                    [showClear]="true"
+                    placeholder="Filtrar categor&iacute;a"
+                    appendTo="body"
+                    styleClass="category-filter"
+                >
+                    <ng-template pTemplate="selectedItem" let-selected>
+                        <div class="dropdown-option" *ngIf="selected">
+                            <i [class]="selected.icon"></i>
+                            <span>{{ selected.label }}</span>
+                        </div>
+                        <span *ngIf="!selected">Todas las categor&iacute;as</span>
+                    </ng-template>
+
+                    <ng-template pTemplate="item" let-option>
+                        <div class="dropdown-option">
+                            <i [class]="option.icon"></i>
+                            <span>{{ option.label }}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
+        </div>
+
+        <app-lista-productos
+            [products]="productsView"
+            [loading]="loading"
+            [globalFilterFields]="globalFilterFields"
+            [canCreate]="tienePermiso(PERMISOS.CREAR_PRODUCTO)"
+            [canEdit]="tienePermiso(PERMISOS.EDITAR_PRODUCTO)"
+            [canDelete]="tienePermiso(PERMISOS.ELIMINAR_PRODUCTO)"
+            [canAdjustStock]="tienePermiso(PERMISOS.AJUSTAR_STOCK_MANUAL)"
+            (createRequested)="abrirDialogoCrear()"
+            (editRequested)="abrirDialogoEditar($event)"
+            (deleteRequested)="eliminarProducto($event)"
+            (adjustStockRequested)="ajustarStockManual($event)"
+            (viewMovementsRequested)="verMovimientos($event)"
+        ></app-lista-productos>
+    </article>
+
+    <article class="app-surface-card mt-4" *ngIf="isAdmin">
+        <div class="card-head">
+            <div>
+                <h3 class="card-title">Campañas y Banners</h3 >
+                <span class="card-subtitle">Personaliza el Hero Carrusel de la Tienda Principal.</span>
+            </div>
+            <button
+                pButton
+                type="button"
+                icon="pi pi-plus"
+                label="Nuevo Bánner"
+                class="p-button-outlined p-button-sm ml-auto"
+                (click)="abrirBannerDialog()"
+            ></button>
+        </div>
+
+        <div class="card-body" style="padding: 1.25rem;">
+            <div class="dir-loading" *ngIf="loadingBanners">
+                <i class="pi pi-spin pi-spinner"></i>
+                <span>Cargando banners...</span>
+            </div>
+
+            <div class="dir-grid" *ngIf="!loadingBanners && banners.length > 0">
+                <div class="dir-card" *ngFor="let banner of banners" [class.predeterminada]="banner.activo == 1 || banner.activo == true">
+                    <div class="dir-card-head" style="margin-bottom:8px">
+                        <span class="dir-alias" style="font-size:0.95rem;">{{ banner.titulo }}</span>
+                        <p-tag *ngIf="banner.activo == 1 || banner.activo == true" value="Activo" severity="success"></p-tag>
+                        <p-tag *ngIf="banner.activo != 1 && banner.activo != true" value="Inactivo" severity="secondary"></p-tag>
+                    </div>
+                    <div class="dir-recipient" style="font-size:0.85rem;"><i class="pi pi-image"></i> URL vinculada</div>
+                    <div class="dir-meta" style="word-break: break-all; margin-top:0.25rem;">{{ banner.link || 'Sin link' }}</div>
+                    <div class="dir-actions" style="margin-top:10px;">
+                        <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm p-button-warn" pTooltip="Editar" (click)="abrirBannerDialog(banner)"></button>
+                        <button pButton type="button" icon="pi pi-trash"  class="p-button-text p-button-sm p-button-danger" pTooltip="Eliminar" (click)="eliminarBanner(banner.id)"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dir-empty" *ngIf="!loadingBanners && !banners.length">
+                <i class="pi pi-images"></i>
+                <p>No tienes banners promocionales en la base de datos.</p>
+            </div>
+        </div>
+    </article>
+</section>
+
+<app-crear-producto
+    [visible]="visibleCrear"
+    [form]="productForm"
+    [categoryOptions]="categoryOptions"
+    [brandOptions]="brandOptions"
+    [guardando]="guardandoProducto"
+    (visibleChange)="visibleCrear = $event"
+    (saveRequested)="guardarCreacionProducto()"
+>
+</app-crear-producto>
+
+<app-editar-producto
+    [visible]="visibleEditar"
+    [form]="productForm"
+    [categoryOptions]="categoryOptions"
+    [brandOptions]="brandOptions"
+    [guardando]="guardandoProducto"
+    (visibleChange)="visibleEditar = $event"
+    (saveRequested)="guardarEdicionProducto()"
+>
+</app-editar-producto>
+
+<app-ajustar-stock
+    [visible]="visibleStock"
+    [form]="stockForm"
+    [guardando]="guardandoProducto"
+    [productName]="currentProductName"
+    (visibleChange)="visibleStock = $event"
+    (saveRequested)="guardarAjusteStock()"
+>
+</app-ajustar-stock>
+
+<app-movimientos-stock
+    [(visible)]="visibleMovimientos"
+    [productId]="currentProductId"
+    [productName]="currentProductName"
+></app-movimientos-stock>
+
+<p-confirmDialog [transitionOptions]="'200ms ease-out'" [style]="{ width: 'min(40rem, 96vw)' }"></p-confirmDialog>
+
+<p-dialog
+    [(visible)]="mostrarBannerDialog"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: 'min(52rem, 96vw)' }"
+    [transitionOptions]="'200ms ease-out'"
+>
+  <ng-template pTemplate="header">
+    <div class="dlg-hero dlg-product">
+      <div class="dlg-hero-icon"><i class="pi pi-images"></i></div>
+      <div>
+        <span class="dlg-hero-title">{{ bannerActual.id ? 'Editar banner' : 'Añadir banner' }}</span>
+        <span class="dlg-hero-sub">Rotación principal en la tienda Online</span>
+      </div>
+    </div>
+  </ng-template>
+    
+  <div class="form-grid pt-2">
+    <div class="form-section">
+      <i class="pi pi-info-circle"></i>
+      <span>Visibilidad del Banner</span>
+    </div>
+
+    <div class="form-field" style="grid-column: span 2;">
+        <div class="flex items-center gap-2" style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--p-surface-100); border-radius: 8px;">
+            <p-checkbox [(ngModel)]="bannerActual.activo" [binary]="true" inputId="bannerActivo"></p-checkbox>
+            <label for="bannerActivo" style="margin-bottom:0; cursor:pointer;" class="font-bold text-900">Mantener este banner activo y público</label>
+        </div>
+    </div>
+
+    <div class="form-section" style="margin-top: 1rem;">
+      <i class="pi pi-image"></i>
+      <span>Contenido visual</span>
+    </div>
+
+    <div class="form-field" style="grid-column: span 2;">
+        <label>URL de Imagen *</label>
+        <input pInputText [(ngModel)]="bannerActual.imagen" placeholder="https://unsplash.com/..." class="w-full" />
+    </div>
+
+    <div class="form-field w-full">
+        <label>Título principal *</label>
+        <input pInputText [(ngModel)]="bannerActual.titulo" placeholder="Ej. Laptops Gamer" class="w-full" />
+    </div>
+
+    <div class="form-field w-full">
+        <label>Subtítulo o descripción</label>
+        <input pInputText [(ngModel)]="bannerActual.subtitulo" placeholder="Explora descuentos increibles..." class="w-full" />
+    </div>
+    
+    <div class="form-field w-full">
+        <label>Enlace destino (Opcional)</label>
+        <div class="p-inputgroup">
+            <span class="p-inputgroup-addon" pTooltip="Ingresa a dónde irá el banner" tooltipPosition="top"><i class="pi pi-link"></i></span>
+            <input pInputText [(ngModel)]="bannerActual.link" placeholder="Ej: /tienda?categoria=Computo" class="w-full" />
+            
+             <p-button 
+                label="Limpiar"
+                icon="pi pi-times" 
+                severity="secondary" 
+                pTooltip="Quitar enlace"
+                (onClick)="bannerActual.link = ''"></p-button>
+        </div>
+        <small class="help text-500 mt-1 block">
+             <b>¿Cómo consigo este enlace?</b> Visita tu tienda online, filtra lo que quieres publicitar y copia todo desde <code>/tienda...</code> de la barra del navegador. O solo escribe el link de alguna promoción.
+        </small>
+    </div>
+
+    <div class="form-field w-full">
+        <label>Orden (Prioridad)</label>
+        <input pInputText type="number" [(ngModel)]="bannerActual.orden" placeholder="Ej. 1" class="w-full" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+      <div class="btn-modal-footer">
+          <button class="btn-modal-cancelar" [disabled]="guardandoBanner" (click)="mostrarBannerDialog = false">
+              <i class="pi pi-times"></i>
+              <span>Cancelar</span>
+          </button>
+          <button class="btn-modal-guardar" [disabled]="guardandoBanner" (click)="guardarBanner()">
+              <i class="pi pi-spin pi-spinner" *ngIf="guardandoBanner"></i>
+              <i class="pi pi-check" *ngIf="!guardandoBanner"></i>
+              <span>{{ guardandoBanner ? 'Guardando...' : 'Aplicar' }}</span>
+          </button>
+      </div>
+  </ng-template>
+</p-dialog>
+

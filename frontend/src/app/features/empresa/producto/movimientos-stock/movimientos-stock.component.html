@@ -1,0 +1,64 @@
+<p-dialog
+  [visible]="visible"
+  (visibleChange)="actualizarVisibilidad($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(64rem, 96vw)' }"
+  [closable]="true"
+  [transitionOptions]="'200ms ease-out'"
+>
+  <ng-template pTemplate="header">
+    <div class="dlg-hero dlg-audit">
+      <div class="dlg-hero-icon"><i class="pi pi-history"></i></div>
+      <div>
+        <span class="dlg-hero-title">Auditoría de stock</span>
+        <span class="dlg-hero-sub">{{ productName }}</span>
+      </div>
+    </div>
+  </ng-template>
+  <div class="pt-3">
+    <p-table 
+      [value]="movimientos" 
+      [loading]="loading" 
+      [paginator]="true" 
+      [rows]="10" 
+      responsiveLayout="scroll"
+      styleClass="p-datatable-sm p-datatable-striped"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Stock Anterior</th>
+          <th>Stock Nuevo</th>
+          <th>Motivo / Referencia</th>
+          <th>Usuario</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-mov>
+        <tr>
+          <td class="white-space-nowrap">{{ mov.creado_en | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <p-tag [severity]="getTipoSeverity(mov.tipo)" [value]="mov.tipo"></p-tag>
+          </td>
+          <td class="font-bold" [ngClass]="{'text-green-600': mov.stock_nuevo >= mov.stock_anterior, 'text-red-500': mov.stock_nuevo < mov.stock_anterior}">
+            {{ mov.stock_nuevo >= mov.stock_anterior ? '+' : '-' }}{{ mov.cantidad }}
+          </td>
+          <td class="text-500">{{ mov.stock_anterior }}</td>
+          <td class="font-bold">{{ mov.stock_nuevo }}</td>
+          <td>{{ mov.motivo || '-' }}</td>
+          <td>{{ mov.usuario_nombre || 'Sistema' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center p-4 text-500">
+            No se encontraron movimientos para este producto.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</p-dialog>

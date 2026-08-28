@@ -1,0 +1,23 @@
+<!-- Skip link — WCAG 2.4.1 Level A -->
+<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+<app-navbar></app-navbar>
+<app-auth-modal></app-auth-modal>
+<app-command-palette></app-command-palette>
+
+<!-- Región aria-live global: anuncia toasts de PrimeNG a screen readers -->
+<div
+  class="sr-only"
+  aria-live="polite"
+  aria-atomic="true"
+  aria-relevant="additions text"
+>{{ ariaLive.message() }}</div>
+
+<main id="main-content" tabindex="-1" class="shell-main">
+  <!-- Wrapper que recibe el trigger de animación de ruta -->
+  <div class="route-view" [@routeAnim]="routeState">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<app-bottom-nav></app-bottom-nav>
