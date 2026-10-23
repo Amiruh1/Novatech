@@ -6,14 +6,14 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0f766e",
-  "theme_color": "#0d9488",
+  "background_color": "#ffffff",
+  "theme_color": "#6254d8",
   "lang": "es",
   "categories": ["shopping", "technology"],
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "48x48",
+      "src": "favicon.ico?v=novatech-1",
+      "sizes": "16x16 32x32 48x48",
       "type": "image/x-icon"
     },
     {
@@ -35,13 +35,13 @@
       "name": "Ir a la tienda",
       "short_name": "Tienda",
       "url": "/tienda",
-      "icons": [{ "src": "favicon.ico", "sizes": "48x48" }]
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Mi carrito",
       "short_name": "Carrito",
       "url": "/carrito",
-      "icons": [{ "src": "favicon.ico", "sizes": "48x48" }]
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

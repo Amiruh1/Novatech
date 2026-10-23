@@ -1,8 +1,7 @@
-// NovaTech Service Worker — v2
 // Estrategia: Network First para API, Cache First para assets estáticos
 
-const CACHE_NAME    = 'novatech-v2';
-const STATIC_ASSETS = ['/', '/tienda', '/favicon.ico'];
+const CACHE_NAME    = 'novatech-v3';
+const STATIC_ASSETS = ['/', '/tienda', '/favicon.svg?v=novatech-1', '/favicon.ico?v=novatech-1', '/icons/icon-192.png', '/icons/icon-512.png'];
 const LOCAL_DEVELOPMENT = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname);
 
 self.addEventListener('install', (event) => {
