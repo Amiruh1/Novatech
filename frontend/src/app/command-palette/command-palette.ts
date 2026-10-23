@@ -10,6 +10,7 @@ import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs'
 
 import { CommandPaletteService, PaletteCommand } from '../services/command-palette.service';
 import { ProductsService }       from '../services/products';
+import { AccessibilityService } from '../core/services/accessibility.service';
 
 interface ProductResult {
   id: number;
@@ -32,6 +33,7 @@ export class CommandPalette implements OnInit, OnDestroy {
   @ViewChild('resultsList') resultsList!: ElementRef<HTMLElement>;
 
   readonly cp      = inject(CommandPaletteService);
+  private readonly accessibility = inject(AccessibilityService);
   private router   = inject(Router);
   private ps       = inject(ProductsService);
   private cd       = inject(ChangeDetectorRef);
@@ -162,6 +164,7 @@ export class CommandPalette implements OnInit, OnDestroy {
   // Registro del atajo global de teclado — se registra en el host de la app
   @HostListener('window:keydown', ['$event'])
   onGlobalKey(e: KeyboardEvent) {
+    if (this.accessibility.panelOpen()) return;
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       this.cp.toggle();

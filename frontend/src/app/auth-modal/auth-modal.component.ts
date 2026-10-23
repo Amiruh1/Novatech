@@ -1,12 +1,11 @@
-import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize, Subscription } from 'rxjs';
-import { MessageService } from 'primeng/api';
+import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../services/auth';
@@ -37,7 +36,6 @@ declare global {
     FormsModule,
     DialogModule,
     InputTextModule,
-    PasswordModule,
     ButtonModule,
     SelectModule
   ],
@@ -50,17 +48,22 @@ export class AuthModalComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
   private router = inject(Router);
   private ngZone = inject(NgZone);
+  private cd = inject(ChangeDetectorRef);
   private subscription = new Subscription();
+  private focusTimer: ReturnType<typeof setTimeout> | undefined;
 
   visible: boolean = false;
   loading: boolean = false;
   authView: AuthModalView = 'login';
   modoAcceso: AuthModalMode = 'cliente';
   returnUrl: string | null = null;
+  formError = '';
 
   showLoginPassword: boolean = false;
   showResetPassword: boolean = false;
   showResetConfirm: boolean = false;
+  showRegisterPassword = false;
+  showRegisterConfirm = false;
 
   loginEmail: string = '';
   loginPassword: string = '';
@@ -103,6 +106,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    clearTimeout(this.focusTimer);
   }
 
   closeModal() {
@@ -115,11 +119,26 @@ export class AuthModalComponent implements OnInit, OnDestroy {
   }
 
   switchView(view: AuthModalView) {
+    this.formError = '';
     this.authModalService.open({
       view,
       mode: view === 'register' ? 'cliente' : this.modoAcceso,
       returnUrl: this.returnUrl || this.getCurrentContextUrl()
     });
+    this.focusCurrentView();
+  }
+
+  focusCurrentView() {
+    clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
+      if (!this.visible || this.loading) return;
+      this.cd.detectChanges();
+      const fieldByView = {
+        login: 'am-email', register: 'am-register-name',
+        forgot: 'am-forgot-email', 'forgot-code': 'am-forgot-code'
+      };
+      document.getElementById(fieldByView[this.authView])?.focus();
+    }, 0);
   }
 
   toggleLoginPassword() {
@@ -144,8 +163,10 @@ export class AuthModalComponent implements OnInit, OnDestroy {
   }
 
   submitLogin() {
+    if (this.loading) return;
+    this.formError = '';
     if (!this.loginEmail || !this.loginPassword) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Campos requeridos',
         detail: 'Ingresa correo y password para continuar.',
@@ -154,7 +175,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       return;
     }
     if (this.loginPassword.trim() === '') {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Contraseña inválida',
         detail: 'La contraseña no puede ser solo espacios.',
@@ -175,7 +196,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
           const usuario = response?.usuario;
 
           if (!usuario) {
-            this.messageService.add({
+            this.showFeedback({
               severity: 'error',
               summary: 'Login incompleto',
               detail: 'No fue posible obtener datos de usuario.',
@@ -186,7 +207,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
 
           if (this.modoAcceso === 'elevado' && usuario.rol !== 'admin') {
             this.authService.logout();
-            this.messageService.add({
+            this.showFeedback({
               severity: 'error',
               summary: 'Modo elevado restringido',
               detail: 'Esta cuenta no tiene permisos administrativos.',
@@ -195,7 +216,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.messageService.add({
+          this.showFeedback({
             severity: 'success',
             summary: 'Sesion iniciada',
             detail: `Bienvenido, ${usuario.nombre}`,
@@ -205,7 +226,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
           this.completeAuth(usuario);
         },
         error: (error) => {
-          this.messageService.add({
+          this.showFeedback({
             severity: 'error',
             summary: 'Acceso denegado',
             detail: this.extractErrorMessage(error, 'Credenciales incorrectas o error de servidor'),
@@ -216,6 +237,8 @@ export class AuthModalComponent implements OnInit, OnDestroy {
   }
 
   submitRegister() {
+    if (this.loading) return;
+    this.formError = '';
     const nombre = this.registerNombre.trim();
     const email = this.registerEmail.trim().toLowerCase();
     const password = this.registerPassword;
@@ -224,7 +247,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
     const numero_documento = this.registerNumeroDocumento.trim();
 
     if (!nombre || !email || !password || !confirm || !numero_documento) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Campos requeridos',
         detail: 'Completa todos los campos solicitados para crear tu cuenta.',
@@ -234,7 +257,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
     }
 
     if (nombre.length < 3) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Nombre inválido',
         detail: 'El nombre debe tener al menos 3 caracteres.',
@@ -243,7 +266,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       return;
     }
     if (nombre.length > 120) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Nombre muy largo',
         detail: 'El nombre no puede superar 120 caracteres.',
@@ -252,7 +275,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       return;
     }
     if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+$/.test(nombre)) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Nombre inválido',
         detail: 'El nombre solo puede contener letras, tildes y guiones.',
@@ -262,7 +285,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
     }
 
     if (!this.isValidEmail(email)) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Email inválido',
         detail: 'Ingresa un correo con formato válido (ej. usuario@gmail.com).',
@@ -271,7 +294,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       return;
     }
     if (email.length > 320) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Email muy largo',
         detail: 'El correo no puede superar 320 caracteres.',
@@ -282,12 +305,12 @@ export class AuthModalComponent implements OnInit, OnDestroy {
 
     const docError = this.validateDocumento(tipo_documento, numero_documento);
     if (docError) {
-      this.messageService.add({ severity: 'warn', summary: 'Documento inválido', detail: docError, life: 3000 });
+      this.showFeedback({ severity: 'warn', summary: 'Documento inválido', detail: docError, life: 3000 });
       return;
     }
 
     if (password.trim() === '') {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Contraseña inválida',
         detail: 'La contraseña no puede estar vacía o ser solo espacios.',
@@ -296,7 +319,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       return;
     }
     if (password.length < 8) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Contraseña muy corta',
         detail: 'La contraseña debe tener al menos 8 caracteres.',
@@ -305,7 +328,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       return;
     }
     if (password.length > 64) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Contraseña muy larga',
         detail: 'La contraseña no puede superar 64 caracteres.',
@@ -315,7 +338,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
     }
 
     if (password !== confirm) {
-      this.messageService.add({
+      this.showFeedback({
         severity: 'warn',
         summary: 'Confirmación incorrecta',
         detail: 'Las contraseñas no coinciden.',
@@ -336,7 +359,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
           const usuario = response?.usuario;
 
           if (!usuario) {
-            this.messageService.add({
+            this.showFeedback({
               severity: 'error',
               summary: 'Registro incompleto',
               detail: 'No fue posible obtener la nueva sesion.',
@@ -345,7 +368,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.messageService.add({
+          this.showFeedback({
             severity: 'success',
             summary: 'Cuenta creada',
             detail: `Tu cuenta ya esta activa, ${usuario.nombre}.`,
@@ -355,7 +378,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
           this.completeAuth(usuario);
         },
         error: (error) => {
-          this.messageService.add({
+          this.showFeedback({
             severity: 'error',
             summary: 'No se pudo registrar',
             detail: this.extractErrorMessage(error, 'Intenta nuevamente con otro correo.'),
@@ -366,65 +389,69 @@ export class AuthModalComponent implements OnInit, OnDestroy {
   }
 
   submitForgot() {
+    if (this.loading) return;
+    this.formError = '';
     const email = this.forgotEmail.trim().toLowerCase();
 
     if (!this.isValidEmail(email)) {
-      this.messageService.add({ severity: 'warn', summary: 'Email inválido', detail: 'Ingresa un correo válido.' });
+      this.showFeedback({ severity: 'warn', summary: 'Email inválido', detail: 'Ingresa un correo válido.' });
       return;
     }
 
     this.loading = true;
     this.authService.forgotPasswordCode(email).pipe(finalize(() => this.loading = false)).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Código enviado', detail: 'Revisa tu correo y copia el código de 6 caracteres.', life: 5000 });
+        this.showFeedback({ severity: 'success', summary: 'Código enviado', detail: 'Revisa tu correo y copia el código de 6 caracteres.', life: 5000 });
         this.switchView('forgot-code');
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: this.extractErrorMessage(err, 'No se pudo enviar') });
+        this.showFeedback({ severity: 'error', summary: 'Error', detail: this.extractErrorMessage(err, 'No se pudo enviar') });
       }
     });
   }
 
   submitResetCode() {
+    if (this.loading) return;
+    this.formError = '';
     const email = this.forgotEmail.trim().toLowerCase();
     const code = this.forgotCode.trim().toUpperCase();
     const password = this.resetNueva;
     const confirm = this.resetConfirm;
 
     if (!code || code.length !== 6) {
-      this.messageService.add({ severity: 'warn', summary: 'Código inválido', detail: 'El código debe tener 6 caracteres.' });
+      this.showFeedback({ severity: 'warn', summary: 'Código inválido', detail: 'El código debe tener 6 caracteres.' });
       return;
     }
 
     if (password.length < 8) {
-      this.messageService.add({ severity: 'warn', summary: 'Contraseña muy corta', detail: 'La contraseña debe tener al menos 8 caracteres.' });
+      this.showFeedback({ severity: 'warn', summary: 'Contraseña muy corta', detail: 'La contraseña debe tener al menos 8 caracteres.' });
       return;
     }
     if (password.length > 64) {
-      this.messageService.add({ severity: 'warn', summary: 'Contraseña muy larga', detail: 'La contraseña no puede superar 64 caracteres.' });
+      this.showFeedback({ severity: 'warn', summary: 'Contraseña muy larga', detail: 'La contraseña no puede superar 64 caracteres.' });
       return;
     }
     if (/^\s|\s$/.test(password)) {
-      this.messageService.add({ severity: 'warn', summary: 'Contraseña inválida', detail: 'La contraseña no debe tener espacios al inicio o al final.' });
+      this.showFeedback({ severity: 'warn', summary: 'Contraseña inválida', detail: 'La contraseña no debe tener espacios al inicio o al final.' });
       return;
     }
 
     if (password !== confirm) {
-      this.messageService.add({ severity: 'warn', summary: 'No coinciden', detail: 'Las contraseñas no coinciden.' });
+      this.showFeedback({ severity: 'warn', summary: 'No coinciden', detail: 'Las contraseñas no coinciden.' });
       return;
     }
 
     this.loading = true;
     this.authService.resetPasswordByCode({ email, code, password }).pipe(finalize(() => this.loading = false)).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: '¡Contraseña actualizada!', detail: 'Ya puedes iniciar sesión con tu nueva contraseña.', life: 4000 });
+        this.showFeedback({ severity: 'success', summary: '¡Contraseña actualizada!', detail: 'Ya puedes iniciar sesión con tu nueva contraseña.', life: 4000 });
         this.forgotCode = '';
         this.resetNueva = '';
         this.resetConfirm = '';
         this.switchView('login');
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: this.extractErrorMessage(err, 'Código incorrecto o expirado.'), life: 4000 });
+        this.showFeedback({ severity: 'error', summary: 'Error', detail: this.extractErrorMessage(err, 'Código incorrecto o expirado.'), life: 4000 });
       }
     });
   }
@@ -464,6 +491,9 @@ export class AuthModalComponent implements OnInit, OnDestroy {
   }
 
   private resetForms() {
+    this.formError = '';
+    this.showRegisterPassword = false;
+    this.showRegisterConfirm = false;
     this.showLoginPassword = false;
     this.showResetPassword = false;
     this.showResetConfirm = false;
@@ -570,10 +600,10 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       next: (response) => {
         const usuario = response?.usuario;
         if (!usuario) {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo obtener datos del usuario.' });
+          this.showFeedback({ severity: 'error', summary: 'Error', detail: 'No se pudo obtener datos del usuario.' });
           return;
         }
-        this.messageService.add({
+        this.showFeedback({
           severity: 'success',
           summary: 'Bienvenido',
           detail: `Sesión iniciada como ${usuario.nombre}`,
@@ -582,7 +612,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
         this.completeAuth(usuario);
       },
       error: (err) => {
-        this.messageService.add({
+        this.showFeedback({
           severity: 'error',
           summary: 'Error con Google',
           detail: this.extractErrorMessage(err, 'No se pudo verificar tu cuenta de Google.'),
@@ -599,5 +629,14 @@ export class AuthModalComponent implements OnInit, OnDestroy {
 
   private extractErrorMessage(error: any, fallback: string) {
     return error?.error?.message || error?.error?.mensaje || fallback;
+  }
+
+  private showFeedback(message: ToastMessageOptions) {
+    this.messageService.add(message);
+    this.formError = message.severity === 'warn' || message.severity === 'error'
+      ? `${message.summary ?? ''}. ${message.detail ?? ''}`
+      : '';
+    this.cd.detectChanges();
+    if (this.formError) document.getElementById('auth-feedback')?.focus();
   }
 }

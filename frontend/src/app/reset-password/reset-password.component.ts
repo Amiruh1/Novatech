@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { MessageService } from 'primeng/api';
+import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { API_BASE_URL } from '../core/config/api.config';
@@ -39,20 +39,21 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   resetear() {
+    if (this.loading) return;
     if (!this.passNueva || this.passNueva.length < 8) {
-      this.msg.add({ severity: 'warn', summary: 'Contraseña muy corta', detail: 'La contraseña debe tener al menos 8 caracteres.' });
+      this.showError({ severity: 'warn', summary: 'Contraseña muy corta', detail: 'La contraseña debe tener al menos 8 caracteres.' });
       return;
     }
     if (this.passNueva.length > 64) {
-      this.msg.add({ severity: 'warn', summary: 'Contraseña muy larga', detail: 'La contraseña no puede superar 64 caracteres.' });
+      this.showError({ severity: 'warn', summary: 'Contraseña muy larga', detail: 'La contraseña no puede superar 64 caracteres.' });
       return;
     }
     if (/^\s|\s$/.test(this.passNueva)) {
-      this.msg.add({ severity: 'warn', summary: 'Contraseña inválida', detail: 'La contraseña no debe tener espacios al inicio o al final.' });
+      this.showError({ severity: 'warn', summary: 'Contraseña inválida', detail: 'La contraseña no debe tener espacios al inicio o al final.' });
       return;
     }
     if (this.passNueva !== this.passConfirm) {
-      this.msg.add({ severity: 'warn', summary: 'No coincide', detail: 'Las contraseñas no coinciden.' });
+      this.showError({ severity: 'warn', summary: 'No coincide', detail: 'Las contraseñas no coinciden.' });
       return;
     }
 
@@ -65,17 +66,26 @@ export class ResetPasswordComponent implements OnInit {
         next: () => {
           this.done    = true;
           this.loading = false;
-          this.cd.markForCheck();
+          this.cd.detectChanges();
+          document.getElementById('rp-success-title')?.focus();
         },
         error: (err) => {
           this.errorMsg = err?.error?.message || 'No se pudo restablecer la contraseña. El enlace puede haber expirado.';
           this.loading  = false;
-          this.cd.markForCheck();
+          this.cd.detectChanges();
+          document.getElementById('rp-error')?.focus();
         }
       });
   }
 
   irATienda() {
     this.router.navigate(['/tienda']);
+  }
+
+  private showError(message: ToastMessageOptions) {
+    this.errorMsg = `${message.summary ?? ''}. ${message.detail ?? ''}`;
+    this.msg.add(message);
+    this.cd.detectChanges();
+    document.getElementById('rp-error')?.focus();
   }
 }

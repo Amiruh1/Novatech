@@ -50,6 +50,10 @@
 
 // ── Gallery ───────────────────────────────────────────────────────────────────
 .gallery-main {
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  font: inherit;
   position: relative;
   background: linear-gradient(160deg, var(--app-surface-muted) 0%, var(--app-surface) 100%);
   border: 1px solid var(--app-border);
@@ -63,7 +67,7 @@
   box-shadow: var(--shadow-soft);
   transition: box-shadow var(--dur-base) var(--ease-smooth);
 
-  &:hover {
+  &:hover, &:focus-visible {
     box-shadow: var(--shadow-medium);
     .gallery-zoom-btn { opacity: 1; transform: scale(1); }
     img { transform: scale(1.04); }
@@ -143,6 +147,34 @@
   display: flex;
   gap: var(--sp-3);
   margin-top: var(--sp-4);
+}
+
+.product-speech-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-block: var(--sp-3);
+}
+
+.product-speech-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--r-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sug-name a, .sug-img, .modal-sug-item { color: inherit; text-decoration: none; }
+
+:host-context(body.a11y-reading) {
+  .sug-name, .modal-sug-name { display: block; -webkit-line-clamp: unset; overflow: visible; }
+  .detalle-gallery-col { position: static; }
 }
 
 .gallery-action-btn {

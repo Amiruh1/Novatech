@@ -1171,3 +1171,26 @@
   }
 }
 
+.accessibility-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: .5rem .75rem;
+  border: 1px solid var(--app-border);
+  border-radius: .65rem;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.sidebar-head { text-decoration: none; color: inherit; }
+@media (max-width: 600px) {
+  .accessibility-trigger { padding: .45rem; font-size: .75rem; gap: .25rem; }
+  .accessibility-trigger > i { display: none; }
+}

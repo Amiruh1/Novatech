@@ -1,6 +1,6 @@
 import { Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth';
 import { Cart } from '../services/cart';
@@ -21,6 +21,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { Drawer } from 'primeng/drawer';
 import { CartItem } from '../services/cart';
 import { precioFinal } from '../core/models/product.model';
+import { AccessibilityService } from '../core/services/accessibility.service';
 
 interface NavItem {
   label: string;
@@ -70,10 +71,12 @@ interface NotificationItem {
     Drawer
   ],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.scss',
+  styleUrls: ['./navbar.scss', './navbar-storefront.scss'],
+  host: { '[class.storefront-shell]': 'isStorefront' },
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Navbar implements OnInit, OnDestroy {
+  readonly accessibility = inject(AccessibilityService);
   private cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
   private cartService = inject(Cart);
@@ -106,6 +109,7 @@ export class Navbar implements OnInit, OnDestroy {
   themeMenuOpen: boolean = false;
   currentTheme: AppTheme = 'ocean';
   themeOptions: AppThemeOption[] = [];
+  isStorefront = false;
 
   // Mini-cart
   cartSidebarOpen: boolean = false;
@@ -141,6 +145,13 @@ export class Navbar implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
+    this.updateStorefrontPresentation(this.router.url);
+    this.subscriptions.add(this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.updateStorefrontPresentation(event.urlAfterRedirects);
+        this.cdr.markForCheck();
+      }
+    }));
     this.collapsed = localStorage.getItem('nt_sidebar_collapsed') === '1';
     this.updateViewportState();
     this.themeOptions = this.themeService.getThemeOptions();
@@ -175,6 +186,11 @@ export class Navbar implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
     this.stopNotificationsAutoRefresh();
     document.body.classList.remove('sidebar-collapsed', 'sidebar-mobile-open');
+  }
+
+  private updateStorefrontPresentation(url: string) {
+    const path = url.split(/[?#]/)[0];
+    this.isStorefront = /^\/(tienda(?:\/|$)|producto\/|carrito(?:\/|$)|checkout(?:\/|$))/.test(path);
   }
 
   @HostListener('window:resize')

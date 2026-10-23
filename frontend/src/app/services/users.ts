@@ -1,13 +1,14 @@
 ﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UserModel } from '../core/models/user.model';
+import { API_BASE_URL } from '../core/config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/usuarios';
+  private apiUrl = `${API_BASE_URL}/usuarios`;
 
   getUsers() {
     return this.http.get<UserModel[]>(this.apiUrl);

@@ -45,9 +45,11 @@ export class ProductsService {
   private brandsUrl = `${API_BASE_URL}/catalogos/marcas`;
 
   getProducts() {
-    return this.http.get<CatalogResponse>(this.apiUrl).pipe(
+    return this.http.get<CatalogResponse | ProductModel[]>(this.apiUrl).pipe(
       map(res => {
-        return Array.isArray(res) ? res : res.data;
+        if (Array.isArray(res)) return res;
+        if (res && Array.isArray(res.data)) return res.data;
+        throw new Error('Respuesta de catálogo inválida');
       })
     );
   }
@@ -81,7 +83,12 @@ export class ProductsService {
     if (options.precioMax) params = params.set('precioMax', options.precioMax.toString());
     if (options.orden) params = params.set('orden', options.orden);
 
-    return this.http.get<CatalogResponse>(this.apiUrl, { params });
+    return this.http.get<CatalogResponse>(this.apiUrl, { params }).pipe(map(res => {
+      if (!res || !Array.isArray(res.data) || !Number.isFinite(Number(res.total))) {
+        throw new Error('Respuesta de catálogo inválida');
+      }
+      return { data: res.data, total: Number(res.total) };
+    }));
   }
 
   getCategories() {

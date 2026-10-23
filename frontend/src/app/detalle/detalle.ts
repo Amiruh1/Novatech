@@ -8,6 +8,7 @@ import { AuthService } from '../services/auth';
 import { PreferencesService } from '../services/preferences';
 import { MessageService } from 'primeng/api';
 import { ProductModel, precioFinal, porcentajeDescuento, cuotaReferencial, tieneOferta } from '../core/models/product.model';
+import { SpeechService } from '../core/services/speech.service';
 
 import { ButtonModule }      from 'primeng/button';
 import { DialogModule }      from 'primeng/dialog';
@@ -36,6 +37,7 @@ interface ProductReview {
   styleUrl: './detalle.scss'
 })
 export class Detalle implements OnInit, OnDestroy {
+  readonly speech = inject(SpeechService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
   private productsService   = inject(ProductsService);
@@ -175,6 +177,13 @@ export class Detalle implements OnInit, OnDestroy {
   irAlCarro()       { this.displayModal = false; this.router.navigate(['/carrito']); }
   seguirComprando() { this.displayModal = false; this.router.navigate(['/tienda']); }
   abrirZoomImagen() { this.displayImageZoom = true; }
+
+  escucharProducto() {
+    if (!this.product) return;
+    const precio = this.precioFinalCalc.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const stock = Number(this.product.stock || 0);
+    this.speech.read(`${this.product.nombre}. Precio: ${precio} soles. ${stock > 0 ? `${stock} unidades disponibles.` : 'Producto agotado.'} ${this.product.descripcion || 'Sin descripción adicional.'}`);
+  }
 
   // ── Computed ────────────────────────────────────────────────────────────────
   get calificacionPromedio() {

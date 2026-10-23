@@ -1,0 +1,63 @@
+<dialog #welcome class="a11y-dialog" aria-labelledby="a11y-title" aria-describedby="a11y-intro a11y-keys"
+  (cancel)="cancel($event)" (keydown)="onKeydown($event)">
+  <button type="button" class="a11y-close" aria-label="Cerrar asistente y continuar sin voz" (click)="skip()">
+    <i class="pi pi-times" aria-hidden="true"></i>
+  </button>
+  <div class="a11y-heading">
+    <h1 #heading id="a11y-title" tabindex="-1" autofocus>¿Cómo prefieres navegar?</h1>
+    <p id="a11y-intro">Elige las ayudas que necesites. Puedes activar ambas.</p>
+  </div>
+  <div class="a11y-voice-box">
+    <div class="a11y-voice-copy">
+      <span class="a11y-voice-icon" aria-hidden="true"><i class="pi pi-volume-up"></i></span>
+      <div>
+        <strong>Guía por voz</strong>
+        <p id="a11y-keys"><kbd>F</kbd> para escuchar · <kbd>K</kbd> para continuar sin voz.</p>
+      </div>
+    </div>
+    <button #voiceButton type="button" class="a11y-button a11y-voice" aria-keyshortcuts="F" (click)="enableVoice()">
+      <i class="pi pi-volume-up" aria-hidden="true"></i>
+      {{ speech.enabled() ? 'Repetir guía' : 'Escuchar guía' }}
+    </button>
+    @if (speech.enabled()) {
+      <button type="button" class="a11y-button a11y-secondary" (click)="disableVoice()">Detener voz</button>
+    }
+  </div>
+  @if (speech.enabled()) {
+    <p class="a11y-voice-details" role="status">
+      @if (speech.loadingVoice()) { Preparando voz latinoamericana… }
+      @else if (speech.voiceName()) { Voz: {{ speech.voiceName() }} }
+      @if (!speech.loadingVoice() && speech.voiceNotice()) { <span>{{ speech.voiceNotice() }}</span> }
+    </p>
+  }
+  <p class="a11y-message" role="status">{{ speech.error() || notice() || accessibility.storageNotice() }}</p>
+  <fieldset class="a11y-options">
+    <legend>Elige tus ayudas</legend>
+    <label class="a11y-option" [class.a11y-selected]="reading()">
+      <span class="a11y-option-icon" aria-hidden="true"><i class="pi pi-eye"></i></span>
+      <span class="a11y-option-copy">
+        <strong>Texto y contraste</strong>
+        <span id="a11y-reading-description">Letras más grandes y colores fáciles de distinguir.</span>
+      </span>
+      <input type="checkbox" [checked]="reading()" (change)="reading.set($any($event.target).checked)" aria-describedby="a11y-reading-description">
+    </label>
+    <label class="a11y-option" [class.a11y-selected]="navigation()">
+      <span class="a11y-option-icon" aria-hidden="true"><i class="pi pi-arrows-alt"></i></span>
+      <span class="a11y-option-copy">
+        <strong>Controles amplios y navegación</strong>
+        <span id="a11y-navigation-description">Botones más grandes y navegación con Tab o las flechas.</span>
+      </span>
+      <input type="checkbox" [checked]="navigation()" (change)="navigation.set($any($event.target).checked)" aria-describedby="a11y-navigation-description">
+    </label>
+  </fieldset>
+  <p class="a11y-keyboard-help"><kbd>Tab</kbd> avanza · <kbd>Shift + Tab</kbd> retrocede · <kbd>Espacio</kbd> marca · <kbd>Enter</kbd> activa botones.</p>
+  <p class="a11y-keyboard-help"><kbd>↓</kbd> / <kbd>→</kbd> siguiente · <kbd>↑</kbd> / <kbd>←</kbd> anterior. Para usarlas en la tienda, activa Controles amplios y navegación.</p>
+  <div class="a11y-footer">
+    <button type="button" class="a11y-button a11y-primary" (click)="apply()">Aplicar y continuar <i class="pi pi-arrow-right" aria-hidden="true"></i></button>
+    <button type="button" class="a11y-button a11y-secondary" aria-keyshortcuts="K" (click)="skip()">Continuar sin asistente <kbd>K</kbd></button>
+  </div>
+  <div class="a11y-footnote">
+    <span>Guardamos tus preferencias. La voz se activa solo cuando la pides.</span>
+    <button type="button" class="a11y-reset" (click)="reset()">Restaurar vista habitual</button>
+  </div>
+</dialog>

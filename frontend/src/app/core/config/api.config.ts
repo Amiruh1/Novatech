@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'http://localhost:3000/api';
+// In development Angular forwards /api to the dedicated Novatech backend.
+export const API_BASE_URL = '/api';
 
 // Google Sign-In — reemplaza con tu Client ID de Google Cloud Console
 // https://console.cloud.google.com/ → APIs & Services → Credentials

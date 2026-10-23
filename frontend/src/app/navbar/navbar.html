@@ -5,15 +5,16 @@
   class="shell-sidebar"
   role="navigation"
   aria-label="Navegación principal"
+  [attr.inert]="isMobile && !mobileMenuOpen ? '' : null"
   [class.collapsed]="isCollapsedDesktop"
   [class.mobile-open]="mobileMenuOpen && isMobile">
-    <div class="sidebar-head" routerLink="/tienda" (click)="closeMobileMenu()">
+    <a class="sidebar-head" routerLink="/tienda" aria-label="Novatech, ir a la tienda" (click)="closeMobileMenu()">
         <div class="logo-mark">N</div>
         <div class="logo-copy" *ngIf="!isCollapsedDesktop">
             <span class="title">NovaTech</span>
-            <small>Commerce Suite</small>
+            <small>{{ isStorefront ? 'Tecnología para ti' : 'Commerce Suite' }}</small>
         </div>
-    </div>
+    </a>
 
     <nav class="sidebar-nav">
         <section class="menu-section" *ngFor="let section of menuSections">
@@ -23,7 +24,9 @@
                 *ngFor="let item of section.items"
                 [routerLink]="item.route"
                 routerLinkActive="active"
+                ariaCurrentWhenActive="page"
                 class="nav-link"
+                [attr.aria-label]="item.label"
                 [pTooltip]="isCollapsedDesktop ? item.label : ''"
                 tooltipPosition="right"
                 (click)="closeMobileMenu()"
@@ -86,8 +89,8 @@
         ></button>
 
         <div class="brand-copy">
-            <span class="brand-title">NovaTech Operations</span>
-            <small>{{ !isAuthenticated ? 'Catalogo publico' : (rol === 'admin' ? 'Control central administrativo' : 'Portal de cliente') }}</small>
+            <span class="brand-title">{{ isStorefront ? 'NovaTech' : 'NovaTech Operations' }}</span>
+            <small>{{ isStorefront ? 'Tu espacio de tecnología' : (!isAuthenticated ? 'Catalogo publico' : (rol === 'admin' ? 'Control central administrativo' : 'Portal de cliente')) }}</small>
         </div>
 
         <div class="quick-nav-wrap">
@@ -96,7 +99,8 @@
                 pInputText
                 type="text"
                 class="quick-input"
-                placeholder="Ir a modulo..."
+                [placeholder]="isStorefront ? 'Buscar productos…' : 'Ir a modulo...'"
+                aria-label="Buscar un módulo o producto"
                 [(ngModel)]="quickSearch"
                 (focus)="onQuickSearchFocus()"
                 (ngModelChange)="onQuickSearchInput($event)"
@@ -108,6 +112,7 @@
                 type="button"
                 icon="pi pi-times"
                 class="p-button-rounded p-button-text quick-clear"
+                aria-label="Limpiar búsqueda de módulos"
                 (click)="clearQuickSearch()"
             ></button>
 
@@ -157,6 +162,11 @@
     </div>
 
     <div class="topbar-actions">
+        <button type="button" class="accessibility-trigger" aria-haspopup="dialog" aria-label="Abrir opciones de accesibilidad"
+            (click)="accessibility.openPanel()">
+            <i class="pi pi-sliders-h" aria-hidden="true"></i>
+            <span>Accesibilidad</span>
+        </button>
         <div class="theme-picker-wrap" *ngIf="usuario">
             <button
                 pButton
@@ -165,6 +175,7 @@
                 class="p-button-rounded p-button-text topbar-icon theme-trigger"
                 [label]="currentThemeLabel"
                 pTooltip="Cambiar apariencia"
+                aria-label="Cambiar apariencia"
                 tooltipPosition="bottom"
                 (click)="toggleThemeMenu($event)"
             ></button>
@@ -194,6 +205,7 @@
             icon="pi pi-bell"
             class="p-button-rounded p-button-text topbar-icon notification-trigger"
             pTooltip="Notificaciones"
+            aria-label="Abrir notificaciones"
             tooltipPosition="bottom"
             (click)="toggleNotifications($event)"
         >
@@ -271,6 +283,7 @@
             type="button"
             icon="pi pi-shopping-cart"
             class="p-button-rounded p-button-text topbar-icon minicart-trigger"
+            aria-label="Abrir carrito"
             pTooltip="Ver carrito"
             tooltipPosition="bottom"
             (click)="toggleCart()"
@@ -319,6 +332,7 @@
                     type="button"
                     icon="pi pi-times"
                     class="p-button-rounded p-button-text p-button-sm p-button-danger minicart-item-remove"
+                    [attr.aria-label]="'Quitar ' + item.producto.nombre + ' del carrito'"
                     pTooltip="Quitar"
                     tooltipPosition="left"
                     (click)="removerDelCarrito(item.producto.id)"

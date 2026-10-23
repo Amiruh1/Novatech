@@ -1,5 +1,7 @@
 <section class="app-shell-page checkout-shell">
 
+    <p class="checkout-feedback" id="checkout-feedback" role="alert" tabindex="-1" *ngIf="validationMessage && !showDirDialog">{{ validationMessage }}</p>
+
     <!-- Progress Bar -->
     <div class="checkout-progress" *ngIf="step < 4">
         <div class="progress-inner">
@@ -7,7 +9,8 @@
                 <div class="progress-step"
                      *ngFor="let label of stepLabels; let i = index"
                      [class.active]="step === i + 1"
-                     [class.done]="step > i + 1">
+                     [class.done]="step > i + 1"
+                     [attr.aria-current]="step === i + 1 ? 'step' : null">
                     <div class="step-dot">
                         <i class="pi pi-check" *ngIf="step > i + 1"></i>
                         <i class="pi {{ stepIcons[i] }}" *ngIf="step <= i + 1"></i>
@@ -70,35 +73,34 @@
 
                 <div class="card-body">
                     <!-- Loading -->
-                    <div class="dir-loading" *ngIf="loadingDirs">
+                    <div class="dir-loading" *ngIf="loadingDirs" role="status">
                         <i class="pi pi-spin pi-spinner"></i> Cargando direcciones...
                     </div>
 
                     <!-- Address cards -->
-                    <div class="dir-options" *ngIf="!loadingDirs && misDirecciones.length > 0">
-                        <div class="dir-option"
+                    <div class="dir-options" role="group" aria-label="Direcciones de envío" *ngIf="!loadingDirs && misDirecciones.length > 0">
+                        <label class="dir-option"
                              *ngFor="let dir of misDirecciones"
-                             [class.selected]="direccionSeleccionada === dir.id"
-                             (click)="onDireccionChange(dir.id ?? null)">
-                            <div class="dir-option-radio">
-                                <div class="radio-dot" [class.active]="direccionSeleccionada === dir.id"></div>
-                            </div>
-                            <div class="dir-option-body">
-                                <div class="dir-alias">
+                             [class.selected]="direccionSeleccionada === dir.id">
+                            <input class="dir-radio" type="radio" name="direccion-envio"
+                                [value]="dir.id" [checked]="direccionSeleccionada === dir.id"
+                                [attr.aria-labelledby]="'dir-alias-' + dir.id"
+                                [attr.aria-describedby]="'dir-detail-' + dir.id"
+                                (change)="onDireccionChange(dir.id ?? null)" />
+                            <span class="dir-option-body">
+                                <span class="dir-alias" [id]="'dir-alias-' + dir.id">
                                     {{ dir.alias }}
                                     <span class="dir-pred-tag" *ngIf="dir.predeterminada">Principal</span>
-                                </div>
-                                <div class="dir-detail">
-                                    <i class="pi pi-user"></i> {{ dir.destinatario }}
-                                </div>
-                                <div class="dir-detail">
-                                    <i class="pi pi-map-marker"></i> {{ dir.direccion_detallada }}, {{ dir.distrito }}, {{ dir.provincia }}
-                                </div>
-                            </div>
-                            <div class="dir-envio-cost" *ngIf="direccionSeleccionada === dir.id">
+                                </span>
+                                <span [id]="'dir-detail-' + dir.id">
+                                    <span class="dir-detail"><i class="pi pi-user" aria-hidden="true"></i> {{ dir.destinatario }}</span>
+                                    <span class="dir-detail"><i class="pi pi-map-marker" aria-hidden="true"></i> {{ dir.direccion_detallada }}, {{ dir.distrito }}, {{ dir.provincia }}</span>
+                                </span>
+                            </span>
+                            <span class="dir-envio-cost" *ngIf="direccionSeleccionada === dir.id">
                                 <span class="envio-tag">Envío: S/ {{ costoEnvio }}</span>
-                            </div>
-                        </div>
+                            </span>
+                        </label>
                     </div>
 
                     <!-- No addresses -->
@@ -124,10 +126,11 @@
                 <div class="card-body">
 
                     <!-- Method selector tabs -->
-                    <div class="method-tabs">
+                    <div class="method-tabs" role="group" aria-label="Método de pago">
                         <button class="method-tab"
                                 *ngFor="let m of metodosPago"
                                 [class.active]="metodoPagoSeleccionado === m.value"
+                                [attr.aria-pressed]="metodoPagoSeleccionado === m.value"
                                 (click)="metodoPagoSeleccionado = m.value"
                                 type="button">
                             <i [class]="m.icon"></i>
@@ -179,15 +182,15 @@
                             Realiza el pago por Yape o Plin y luego ingresa los datos de la operación.
                         </div>
                         <div class="pay-field">
-                            <label>Teléfono Yape / Plin</label>
-                            <input pInputText type="text" inputmode="numeric" maxlength="9"
+                            <label for="wallet-phone">Teléfono Yape / Plin</label>
+                            <input pInputText id="wallet-phone" type="text" inputmode="numeric" autocomplete="tel-national" maxlength="9"
                                    [(ngModel)]="telefonoBilletera"
                                    (ngModelChange)="onTelefonoChange($event)"
                                    placeholder="9XXXXXXXX" class="w-full"/>
                         </div>
                         <div class="pay-field">
-                            <label>Código de operación</label>
-                            <input pInputText type="text" inputmode="numeric" maxlength="12"
+                            <label for="wallet-code">Código de operación</label>
+                            <input pInputText id="wallet-code" type="text" inputmode="numeric" maxlength="12"
                                    [(ngModel)]="codigoVerificacion"
                                    (ngModelChange)="onCodigoChange($event)"
                                    placeholder="Ej. 092738" class="w-full"/>
@@ -201,13 +204,13 @@
                             Realiza la transferencia y adjunta el número de operación.
                         </div>
                         <div class="pay-field">
-                            <label>Banco</label>
-                            <input pInputText type="text" [(ngModel)]="bancoTransferencia"
+                            <label for="transfer-bank">Banco</label>
+                            <input pInputText id="transfer-bank" type="text" [(ngModel)]="bancoTransferencia"
                                    placeholder="Ej. BCP, Interbank, BBVA" maxlength="60" class="w-full"/>
                         </div>
                         <div class="pay-field">
-                            <label>Número de operación</label>
-                            <input pInputText type="text" [(ngModel)]="nroOperacionTransferencia"
+                            <label for="transfer-operation">Número de operación</label>
+                            <input pInputText id="transfer-operation" type="text" [(ngModel)]="nroOperacionTransferencia"
                                    placeholder="Ej. 00912873" maxlength="30" class="w-full"/>
                         </div>
                     </div>
@@ -215,14 +218,16 @@
                     <!-- Comprobante -->
                     <div class="comprobante-section">
                         <div class="section-label-co">Tipo de comprobante</div>
-                        <div class="comprobante-tabs">
+                        <div class="comprobante-tabs" role="group" aria-label="Tipo de comprobante">
                             <button class="comp-tab" type="button"
                                     [class.active]="tipoComprobante === 'boleta'"
+                                    [attr.aria-pressed]="tipoComprobante === 'boleta'"
                                     (click)="tipoComprobante = 'boleta'">
                                 <i class="pi pi-file"></i> Boleta
                             </button>
                             <button class="comp-tab" type="button"
                                     [class.active]="tipoComprobante === 'factura'"
+                                    [attr.aria-pressed]="tipoComprobante === 'factura'"
                                     (click)="tipoComprobante = 'factura'">
                                 <i class="pi pi-building"></i> Factura
                             </button>
@@ -230,15 +235,15 @@
 
                         <div class="pay-fields mt-4" *ngIf="tipoComprobante === 'factura'">
                             <div class="pay-field">
-                                <label>RUC (11 dígitos)</label>
-                                <input pInputText type="text" inputmode="numeric" maxlength="11"
+                                <label for="invoice-ruc">RUC (11 dígitos)</label>
+                                <input pInputText id="invoice-ruc" type="text" inputmode="numeric" maxlength="11"
                                        [(ngModel)]="documentoFiscal"
                                        (ngModelChange)="onRucChange($event)"
                                        placeholder="20123456789" class="w-full"/>
                             </div>
                             <div class="pay-field">
-                                <label>Razón social</label>
-                                <input pInputText type="text" [(ngModel)]="razonSocial"
+                                <label for="invoice-company">Razón social</label>
+                                <input pInputText id="invoice-company" type="text" autocomplete="organization" [(ngModel)]="razonSocial"
                                        placeholder="Ej. Empresa SAC" maxlength="150" class="w-full"/>
                             </div>
                         </div>
@@ -246,8 +251,8 @@
 
                     <!-- Comentario -->
                     <div class="pay-field mt-4">
-                        <label>Comentario de entrega (opcional)</label>
-                        <textarea pTextarea rows="2" [(ngModel)]="comentarioPago"
+                        <label for="delivery-comment">Comentario de entrega (opcional)</label>
+                        <textarea pTextarea id="delivery-comment" rows="2" [(ngModel)]="comentarioPago"
                                   placeholder="Referencias, instrucciones especiales, etc."
                                   maxlength="300" class="w-full"></textarea>
                     </div>
@@ -346,7 +351,7 @@
             <div class="success-ring"></div>
             <div class="success-check"><i class="pi pi-check"></i></div>
         </div>
-        <h1 class="success-title">¡Pedido confirmado!</h1>
+        <h1 class="success-title" id="checkout-step-heading" tabindex="-1">¡Pedido confirmado!</h1>
         <p class="success-subtitle">
             Tu pedido <strong>#{{ ventaId }}</strong> fue registrado correctamente.
             Recibirás actualizaciones sobre el estado de tu despacho.
@@ -407,61 +412,63 @@
 
 <!-- Quick-add address dialog -->
 <p-dialog [(visible)]="showDirDialog" [modal]="true" [draggable]="false" [resizable]="false"
-    [closable]="!guardandoDir" [style]="{ width: 'min(34rem, 96vw)' }"
+    (onHide)="validationMessage = ''"
+    [closable]="!guardandoDir" [closeOnEscape]="!guardandoDir" ariaLabelledBy="checkout-address-title" [style]="{ width: 'min(34rem, 96vw)' }"
     [transitionOptions]="'200ms ease-out'">
     <ng-template pTemplate="header">
         <div class="dlg-hero dlg-address">
             <div class="dlg-hero-icon"><i class="pi pi-map-marker"></i></div>
             <div>
-                <span class="dlg-hero-title">Nueva dirección</span>
+                <span class="dlg-hero-title" id="checkout-address-title">Nueva dirección</span>
                 <span class="dlg-hero-sub">Datos de entrega para tu pedido</span>
             </div>
         </div>
     </ng-template>
     <div class="dir-form mt-2">
+        <p class="checkout-feedback" id="checkout-address-feedback" role="alert" tabindex="-1" *ngIf="validationMessage">{{ validationMessage }}</p>
         <div class="form-group">
-            <label>Alias *</label>
-            <input pInputText [(ngModel)]="nuevaDireccion.alias" placeholder="Ej. Casa, Trabajo"
+            <label for="address-alias">Alias (obligatorio)</label>
+            <input pInputText id="address-alias" required [(ngModel)]="nuevaDireccion.alias" placeholder="Ej. Casa, Trabajo"
                    maxlength="80" [disabled]="guardandoDir" class="w-full" />
         </div>
         <div class="form-group">
-            <label>Destinatario *</label>
-            <input pInputText [(ngModel)]="nuevaDireccion.destinatario"
+            <label for="address-name">Destinatario (obligatorio)</label>
+            <input pInputText id="address-name" required autocomplete="shipping name" [(ngModel)]="nuevaDireccion.destinatario"
                    placeholder="Nombre de quien recibe" maxlength="120"
                    [disabled]="guardandoDir" class="w-full" />
         </div>
         <div class="form-group">
-            <label>Dirección detallada *</label>
-            <input pInputText [(ngModel)]="nuevaDireccion.direccion_detallada"
+            <label for="address-line">Dirección detallada (obligatorio)</label>
+            <input pInputText id="address-line" required autocomplete="shipping address-line1" [(ngModel)]="nuevaDireccion.direccion_detallada"
                    placeholder="Av. / Jr. / Calle + número" maxlength="220"
                    [disabled]="guardandoDir" class="w-full" />
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label>Distrito *</label>
-                <input pInputText [(ngModel)]="nuevaDireccion.distrito"
+                <label for="address-district">Distrito (obligatorio)</label>
+                <input pInputText id="address-district" required autocomplete="shipping address-level3" [(ngModel)]="nuevaDireccion.distrito"
                        placeholder="Ej. Miraflores" maxlength="80"
                        [disabled]="guardandoDir" class="w-full" />
             </div>
             <div class="form-group">
-                <label>Provincia *</label>
-                <input pInputText [(ngModel)]="nuevaDireccion.provincia"
+                <label for="address-province">Provincia (obligatorio)</label>
+                <input pInputText id="address-province" required autocomplete="shipping address-level2" [(ngModel)]="nuevaDireccion.provincia"
                        placeholder="Ej. Lima" maxlength="80"
                        [disabled]="guardandoDir" class="w-full" />
             </div>
         </div>
         <div class="form-group">
-            <label>Referencias (opcional)</label>
-            <input pInputText [(ngModel)]="nuevaDireccion.referencias"
+            <label for="address-reference">Referencias (opcional)</label>
+            <input pInputText id="address-reference" [(ngModel)]="nuevaDireccion.referencias"
                    placeholder="Cerca de, color de puerta..." [disabled]="guardandoDir" class="w-full" />
         </div>
     </div>
     <ng-template pTemplate="footer">
         <div class="btn-modal-footer">
-            <button class="btn-modal-cancelar" [disabled]="guardandoDir" (click)="showDirDialog = false">
+            <button type="button" class="btn-modal-cancelar" [disabled]="guardandoDir" (click)="showDirDialog = false">
                 <i class="pi pi-times"></i><span>Cancelar</span>
             </button>
-            <button class="btn-modal-guardar" [disabled]="guardandoDir" (click)="guardarDireccion()">
+            <button type="button" class="btn-modal-guardar" [disabled]="guardandoDir" (click)="guardarDireccion()">
                 <i class="pi pi-spin pi-spinner" *ngIf="guardandoDir"></i>
                 <i class="pi pi-check" *ngIf="!guardandoDir"></i>
                 <span>{{ guardandoDir ? 'Guardando...' : 'Guardar dirección' }}</span>

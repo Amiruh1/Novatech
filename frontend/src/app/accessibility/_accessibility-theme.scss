@@ -1,0 +1,60 @@
+// Visual reference: full-version / Vuexy, bootstrap-extended/_variables.scss
+// and components/custom-options.scss. Kept local to the new assistance UI.
+@font-face {
+  font-family: 'NT Accessibility Montserrat';
+  src: url('/fonts/accessibility/montserrat-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@mixin surface {
+  --a11y-primary: #7367f0;
+  // A deeper shade keeps small text and white button labels above 4.5:1.
+  --a11y-action: #6254d8;
+  --a11y-heading: #5e5873;
+  --a11y-text: #6e6b7b;
+  --a11y-border: #ebe9f1;
+  --a11y-soft: #f0eefc;
+  color: var(--a11y-text);
+  font: 400 .875rem/1.5 'NT Accessibility Montserrat', Helvetica, Arial, sans-serif;
+
+  *, *::before, *::after { box-sizing: border-box; }
+  button, input, a { font: inherit; }
+  button { cursor: pointer; touch-action: manipulation; }
+  :focus-visible { outline: 3px solid var(--a11y-action); outline-offset: 3px; }
+  kbd {
+    display: inline-block;
+    padding: .08rem .3rem;
+    border: 1px solid #d8d4e4;
+    border-radius: .25rem;
+    background: #fff;
+    box-shadow: 0 1px 0 #d8d4e4;
+    color: var(--a11y-heading);
+    font: 500 .75rem/1.4 'NT Accessibility Montserrat', Helvetica, Arial, sans-serif;
+    white-space: nowrap;
+  }
+}
+
+@mixin button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 44px;
+  padding: .65rem 1rem;
+  border: 1px solid #b5b0c3;
+  border-radius: .357rem;
+  background: #fff;
+  color: var(--a11y-heading);
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  touch-action: manipulation;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover { background: #f8f8fa; }
+  }
+
+  &:active { background: #eeecf3; }
+}

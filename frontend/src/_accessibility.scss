@@ -1,0 +1,413 @@
+// Optional accessibility preferences. Removing these classes restores the theme.
+// Keep this import after the existing themes and PrimeNG overrides.
+body.a11y-modal-open {
+  overflow: hidden;
+}
+
+// The assistance toolbar reserves the fixed header space when it is present.
+app-accessibility-toolbar.a11y-toolbar-visible + .route-view .app-shell-page {
+  padding-top: 1rem;
+}
+
+html.a11y-reading {
+  font-size: 20px;
+}
+
+body.a11y-reading {
+  // White / slate text = 17.9:1; muted slate / white = 7.6:1;
+  // teal / white = 7.6:1. The muted surface (#f1f5f9) also exceeds 4.5:1.
+  color-scheme: light;
+  --app-bg: #f1f5f9;
+  --app-bg-glow-a: transparent;
+  --app-bg-glow-b: transparent;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f1f5f9;
+  --app-border: #64748b;
+  --app-border-subtle: #94a3b8;
+  --app-text: #0f172a;
+  --app-text-2: #1e293b;
+  --app-muted: #475569;
+  --app-primary: #115e59;
+  --app-primary-strong: #134e4a;
+  --app-primary-glow: #d5eeeb;
+  --app-success: #166534;
+  --app-success-soft: #f0fdf4;
+  --app-danger: #991b1b;
+  --app-danger-soft: #fef2f2;
+  --app-warning: #854d0e;
+  --app-warning-soft: #fefce8;
+  --app-info: #075985;
+  --app-info-strong: #0c4a6e;
+  --app-info-soft: #f0f9ff;
+  --app-accent: #4338ca;
+  --app-accent-strong: #3730a3;
+  --app-accent-soft: #eef2ff;
+  --glass-bg: #ffffff;
+  --glass-border: #64748b;
+  --glass-blur: 0px;
+  --glass-specular: transparent;
+  --shell-gradient-start: #0f172a;
+  --shell-gradient-mid: #0f172a;
+  --shell-gradient-end: #0f172a;
+  --shell-sidebar-text: #ffffff;
+  --text-100: #0f172a;
+  --text-200: #1e293b;
+  --text-300: #475569;
+  --surface-ground: #f1f5f9;
+  // PrimeNG uses its own theme tokens for controls and their interaction states.
+  --p-primary-color: #115e59;
+  --p-primary-hover-color: #134e4a;
+  --p-primary-active-color: #134e4a;
+  --p-primary-contrast-color: #ffffff;
+  --p-button-primary-background: #115e59;
+  --p-button-primary-border-color: #115e59;
+  --p-button-primary-color: #ffffff;
+  --p-button-primary-hover-background: #134e4a;
+  --p-button-primary-hover-border-color: #134e4a;
+  --p-button-primary-hover-color: #ffffff;
+  --p-button-primary-active-background: #134e4a;
+  --p-button-primary-active-border-color: #134e4a;
+  --p-button-primary-active-color: #ffffff;
+  --p-button-text-primary-color: #115e59;
+  --p-button-outlined-primary-color: #115e59;
+  --p-button-outlined-primary-border-color: #115e59;
+  --p-text-color: #0f172a;
+  --p-text-muted-color: #475569;
+  --p-content-background: #ffffff;
+  --p-content-color: #0f172a;
+  --p-content-border-color: #64748b;
+  --p-form-field-placeholder-color: #475569;
+
+  font-size: 1rem;
+  line-height: 1.75;
+  background: var(--app-bg);
+
+  // Target textual content, not icon glyphs, badges, images, or radio widgets.
+  :is(.tienda-shell, .detalle-shell, app-carrito, .checkout-shell, .auth-form) {
+    :is(p, label, .field-hint, .field-req, .char-counter, .page-subtitle,
+      .card-subtitle, .detalle-desc-text, .co-item-name, .cart-item-name,
+      .pc-name, .sb-name) {
+      line-height: 1.75;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  :is(.page-subtitle, .card-subtitle, .circle-label, .section-label,
+    .pc-brand, .pc-cuotas, .pc-low-stock, .co-item-brand, .co-item-qty,
+    .cart-item-brand, .cart-item-sku, .unit-label, .detalle-brand,
+    .detalle-sku, .precio-cuotas, .step-label, .field-req, .char-counter,
+    .sidebar-section-label, .sb-name, .cmb-label) {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    letter-spacing: normal;
+  }
+
+  :is(.pc-name, .cart-item-name, .sb-name, .bc-current, .minicart-item-name,
+    .quick-product-name, .recent-copy strong) {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    white-space: normal;
+    max-height: none;
+    overflow-wrap: anywhere;
+  }
+
+  :is(.pc-price-old, .precio-original, .quick-group-label, .quick-product-cat) {
+    color: var(--app-muted);
+  }
+
+  .quick-product-price {
+    color: var(--app-primary);
+  }
+
+  :is(.shell-topbar, .minicart-totals, .glass-surface) {
+    background: var(--app-surface);
+    backdrop-filter: none;
+  }
+
+  .hero-overlay {
+    background: #0f172a;
+  }
+
+  .hero-content p {
+    color: #ffffff;
+    text-shadow: none;
+  }
+
+  .hero-banner-item {
+    height: auto;
+    min-height: 18rem;
+    padding-block: 3.5rem;
+  }
+
+  .hero-content h2 {
+    line-height: 1.4;
+    text-shadow: none;
+  }
+
+  .hero-btn, .hero-btn:hover {
+    // Existing hero buttons declare their transparent backgrounds !important.
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .minicart-checkout-btn {
+    background: var(--app-primary) !important;
+  }
+
+  .circle-label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .category-circle-item {
+    width: 6rem;
+  }
+
+  .category-circles-scroll {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  :is(.orb, .success-ring) {
+    display: none;
+  }
+
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand {
+    display: none;
+  }
+
+  .auth-form {
+    max-height: 85dvh;
+  }
+
+  .step-label {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .progress-steps {
+    gap: 0.5rem;
+  }
+
+  .progress-step {
+    min-width: 0;
+  }
+
+  .progress-inner {
+    padding-inline: 0.75rem;
+  }
+
+  :is(.card-head, .detalle-brand-row, .detalle-breadcrumb,
+    .gallery-actions, .detalle-precio-row, .resumen-total,
+    .sidebar-total-final, .resumen-linea, .sidebar-total-row) {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  :is(.tienda-shell, .detalle-shell, app-carrito, .checkout-shell,
+    .auth-modal-shell, .minicart-sidebar, .shell-topbar, .shell-sidebar) {
+    // Essential loading indicators still render; only their movement is reduced.
+    &, *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+body.a11y-navigation {
+  :is(.app-shell-page, .shell-topbar, .shell-sidebar, .bottom-nav,
+    .auth-modal-shell, .minicart-sidebar, .p-dialog, .checkout-mobile-bar) {
+    // Do not resize checkbox/radio inputs or the SVG/PrimeIcons inside buttons.
+    :is(button, a[href], [role='button'], [role='radio'], select,
+      input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+      textarea, .p-select) {
+      min-height: 44px;
+      min-width: 44px;
+      scroll-margin-block: calc(var(--topbar-height) + 1.5rem) 10rem;
+    }
+
+    :is(button, a[href], [role='button'], [role='radio']) {
+      touch-action: manipulation;
+    }
+
+    // Inline links need an actual hit area; exclude compound thumbnail links.
+    :is(.bc-link, .rating-link) {
+      display: inline-flex;
+      align-items: center;
+      padding-inline: 0.25rem;
+    }
+
+    :focus-visible {
+      // Two colors keep the ring identifiable against light and dark surfaces.
+      outline: 3px solid #075985 !important;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 3px #ffffff !important;
+      scroll-margin-block: calc(var(--topbar-height) + 1.5rem) 10rem;
+    }
+  }
+
+  :is(.qty-controls, .cart-item-qty, .gallery-actions, .head-tools,
+    .topbar-actions, .comprobante-tabs, .view-switch, .hero-banners-dots) {
+    gap: 0.75rem;
+  }
+
+  :is(.filter-item, .orden-option, .suggestion-item, .quick-result-item) {
+    margin-block: 0.35rem;
+  }
+
+  :is(.hero-nav-btn, .gallery-zoom-btn, .pc-quick-actions,
+    .cart-item-remove, .minicart-item-remove) {
+    opacity: 1;
+  }
+
+  :is(.gallery-zoom-btn, .pc-quick-actions) {
+    transform: none;
+  }
+
+  .dot-btn {
+    // Keep visual dots compact within a 44px clickable target.
+    background: radial-gradient(circle, #ffffff 4px, transparent 5px);
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+
+    &.active {
+      background: radial-gradient(circle, #ffffff 9px, transparent 10px);
+    }
+  }
+
+  :is(.qty-btn, .pc-add-btn, .pc-fav-btn, .pc-compare-btn,
+    .btn-add-cart, .btn-checkout, .co-btn-next, .co-btn-back, .cmb-cta,
+    .gallery-action-btn, .category-circle-item) {
+    &:hover, &:active {
+      transform: none !important;
+    }
+  }
+}
+
+// Shared reflow rules only while one or both preferences are active.
+body:is(.a11y-reading, .a11y-navigation) {
+  .shell-sidebar {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  :is(.head-tools, .gallery-actions, .comprobante-tabs, .detalle-add-block) {
+    flex-wrap: wrap;
+  }
+
+  .search-box input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  :is(.search-autocomplete, .search-box, .topbar-start, .quick-nav-wrap,
+    .quick-input, .checkout-sidebar, .carrito-resumen) {
+    min-width: 0;
+  }
+
+  :is(.cart-item-info, .co-item-info, .dir-option > div) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 1280px) {
+    :is(.carrito-layout, .checkout-layout, .detalle-layout) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    :is(.carrito-resumen, .checkout-sidebar, .detalle-gallery-col, .filters-card) {
+      position: static;
+    }
+
+    .resumen-card {
+      max-width: none;
+    }
+
+    .brand-copy {
+      display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    // The sidebar already contains the same checkout action. Keeping the mobile
+    // duplicate in flow prevents it from covering focused fields and text.
+    .checkout-mobile-bar {
+      position: static;
+      flex-wrap: wrap;
+      margin: 0.75rem;
+      margin-bottom: 6rem;
+    }
+
+    .cart-item {
+      grid-template-columns: 64px minmax(0, 1fr) auto;
+      gap: 0.75rem;
+    }
+
+    .cart-item-img {
+      width: 64px;
+      height: 64px;
+    }
+
+    .cart-item-info { grid-column: 2 / 4; grid-row: 1; }
+    .cart-item-qty { grid-column: 1 / 3; grid-row: 2; justify-self: start; }
+    .cart-item-remove { grid-column: 3; grid-row: 2; }
+    .cart-item-unit { display: flex; grid-column: 1 / 3; grid-row: 3; }
+    .cart-item-subtotal { grid-column: 2 / 4; grid-row: 4; text-align: right; }
+  }
+
+  @media (max-width: 600px) {
+    .app-shell-page {
+      padding-inline: 0.75rem;
+    }
+
+    :is(.card-body, .carrito-items-list, .checkout-item-list) {
+      padding-inline: 0.75rem;
+    }
+
+    :is(.two-col, .auth-form .two-col, .dir-form .form-row) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .co-item {
+      grid-template-columns: 56px minmax(0, 1fr);
+    }
+
+    .co-item-img {
+      width: 56px;
+      height: 56px;
+    }
+
+    .co-item-price { grid-column: 2; }
+
+    .sidebar-item { grid-template-columns: 44px minmax(0, 1fr); }
+    .sb-price { grid-column: 2; }
+
+    .dir-option {
+      padding: 0.75rem;
+      gap: 0.5rem;
+    }
+
+    .profile-pill { display: none; }
+
+    :is(.topbar-start, .topbar-actions) { gap: 0.25rem; }
+
+    .shell-topbar { gap: 0.25rem; padding-inline: 0.5rem; }
+
+    .quick-input { min-width: 0; }
+
+    .head-tools > *, .search-box { max-width: 100%; }
+
+    .hero-banner-item { padding-inline: 3rem; }
+    .hero-nav-prev { left: 0.25rem; }
+    .hero-nav-next { right: 0.25rem; }
+  }
+}

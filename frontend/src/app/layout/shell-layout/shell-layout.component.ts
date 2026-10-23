@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, signal, ElementRef, HostListener } from '@angular/core';
 import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -12,6 +12,9 @@ import { BottomNav }          from '../../bottom-nav/bottom-nav';
 import { CommandPalette }     from '../../command-palette/command-palette';
 import { AriaLiveService }    from '../../services/aria-live.service';
 import { MessageService }     from 'primeng/api';
+import { AccessibilityToolbar } from '../../accessibility/accessibility-toolbar';
+import { AccessibilityService } from '../../core/services/accessibility.service';
+import { moveFocusWithArrow } from '../../accessibility/arrow-navigation';
 
 // ── Route transition animation ────────────────────────────────────────────────
 // Sólo anima el :enter para evitar flashes de layout durante el :leave.
@@ -32,13 +35,18 @@ const routeAnim = trigger('routeAnim', [
 @Component({
   selector: 'app-shell-layout',
   standalone: true,
-  imports: [Navbar, RouterOutlet, RouterModule, AuthModalComponent, BottomNav, CommandPalette],
+  imports: [Navbar, RouterOutlet, RouterModule, AuthModalComponent, BottomNav, CommandPalette, AccessibilityToolbar],
   templateUrl: './shell-layout.component.html',
   styleUrl:    './shell-layout.component.scss',
   animations:  [routeAnim]
 })
 export class ShellLayoutComponent implements OnInit, OnDestroy {
   ariaLive        = inject(AriaLiveService);
+  readonly accessibility = inject(AccessibilityService);
+  private readonly element = inject(ElementRef<HTMLElement>);
+  private readonly motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  readonly reducedMotion = signal(this.motionQuery.matches);
+  private readonly onMotionChange = (event: MediaQueryListEvent) => this.reducedMotion.set(event.matches);
   private msgSvc  = inject(MessageService);
   private router  = inject(Router);
   private cd      = inject(ChangeDetectorRef);
@@ -47,7 +55,15 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   /** Incrementa en cada NavigationEnd → desencadena routeAnim */
   routeState = 0;
 
+  @HostListener('keydown', ['$event'])
+  onNavigationKey(event: KeyboardEvent) {
+    if (this.accessibility.preferences().navigation && !this.accessibility.panelOpen()) {
+      moveFocusWithArrow(event, this.element.nativeElement);
+    }
+  }
+
   ngOnInit() {
+    this.motionQuery.addEventListener('change', this.onMotionChange);
     // ── Animación de ruta ──────────────────────────────────────────────────────
     this.sub.add(
       this.router.events.pipe(filter(e => e instanceof NavigationEnd))
@@ -67,5 +83,8 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy() { this.sub.unsubscribe(); }
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+    this.motionQuery.removeEventListener('change', this.onMotionChange);
+  }
 }

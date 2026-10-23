@@ -14,8 +14,9 @@
 >{{ ariaLive.message() }}</div>
 
 <main id="main-content" tabindex="-1" class="shell-main">
+  <app-accessibility-toolbar></app-accessibility-toolbar>
   <!-- Wrapper que recibe el trigger de animación de ruta -->
-  <div class="route-view" [@routeAnim]="routeState">
+  <div class="route-view" [@routeAnim]="routeState" [@.disabled]="accessibility.active() || reducedMotion()">
     <router-outlet></router-outlet>
   </div>
 </main>

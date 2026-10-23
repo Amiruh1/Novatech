@@ -1,8 +1,21 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { ShellLayoutComponent } from './layout/shell-layout/shell-layout.component';
+import { accessibilityEntryGuard } from './accessibility/accessibility-entry.guard';
 
 export const routes: Routes = [
+    {
+        path: 'accesibilidad/lectura',
+        component: ShellLayoutComponent,
+        canActivate: [accessibilityEntryGuard],
+        data: { accessibilityMode: 'reading' }
+    },
+    {
+        path: 'accesibilidad/navegacion',
+        component: ShellLayoutComponent,
+        canActivate: [accessibilityEntryGuard],
+        data: { accessibilityMode: 'navigation' }
+    },
     { path: 'login', redirectTo: '', pathMatch: 'full' },
     {
         path: '',

@@ -1,8 +1,18 @@
 <section class="app-shell-page tienda-shell">
-    
-    <div class="tienda-hero-container mb-4" *ngIf="heroBanners.length > 0">
+    <div class="page-intro">
+        <div>
+            <div class="catalog-eyebrow"><i class="pi pi-shopping-bag" aria-hidden="true"></i> NOVATECH / TIENDA</div>
+            <h1 class="page-title">{{ categoriaActual === 'Todas' ? 'Explora el catálogo' : categoriaActual }}</h1>
+            <p class="page-subtitle">Encuentra tu próxima tecnología. Compara y elige a tu ritmo.</p>
+        </div>
+        <a class="catalog-cart-link" routerLink="/carrito"><i class="pi pi-shopping-cart" aria-hidden="true"></i> Ver mi carrito <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+
+    <div class="tienda-hero-container mb-4" *ngIf="heroBanners.length > 0"
+         (mouseenter)="bannerInteracting = true" (mouseleave)="bannerInteracting = false"
+         (focusin)="bannerFocused = true" (focusout)="salirBanner($event)" aria-label="Ofertas destacadas">
         <div class="hero-banners-scroll" [style.transform]="'translateX(-' + (activeBannerIndex * 100) + '%)'">
-            <article class="hero-banner-item" *ngFor="let banner of heroBanners" [style.backgroundImage]="'url(' + banner.imagen + ')'">
+            <article class="hero-banner-item" *ngFor="let banner of heroBanners; let i = index" [attr.inert]="i === activeBannerIndex ? null : ''" [style.backgroundImage]="'url(' + banner.imagen + ')'">
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
                     <h2>{{ banner.titulo }}</h2>
@@ -12,45 +22,43 @@
             </article>
         </div>
         
-        <button class="hero-nav-btn hero-nav-prev" *ngIf="heroBanners.length > 1" (click)="bannerAnteriorManual()">
+        <button class="hero-nav-btn hero-nav-prev" type="button" aria-label="Oferta anterior" *ngIf="heroBanners.length > 1" (click)="bannerAnteriorManual()">
             <i class="pi pi-chevron-left"></i>
         </button>
-        <button class="hero-nav-btn hero-nav-next" *ngIf="heroBanners.length > 1" (click)="siguienteBannerManual()">
+        <button class="hero-nav-btn hero-nav-next" type="button" aria-label="Oferta siguiente" *ngIf="heroBanners.length > 1" (click)="siguienteBannerManual()">
             <i class="pi pi-chevron-right"></i>
         </button>
 
         <div class="hero-banners-dots" *ngIf="heroBanners.length > 1">
-            <button class="dot-btn" *ngFor="let b of heroBanners; let i = index" [class.active]="i === activeBannerIndex" (click)="setBanner(i)"></button>
+            <button class="dot-btn" type="button" *ngFor="let b of heroBanners; let i = index" [class.active]="i === activeBannerIndex" [attr.aria-label]="'Mostrar oferta ' + (i + 1)" [attr.aria-pressed]="i === activeBannerIndex" (click)="setBanner(i)"></button>
         </div>
+        <button type="button" class="hero-pause-btn" *ngIf="heroBanners.length > 1"
+                (click)="bannerPaused = !bannerPaused" [attr.aria-pressed]="bannerPaused">
+            {{ bannerPaused ? 'Reanudar ofertas' : 'Pausar ofertas' }}
+        </button>
     </div>
 
-    <div class="category-circles-wrapper mb-5">
+    <div class="category-circles-wrapper" *ngIf="categorias.length > 0">
         <div class="category-circles-scroll">
-            <div class="category-circle-item" 
+            <button type="button" class="category-circle-item"
                  *ngFor="let cat of categorias" 
                  (click)="filtrarPorCategoria(cat)" 
-                 [class.active]="categoriaActual === cat">
-                <div class="circle-img-container">
-                    <img [src]="getCategoryImageUrl(cat)" [alt]="cat" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=Cat'">
-                </div>
+                 [class.active]="categoriaActual === cat" [attr.aria-pressed]="categoriaActual === cat">
+                <span class="circle-img-container">
+                    <img [src]="getCategoryImageUrl(cat)" alt="" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=Cat'">
+                </span>
                 <span class="circle-label">{{ cat }}</span>
-            </div>
+            </button>
             
-            <div class="category-circle-item" 
+            <button type="button" class="category-circle-item"
                  (click)="filtrarPorCategoria('Todas')" 
-                 [class.active]="categoriaActual === 'Todas'">
-                <div class="circle-img-container all-categories">
+                 [class.active]="categoriaActual === 'Todas'" [attr.aria-pressed]="categoriaActual === 'Todas'">
+                <span class="circle-img-container all-categories">
                     <i class="pi pi-th-large"></i>
-                </div>
+                </span>
                 <span class="circle-label">Ver todo</span>
-            </div>
+            </button>
         </div>
-    </div>
-
-    <div class="page-intro">
-        <h1 class="page-title" *ngIf="categoriaActual !== 'Todas'">{{ categoriaActual }} en NovaTech</h1>
-        <h1 class="page-title" *ngIf="categoriaActual === 'Todas'">Cat&aacute;logo de Productos</h1>
-        <p class="page-subtitle">Explora lo mejor en tecnolog&iacute;a, filtra por categor&iacute;a y agrega al carrito en un clic.</p>
     </div>
 
     <article class="app-surface-card recent-card mb-4" *ngIf="mostrarVistosRecientes">
@@ -64,13 +72,13 @@
         <div class="card-body">
             <div class="recent-row">
                 <article class="recent-item" *ngFor="let item of vistosRecientes">
-                    <div class="recent-image" [routerLink]="['/producto', item.id]">
+                    <a class="recent-image" [routerLink]="['/producto', item.id]">
                         <img [src]="item.imagen" [alt]="item.nombre" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/110x110?text=Sin+Imagen'">
-                    </div>
+                    </a>
 
                     <div class="recent-copy">
                         <small>{{ item.categoria || 'Categoria' }}</small>
-                        <strong [routerLink]="['/producto', item.id]">{{ item.nombre }}</strong>
+                        <strong><a [routerLink]="['/producto', item.id]">{{ item.nombre }}</a></strong>
                         <span>S/ {{ item.precio | number:'1.2-2' }}</span>
                     </div>
                 </article>
@@ -78,12 +86,13 @@
         </div>
     </article>
 
-    <div class="grid">
-        <aside class="col-12 lg:col-3">
-            <article class="app-surface-card filters-card">
-                <div class="card-head">
-                    <h3 class="card-title">Filtros</h3>
-                </div>
+    <div class="catalog-layout">
+        <aside class="catalog-filters" aria-label="Filtrar productos">
+            <details class="app-surface-card filters-card" open>
+                <summary class="card-head">
+                    <h2 class="card-title"><i class="pi pi-filter" aria-hidden="true"></i> Filtros</h2>
+                    <span class="filter-hint">Mostrar / ocultar <i class="pi pi-angle-down" aria-hidden="true"></i></span>
+                </summary>
 
                 <div class="card-body">
                     <span class="block section-label">Categor&iacute;as</span>
@@ -91,7 +100,7 @@
                     <button
                         type="button"
                         class="filter-item"
-                        [class.active]="categoriaActual === 'Todas'"
+                        [class.active]="categoriaActual === 'Todas'" [attr.aria-pressed]="categoriaActual === 'Todas'"
                         (click)="filtrarPorCategoria('Todas')"
                     >
                         <span>Todas</span>
@@ -101,7 +110,7 @@
                         <button
                             type="button"
                             class="filter-item"
-                            [class.active]="categoriaActual === cat"
+                            [class.active]="categoriaActual === cat" [attr.aria-pressed]="categoriaActual === cat"
                             [class.has-subcats]="categoriaActual === cat && subcategoriasActuales.length > 0"
                             (click)="filtrarPorCategoria(cat)"
                         >
@@ -113,7 +122,7 @@
                             <button
                                 type="button"
                                 class="filter-item filter-item-sub"
-                                [class.active]="subcategoriaActual === ''"
+                                [class.active]="subcategoriaActual === ''" [attr.aria-pressed]="subcategoriaActual === ''"
                                 (click)="filtrarPorSubcategoria('')"
                             >
                                 <span>Todas las {{ cat | lowercase }}</span>
@@ -124,7 +133,7 @@
                                 type="button"
                                 class="filter-item filter-item-sub"
                                 *ngFor="let sub of subcategoriasActuales"
-                                [class.active]="subcategoriaActual === sub.nombre"
+                                [class.active]="subcategoriaActual === sub.nombre" [attr.aria-pressed]="subcategoriaActual === sub.nombre"
                                 (click)="filtrarPorSubcategoria(sub.nombre)"
                             >
                                 <span>{{ sub.nombre }}</span>
@@ -138,7 +147,7 @@
                     <button
                         type="button"
                         class="filter-item"
-                        [class.active]="marcaActual === 'Todas'"
+                        [class.active]="marcaActual === 'Todas'" [attr.aria-pressed]="marcaActual === 'Todas'"
                         (click)="filtrarPorMarca('Todas')"
                     >
                         <span>Todas</span>
@@ -149,63 +158,66 @@
                         type="button"
                         class="filter-item"
                         *ngFor="let marca of marcas"
-                        [class.active]="marcaActual === marca"
+                        [class.active]="marcaActual === marca" [attr.aria-pressed]="marcaActual === marca"
                         (click)="filtrarPorMarca(marca)"
                     >
                         <span>{{ marca }}</span>
                         <i class="pi pi-angle-right"></i>
                     </button>
 
-                    <span class="block section-label mt-3">Entrega</span>
+                    <span class="block section-label mt-3">Disponibilidad</span>
 
-                    <button type="button" class="toggle-chip" [class.active]="soloDisponibles" (click)="toggleSoloDisponibles()">
+                    <button type="button" class="toggle-chip" [class.active]="soloDisponibles" [attr.aria-pressed]="soloDisponibles" (click)="toggleSoloDisponibles()">
                         <i class="pi pi-check-square"></i>
                         Solo disponibles
                     </button>
 
-                    <button type="button" class="toggle-chip" [class.active]="envioRapido" (click)="toggleEnvioRapido()">
+                    <button type="button" class="toggle-chip" [class.active]="envioRapido" [attr.aria-pressed]="envioRapido" (click)="toggleEnvioRapido()">
                         <i class="pi pi-send"></i>
-                        Envio rapido
+                        Envío rápido
                     </button>
 
                     <span class="block section-label mt-3">Rango de precio</span>
                     <div class="price-range-filter">
-                        <p-slider [(ngModel)]="precioRango" [range]="true" [min]="0" [max]="10000" [step]="50" (onSlideEnd)="aplicarPrecioRango()"></p-slider>
+                        <p-slider [(ngModel)]="precioRango" [range]="true" [min]="0" [max]="10000" [step]="50" ariaLabel="Rango de precio en soles" (onSlideEnd)="aplicarPrecioRango()"></p-slider>
                         <div class="price-range-labels">
                             <span>S/ {{ precioRango[0] }}</span>
                             <span>S/ {{ precioRango[1] }}</span>
                         </div>
+                        <button type="button" class="toggle-chip" (click)="aplicarPrecioRango()">Aplicar rango de precio</button>
                     </div>
 
                     <div class="service-box">
-                        <div class="service-title">Beneficios de compra</div>
-                        <div class="service-item"><i class="pi pi-check-circle"></i> Garant&iacute;a extendida</div>
-                        <div class="service-item"><i class="pi pi-truck"></i> Env&iacute;o a todo el pa&iacute;s</div>
-                        <div class="service-item"><i class="pi pi-shield"></i> Pago seguro</div>
+                        <i class="pi pi-sliders-h" aria-hidden="true"></i>
+                        <div><strong>Elige con calma</strong><p>Guarda favoritos y compara productos antes de decidir.</p></div>
                     </div>
                 </div>
-            </article>
+            </details>
         </aside>
 
-        <div class="col-12 lg:col-9">
+        <div class="catalog-results">
             <article class="app-surface-card catalog-card">
                 <div class="card-head products-head">
                     <div>
-                        <h3 class="card-title">{{ categoriaActual === 'Todas' ? 'Todos los productos' : categoriaActual }}</h3>
-                        <span class="card-subtitle">{{ totalRegistros }} resultados</span>
+                        <h2 #catalogTitle class="card-title" tabindex="-1">{{ categoriaActual === 'Todas' ? 'Todos los productos' : categoriaActual }}</h2>
+                        <span class="card-subtitle" role="status">{{ loading ? 'Cargando productos…' : (loadError ? 'Catálogo no disponible' : totalRegistros + ' productos encontrados') }}</span>
                     </div>
 
                     <div class="head-tools">
-                        <div class="search-box search-autocomplete">
+                        <div class="search-box search-autocomplete" (focusout)="salirBusqueda($event)"
+                             (keydown.escape)="cerrarSugerencias(true); $event.stopPropagation()">
                             <input
+                                #catalogSearch
+                                id="catalog-search"
+                                aria-label="Buscar productos por nombre, categoría, marca o SKU"
+                                aria-controls="catalog-suggestions"
                                 pInputText
                                 type="text"
                                 [(ngModel)]="busquedaTexto"
                                 (ngModelChange)="onSearchChange($event)"
-                                placeholder="Buscar por nombre, categor&iacute;a, marca o SKU"
+                                placeholder="¿Qué estás buscando?"
                                 (keyup.enter)="aplicarBusqueda()"
                                 (focus)="computeSugerencias(busquedaTexto)"
-                                (blur)="ocultarSugerencias()"
                                 autocomplete="off"
                             />
                             <button
@@ -214,16 +226,17 @@
                                 icon="pi pi-search"
                                 class="p-button-sm p-button-text"
                                 (click)="aplicarBusqueda()"
+                                aria-label="Buscar productos"
                                 pTooltip="Buscar"
                                 tooltipPosition="top"
                             ></button>
 
-                            <div class="search-dropdown" *ngIf="mostrarSugerencias">
+                            <div id="catalog-suggestions" class="search-dropdown" *ngIf="mostrarSugerencias" role="group" aria-label="Sugerencias de búsqueda">
                                 <button
                                     type="button"
                                     class="suggestion-item"
                                     *ngFor="let s of sugerencias"
-                                    (mousedown)="seleccionarSugerencia(s)"
+                                    (click)="seleccionarSugerencia(s)"
                                 >
                                     <i class="pi pi-search suggestion-icon"></i>
                                     <span>{{ s }}</span>
@@ -240,11 +253,14 @@
                             pTooltip="Limpiar b&uacute;squeda"
                             tooltipPosition="top"
                             (click)="limpiarBusqueda()"
+                            aria-label="Limpiar búsqueda"
                         ></button>
 
-                        <div class="orden-wrap">
+                        <div class="orden-wrap" (focusout)="salirOrden($event)"
+                             (keydown.escape)="cerrarOrdenDropdown(true); $event.stopPropagation()">
                             <div class="orden-backdrop" *ngIf="mostrarOrdenDropdown" (click)="cerrarOrdenDropdown()"></div>
                             <button
+                                #orderButton
                                 pButton
                                 type="button"
                                 icon="pi pi-sort-alt"
@@ -252,12 +268,15 @@
                                 severity="secondary"
                                 [outlined]="true"
                                 (click)="alternarOrden()"
+                                [attr.aria-expanded]="mostrarOrdenDropdown"
+                                aria-controls="catalog-order-options"
                             ></button>
-                            <div class="orden-dropdown" *ngIf="mostrarOrdenDropdown">
-                                <div
+                            <div #orderOptions id="catalog-order-options" class="orden-dropdown" *ngIf="mostrarOrdenDropdown" role="group" aria-label="Ordenar productos">
+                                <button type="button"
                                     class="orden-option"
                                     *ngFor="let op of opcionesOrden"
                                     [class.selected]="ordenActual === op.value"
+                                    [attr.aria-pressed]="ordenActual === op.value"
                                     (click)="seleccionarOrden(op.value)"
                                 >
                                     <span class="orden-check">
@@ -265,7 +284,7 @@
                                     </span>
                                     <i [class]="op.icon + ' orden-icon'"></i>
                                     <span>{{ op.label }}</span>
-                                </div>
+                                </button>
                             </div>
                         </div>
 
@@ -295,8 +314,8 @@
                 </div>
 
                 <div class="card-body">
-                    <div class="grid" *ngIf="loading">
-                        <div class="col-12 sm:col-6 xl:col-4" *ngFor="let s of [1,2,3,4,5,6]">
+                    <div class="product-grid" *ngIf="loading" aria-hidden="true">
+                        <div *ngFor="let s of [1,2,3,4,5,6]">
                             <div class="skeleton-card">
                                 <p-skeleton width="100%" height="180px" borderRadius="0.85rem 0.85rem 0 0"></p-skeleton>
                                 <div class="skeleton-body">
@@ -309,15 +328,16 @@
                         </div>
                     </div>
 
-                    <div class="grid" *ngIf="!loading && visibleProducts.length > 0">
-                        <div class="col-12 sm:col-6 xl:col-4 product-entry" *ngFor="let product of visibleProducts; let i = index" [style.animation-delay]="(i * 0.055) + 's'">
+                    <div class="product-grid" *ngIf="!loading && visibleProducts.length > 0">
+                        <div class="product-entry" *ngFor="let product of visibleProducts">
 
                             <article class="producto-card"
                                      [class.has-offer]="getHayOferta(product)"
                                      [class.out-of-stock]="product.stock == 0 || product.stock === '0'">
 
                                 <!-- Image zone -->
-                                <div class="pc-img-zone" [routerLink]="['/producto', product.id]">
+                                <div class="pc-img-zone">
+                                    <a class="pc-image-link" [routerLink]="['/producto', product.id]" [attr.aria-label]="'Ver ' + product.nombre">
                                     <img [src]="product.imagen"
                                          [alt]="product.nombre"
                                          loading="lazy"
@@ -331,19 +351,22 @@
                                     <div class="discount-badge" *ngIf="descuentoAproximado(product) > 0">
                                         -{{ descuentoAproximado(product) }}%
                                     </div>
+                                    </a>
 
-                                    <!-- Quick action buttons (appear on hover) -->
+                                    <!-- Product actions stay visible for touch and keyboard use. -->
                                     <div class="pc-quick-actions">
                                         <button class="pc-fav-btn" type="button"
                                             [class.active]="esFavorito(product.id)"
+                                            [attr.aria-pressed]="esFavorito(product.id)"
                                             (click)="$event.stopPropagation(); toggleFavorito(product.id)"
-                                            [attr.aria-label]="esFavorito(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'">
+                                            [attr.aria-label]="(esFavorito(product.id) ? 'Quitar de favoritos: ' : 'Agregar a favoritos: ') + product.nombre">
                                             <i class="pi" [ngClass]="esFavorito(product.id) ? 'pi-heart-fill' : 'pi-heart'"></i>
                                         </button>
                                         <button class="pc-compare-btn" type="button"
                                             [class.active]="estaComparado(product.id)"
+                                            [attr.aria-pressed]="estaComparado(product.id)"
                                             (click)="$event.stopPropagation(); toggleComparar(product)"
-                                            [attr.aria-label]="estaComparado(product.id) ? 'Quitar del comparador' : 'Comparar producto'">
+                                            [attr.aria-label]="(estaComparado(product.id) ? 'Quitar del comparador: ' : 'Comparar: ') + product.nombre">
                                             <i class="pi pi-sliders-h"></i>
                                         </button>
                                     </div>
@@ -353,9 +376,9 @@
                                 <div class="pc-content">
                                     <div class="pc-brand">{{ product.marca || product.categoria }}</div>
 
-                                    <h4 class="pc-name" [routerLink]="['/producto', product.id]">
-                                        {{ product.nombre }}
-                                    </h4>
+                                    <h3 class="pc-name">
+                                        <a [routerLink]="['/producto', product.id]">{{ product.nombre }}</a>
+                                    </h3>
 
                                     <div class="pc-price">
                                         <span class="pc-price-old" *ngIf="descuentoAproximado(product) > 0">
@@ -366,10 +389,6 @@
                                         </span>
                                     </div>
 
-                                    <small class="pc-cuotas">
-                                        6x S/ {{ getCuotaReferencial(product) | number:'1.2-2' }} sin intereses
-                                    </small>
-
                                     <!-- Solo mostrar cuando stock es crítico -->
                                     <div class="pc-low-stock"
                                          *ngIf="+product.stock > 0 && +product.stock <= 5 && product.stock !== '0'">
@@ -377,16 +396,25 @@
                                         Solo {{ product.stock }} disponibles
                                     </div>
 
+                                    <button *ngIf="accessibility.preferences().reading || speech.enabled()"
+                                        type="button" class="pc-listen-btn"
+                                        [attr.aria-label]="'Escuchar producto: ' + product.nombre"
+                                        (click)="escucharProducto(product)">
+                                        <i class="pi pi-volume-up" aria-hidden="true"></i>
+                                        Escuchar producto
+                                    </button>
+
                                     <button class="pc-add-btn"
                                         type="button"
                                         [disabled]="product.stock == 0 || product.stock === '0'"
                                         [class.pc-add-btn--success]="isJustAdded(product.id)"
+                                        [attr.aria-label]="'Agregar ' + product.nombre + ' al carrito'"
                                         (click)="agregarAlCarrito(product)">
                                         <i class="pi"
                                            [ngClass]="isJustAdded(product.id) ? 'pi-check' : ((product.stock == 0 || product.stock === '0') ? 'pi-ban' : 'pi-shopping-cart')"
                                            aria-hidden="true">
                                         </i>
-                                        <span>{{ isJustAdded(product.id) ? '¡Agregado!' : ((product.stock == 0 || product.stock === '0') ? 'Sin stock' : 'Agregar') }}</span>
+                                        <span>{{ isJustAdded(product.id) ? '¡Agregado!' : ((product.stock == 0 || product.stock === '0') ? 'Sin stock' : 'Agregar al carrito') }}</span>
                                     </button>
                                 </div>
                             </article>
@@ -395,7 +423,7 @@
                     </div>
 
                     <p-paginator 
-                        *ngIf="totalRegistros > 0 && !loading"
+                        *ngIf="totalRegistros > 0 && !loading && !loadError"
                         (onPageChange)="onPageChange($event)" 
                         [first]="(currentPage - 1) * limit" 
                         [rows]="limit" 
@@ -404,8 +432,15 @@
                         styleClass="mt-4">
                     </p-paginator>
 
-                    <div class="table-empty-state" *ngIf="!loading && visibleProducts.length === 0">
-                        <i class="pi pi-search"></i>
+                    <div class="table-empty-state catalog-load-error" *ngIf="loadError && !loading" role="alert">
+                        <span class="empty-state-icon"><i class="pi pi-cloud" aria-hidden="true"></i></span>
+                        <h3>No pudimos cargar el catálogo</h3>
+                        <p>{{ loadError }}</p>
+                        <button pButton type="button" label="Volver a intentar" icon="pi pi-refresh" (click)="reintentarCarga()"></button>
+                    </div>
+
+                    <div class="table-empty-state" *ngIf="!loading && !loadError && visibleProducts.length === 0">
+                        <span class="empty-state-icon"><i class="pi pi-search" aria-hidden="true"></i></span>
                         <h3>No encontramos productos</h3>
                         <p>Prueba con otra categor&iacute;a o ajusta los filtros.</p>
                         <button pButton type="button" label="Mostrar todo" icon="pi pi-refresh" (click)="limpiarTodo()"></button>
@@ -414,8 +449,6 @@
             </article>
         </div>
     </div>
-</section>
-
 <p-dialog
     [(visible)]="comparadorVisible"
     [modal]="true"
@@ -445,7 +478,7 @@
     </div>
 
     <div class="compare-grid" *ngIf="comparados.length > 0">
-        <article class="compare-card" *ngFor="let product of comparados">
+        <article class="compare-card" *ngFor="let product of comparados; let i = index">
             <div class="compare-image">
                 <img [src]="product.imagen" [alt]="product.nombre" onerror="this.onerror=null; this.src='https://placehold.co/140x140?text=Sin+Imagen'">
             </div>
@@ -470,7 +503,7 @@
                 <small class="stock-best" *ngIf="isBestStock(product)">Mayor disponibilidad</small>
             </div>
 
-            <button pButton type="button" icon="pi pi-times" class="p-button-rounded p-button-text" (click)="toggleComparar(product)"></button>
+            <button #compareRemove pButton type="button" icon="pi pi-times" class="p-button-rounded p-button-text" [attr.aria-label]="'Quitar ' + product.nombre + ' del comparador'" (click)="quitarDelComparador(product, i)"></button>
         </article>
     </div>
 
@@ -480,13 +513,14 @@
                 <i class="pi pi-trash"></i>
                 <span>Limpiar</span>
             </button>
-            <button class="btn-modal-guardar" (click)="comparadorVisible = false">
+            <button #compareClose type="button" class="btn-modal-guardar" (click)="comparadorVisible = false">
                 <i class="pi pi-check"></i>
                 <span>Cerrar</span>
             </button>
         </div>
     </ng-template>
 </p-dialog>
+</section>
 
 
 

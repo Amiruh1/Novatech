@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, ElementRef, QueryList, ViewChild, ViewChildren, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Cart, CartItem } from '../services/cart';
 import { AuthService } from '../services/auth';
@@ -19,6 +19,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SalePaymentPayload } from '../services/sales';
 import { DireccionesService, Direccion } from '../services/direcciones.service';
 import { precioFinal } from '../core/models/product.model';
+import { StoreAlertsService } from '../core/services/store-alerts.service';
 
 interface MetodoPagoOption {
   label: string;
@@ -45,6 +46,8 @@ interface MetodoPagoOption {
   styleUrl: './carrito.scss'
 })
 export class Carrito implements OnInit {
+  @ViewChild('cartTitle') private cartTitle?: ElementRef<HTMLElement>;
+  @ViewChildren('cartItemLink') private cartItemLinks?: QueryList<ElementRef<HTMLAnchorElement>>;
   cart = inject(Cart);
   router = inject(Router);
   auth = inject(AuthService);
@@ -53,6 +56,8 @@ export class Carrito implements OnInit {
   messageService = inject(MessageService);
   direccionesService = inject(DireccionesService);
   private cd = inject(ChangeDetectorRef);
+  private alerts = inject(StoreAlertsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   items: CartItem[] = [];
   procesandoPago: boolean = false;
@@ -116,18 +121,31 @@ export class Carrito implements OnInit {
 
   getPrecioFinal = precioFinal;
 
+  trackCartItem(_index: number, item: CartItem): number {
+    return Number(item.producto.id);
+  }
+
   eliminar(productId: number) {
+    const index = this.items.findIndex(item => Number(item.producto.id) === Number(productId));
     this.cart.removeFromCart(productId);
     this.actualizarDatos();
+    this.cd.detectChanges();
+    const links = this.cartItemLinks?.toArray() || [];
+    (links[Math.min(Math.max(index, 0), links.length - 1)]?.nativeElement || this.cartTitle?.nativeElement)?.focus();
     this.messageService.add({severity:'info', summary:'Eliminado', detail:'Producto quitado del carrito'});
   }
 
   savedQty: Record<number, boolean> = {};
 
-  actualizarCantidad(productId: number, nuevaCantidad: number) {
+  actualizarCantidad(productId: number, nuevaCantidad: number, event?: Event) {
+    const trigger = event?.currentTarget as HTMLButtonElement | null;
     this.cart.updateQuantity(productId, nuevaCantidad);
     this.actualizarDatos();
     this.savedQty[productId] = true;
+    this.cd.detectChanges();
+    if (trigger?.disabled) {
+      trigger.parentElement?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+    }
     setTimeout(() => { this.savedQty[productId] = false; this.cd.detectChanges(); }, 600);
   }
 
@@ -191,10 +209,16 @@ export class Carrito implements OnInit {
     this.router.navigate(['/checkout']);
   }
 
-  vaciarCarrito() {
+  async vaciarCarrito() {
+    const trigger = document.activeElement as HTMLElement | null;
+    const confirmed = await this.alerts.confirmClearCart();
+    if (this.destroyRef.destroyed) return;
+    if (!confirmed) { if (trigger?.isConnected) trigger.focus(); return; }
     this.cart.clearCart();
     this.actualizarDatos();
-    this.messageService.add({ severity: 'info', summary: 'Carrito vacío', detail: 'Se eliminaron todos los productos.' });
+    this.cd.detectChanges();
+    this.cartTitle?.nativeElement.focus();
+    this.alerts.notify('success', 'Carrito vacío', 'Puedes seguir explorando el catálogo.');
   }
 
   pagar() {

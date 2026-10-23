@@ -1,10 +1,12 @@
-// NovaTech Service Worker — v1
+// NovaTech Service Worker — v2
 // Estrategia: Network First para API, Cache First para assets estáticos
 
-const CACHE_NAME    = 'novatech-v1';
+const CACHE_NAME    = 'novatech-v2';
 const STATIC_ASSETS = ['/', '/tienda', '/favicon.ico'];
+const LOCAL_DEVELOPMENT = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname);
 
 self.addEventListener('install', (event) => {
+  if (LOCAL_DEVELOPMENT) { self.skipWaiting(); return; }
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
@@ -14,13 +16,14 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+      Promise.all(keys.filter(k => k.startsWith('novatech-') && (LOCAL_DEVELOPMENT || k !== CACHE_NAME)).map(k => caches.delete(k)))
+    ).then(() => LOCAL_DEVELOPMENT ? self.registration.unregister() : undefined)
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
+  if (LOCAL_DEVELOPMENT) return;
   const url = new URL(event.request.url);
 
   // Siempre red para llamadas API

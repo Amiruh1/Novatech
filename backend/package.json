@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only index.ts",
+    "dev:local": "node scripts/dev-local.cjs",
     "build": "tsc -p tsconfig.json",
     "db:apply-schema": "node scripts/apply-schema.js sql/novatech_erp_full.sql",
     "db:validate-schema": "node scripts/validate-schema.js",

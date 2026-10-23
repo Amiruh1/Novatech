@@ -3,16 +3,19 @@
     [modal]="true"
     [dismissableMask]="!loading"
     [closable]="!loading"
+    [closeOnEscape]="!loading"
+    ariaLabelledBy="auth-modal-title"
     [draggable]="false"
     [resizable]="false"
     [style]="{ width: 'min(52rem, 97vw)' }"
     styleClass="auth-modal-shell"
     [transitionOptions]="'240ms cubic-bezier(0.16, 1, 0.3, 1)'"
     (onHide)="closeModal()"
+    (onShow)="focusCurrentView()"
 >
     <div class="auth-grid">
 
-        <section class="auth-brand">
+        <section class="auth-brand" aria-hidden="true">
             <div class="orb orb-1"></div>
             <div class="orb orb-2"></div>
 
@@ -91,12 +94,20 @@
 
         <section class="auth-form">
 
+            <h2 class="sr-only" id="auth-modal-title">{{ authView === 'register' ? 'Crear cuenta' : authView === 'login' ? 'Iniciar sesión' : 'Recuperar contraseña' }}</h2>
+            <button pButton type="button" class="p-button-text auth-close" [disabled]="loading" (click)="closeModal()">
+                <i class="pi pi-times" aria-hidden="true"></i><span>Cerrar</span>
+            </button>
+            <p class="auth-feedback" id="auth-feedback" role="alert" tabindex="-1" *ngIf="formError">{{ formError }}</p>
+
             <div class="view-switch">
                 <button type="button" class="switch-btn" [class.active]="authView === 'login'"
+                    [attr.aria-pressed]="authView === 'login'"
                     (click)="switchView('login')" [disabled]="loading">
                     Iniciar sesión
                 </button>
                 <button type="button" class="switch-btn" [class.active]="authView === 'register'"
+                    [attr.aria-pressed]="authView === 'register'"
                     (click)="switchView('register')" [disabled]="loading">
                     Crear cuenta
                 </button>
@@ -130,8 +141,9 @@
                             placeholder="••••••••"
                             class="w-full"
                         />
-                        <button type="button" class="eye-btn" (click)="toggleLoginPassword()" [disabled]="loading" tabindex="-1">
-                            <i [class]="showLoginPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                        <button type="button" class="eye-btn" (click)="toggleLoginPassword()" [disabled]="loading"
+                            aria-label="Mostrar contraseña" [attr.aria-pressed]="showLoginPassword" aria-controls="am-pwd">
+                            <i [class]="showLoginPassword ? 'pi pi-eye' : 'pi pi-eye-slash'" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -168,8 +180,8 @@
 
             <ng-container *ngIf="authView === 'register'">
                 <div class="field-wrap">
-                    <label>Nombre completo</label>
-                    <input pInputText [(ngModel)]="registerNombre" [disabled]="loading"
+                    <label for="am-register-name">Nombre completo</label>
+                    <input pInputText id="am-register-name" autocomplete="name" [(ngModel)]="registerNombre" [disabled]="loading"
                         placeholder="Ej. María López" maxlength="120" class="w-full"/>
                     <small class="field-req req-error"
                         *ngIf="registerNombre.length > 0 && registerNombre.length < 3">
@@ -183,16 +195,17 @@
                 </div>
 
                 <div class="field-wrap">
-                    <label>Correo electrónico</label>
-                    <input pInputText type="email" autocomplete="email"
+                    <label for="am-register-email">Correo electrónico</label>
+                    <input pInputText id="am-register-email" type="email" autocomplete="email"
                         [(ngModel)]="registerEmail" [disabled]="loading"
                         placeholder="maria@correo.com" maxlength="320" class="w-full"/>
                 </div>
 
                 <div class="two-col">
                     <div class="field-wrap">
-                        <label>Tipo Doc.</label>
+                        <label for="am-document-type">Tipo de documento</label>
                         <p-select
+                            inputId="am-document-type"
                             [options]="tiposDocumento"
                             [(ngModel)]="registerTipoDocumento"
                             [disabled]="loading"
@@ -201,21 +214,25 @@
                         ></p-select>
                     </div>
                     <div class="field-wrap">
-                        <label>N° Documento</label>
-                        <input pInputText [(ngModel)]="registerNumeroDocumento" [disabled]="loading"
+                        <label for="am-document-number">N° Documento</label>
+                        <input pInputText id="am-document-number" [attr.inputmode]="registerTipoDocumento === 'DNI' ? 'numeric' : 'text'" [(ngModel)]="registerNumeroDocumento" [disabled]="loading"
                             [placeholder]="docPlaceholder" [maxlength]="docMaxLength"
                             (input)="onDocumentoInput($event)" class="w-full"/>
                     </div>
                 </div>
 
                 <div class="field-wrap">
-                    <label>Contraseña</label>
-                    <p-password [(ngModel)]="registerPassword" [disabled]="loading"
-                        [feedback]="false" [toggleMask]="true"
-                        placeholder="Mínimo 8 caracteres"
-                        [maxLength]="64"
-                        inputStyleClass="w-full" styleClass="w-full">
-                    </p-password>
+                    <label for="am-register-password">Contraseña</label>
+                    <div class="pwd-wrap">
+                        <input pInputText id="am-register-password" [type]="showRegisterPassword ? 'text' : 'password'"
+                            autocomplete="new-password" [(ngModel)]="registerPassword" [disabled]="loading"
+                            placeholder="Mínimo 8 caracteres" maxlength="64" class="w-full" />
+                        <button type="button" class="eye-btn" [disabled]="loading"
+                            (click)="showRegisterPassword = !showRegisterPassword" aria-label="Mostrar contraseña"
+                            [attr.aria-pressed]="showRegisterPassword" aria-controls="am-register-password">
+                            <i class="pi" [class.pi-eye]="showRegisterPassword" [class.pi-eye-slash]="!showRegisterPassword" aria-hidden="true"></i>
+                        </button>
+                    </div>
                     <small class="field-req req-error"
                         *ngIf="registerPassword.length > 0 && registerPassword.length < 8">
                         Faltan {{ 8 - registerPassword.length }} caracter{{ 8 - registerPassword.length === 1 ? '' : 'es' }} para el mínimo
@@ -228,13 +245,17 @@
                 </div>
 
                 <div class="field-wrap">
-                    <label>Confirmar contraseña</label>
-                    <p-password [(ngModel)]="registerConfirmPassword" [disabled]="loading"
-                        [feedback]="false" [toggleMask]="true"
-                        placeholder="Repite tu contraseña"
-                        [maxLength]="64"
-                        inputStyleClass="w-full" styleClass="w-full">
-                    </p-password>
+                    <label for="am-register-confirm">Confirmar contraseña</label>
+                    <div class="pwd-wrap">
+                        <input pInputText id="am-register-confirm" [type]="showRegisterConfirm ? 'text' : 'password'"
+                            autocomplete="new-password" [(ngModel)]="registerConfirmPassword" [disabled]="loading"
+                            placeholder="Repite tu contraseña" maxlength="64" class="w-full" />
+                        <button type="button" class="eye-btn" [disabled]="loading"
+                            (click)="showRegisterConfirm = !showRegisterConfirm" aria-label="Mostrar confirmación de contraseña"
+                            [attr.aria-pressed]="showRegisterConfirm" aria-controls="am-register-confirm">
+                            <i class="pi" [class.pi-eye]="showRegisterConfirm" [class.pi-eye-slash]="!showRegisterConfirm" aria-hidden="true"></i>
+                        </button>
+                    </div>
                     <small class="field-req req-error"
                         *ngIf="registerConfirmPassword.length > 0 && registerConfirmPassword !== registerPassword">
                         Las contraseñas no coinciden
@@ -267,8 +288,8 @@
                 </div>
 
                 <div class="field-wrap">
-                    <label>Correo electrónico</label>
-                    <input pInputText type="email" [(ngModel)]="forgotEmail" [disabled]="loading"
+                    <label for="am-forgot-email">Correo electrónico</label>
+                    <input pInputText id="am-forgot-email" type="email" autocomplete="email" [(ngModel)]="forgotEmail" [disabled]="loading"
                         placeholder="tu@correo.com" class="w-full"/>
                 </div>
 
@@ -296,27 +317,29 @@
                 </div>
 
                 <div class="field-wrap">
-                    <label>Código de recuperación</label>
-                    <input pInputText type="text" [(ngModel)]="forgotCode" [disabled]="loading"
+                    <label for="am-forgot-code">Código de recuperación</label>
+                    <input pInputText id="am-forgot-code" type="text" autocomplete="one-time-code" [(ngModel)]="forgotCode" [disabled]="loading"
                         placeholder="Ej. A3K7MX" maxlength="6"
                         style="text-transform:uppercase;letter-spacing:0.18em;font-weight:700;font-size:1.1rem;text-align:center;"
                         class="w-full"/>
                 </div>
 
                 <div class="field-wrap">
-                    <label>Nueva contraseña</label>
+                    <label for="am-reset-password">Nueva contraseña</label>
                     <div class="pwd-wrap">
                         <input
                             pInputText
                             [type]="showResetPassword ? 'text' : 'password'"
+                            id="am-reset-password" autocomplete="new-password"
                             [(ngModel)]="resetNueva"
                             [disabled]="loading"
                             placeholder="Mínimo 8 caracteres"
                             maxlength="64"
                             class="w-full"
                         />
-                        <button type="button" class="eye-btn" (click)="toggleResetPassword()" [disabled]="loading" tabindex="-1">
-                            <i [class]="showResetPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                        <button type="button" class="eye-btn" (click)="toggleResetPassword()" [disabled]="loading"
+                            aria-label="Mostrar nueva contraseña" [attr.aria-pressed]="showResetPassword" aria-controls="am-reset-password">
+                            <i [class]="showResetPassword ? 'pi pi-eye' : 'pi pi-eye-slash'" aria-hidden="true"></i>
                         </button>
                     </div>
                     <small class="field-req req-error"
@@ -326,19 +349,21 @@
                 </div>
 
                 <div class="field-wrap">
-                    <label>Confirmar contraseña</label>
+                    <label for="am-reset-confirm">Confirmar contraseña</label>
                     <div class="pwd-wrap">
                         <input
                             pInputText
                             [type]="showResetConfirm ? 'text' : 'password'"
+                            id="am-reset-confirm" autocomplete="new-password"
                             [(ngModel)]="resetConfirm"
                             [disabled]="loading"
                             placeholder="Repite tu contraseña"
                             maxlength="64"
                             class="w-full"
                         />
-                        <button type="button" class="eye-btn" (click)="toggleResetConfirm()" [disabled]="loading" tabindex="-1">
-                            <i [class]="showResetConfirm ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                        <button type="button" class="eye-btn" (click)="toggleResetConfirm()" [disabled]="loading"
+                            aria-label="Mostrar confirmación de contraseña" [attr.aria-pressed]="showResetConfirm" aria-controls="am-reset-confirm">
+                            <i [class]="showResetConfirm ? 'pi pi-eye' : 'pi pi-eye-slash'" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>

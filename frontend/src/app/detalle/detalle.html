@@ -41,18 +41,18 @@
         <div class="detalle-gallery-col">
 
             <!-- Main image -->
-            <div class="gallery-main" (click)="abrirZoomImagen()" role="button" tabindex="0"
-                 (keydown.enter)="abrirZoomImagen()" aria-label="Ampliar imagen del producto">
+            <button type="button" class="gallery-main" (click)="abrirZoomImagen()"
+                    aria-label="Ampliar imagen del producto">
 
                 <!-- Agotado overlay -->
-                <div class="gallery-agotado" *ngIf="product.stock === 0 || product.stock === '0'" aria-label="Producto agotado">
+                <span class="gallery-agotado" *ngIf="product.stock === 0 || product.stock === '0'" aria-label="Producto agotado">
                     <span>AGOTADO</span>
-                </div>
+                </span>
 
                 <!-- Discount badge -->
-                <div class="gallery-discount" *ngIf="hayOferta" aria-label="{{ descuentoAproximado }}% de descuento">
+                <span class="gallery-discount" *ngIf="hayOferta" aria-label="{{ descuentoAproximado }}% de descuento">
                     -{{ descuentoAproximado }}%
-                </div>
+                </span>
 
                 <img [src]="product.imagen"
                      [alt]="product.nombre + ' — imagen del producto'"
@@ -60,10 +60,10 @@
                      onerror="this.onerror=null; this.src='https://placehold.co/480x480?text=Sin+Imagen'"
                      [class.img-agotado]="product.stock === 0 || product.stock === '0'">
 
-                <button class="gallery-zoom-btn" type="button" aria-label="Ampliar imagen">
+                <span class="gallery-zoom-btn" aria-hidden="true">
                     <i class="pi pi-search-plus" aria-hidden="true"></i>
-                </button>
-            </div>
+                </span>
+            </button>
 
             <!-- Social actions under image (desktop) -->
             <div class="gallery-actions">
@@ -96,6 +96,17 @@
 
             <!-- Product name -->
             <h1 class="detalle-nombre">{{ product.nombre }}</h1>
+
+            <div class="product-speech-actions" role="group" aria-label="Lectura del producto">
+                <button type="button" class="product-speech-btn" (click)="escucharProducto()">
+                    <i class="pi pi-volume-up" aria-hidden="true"></i>
+                    Escuchar producto
+                </button>
+                <button type="button" class="product-speech-btn" *ngIf="speech.enabled()" (click)="speech.stop()">
+                    <i class="pi pi-stop" aria-hidden="true"></i>
+                    Detener voz
+                </button>
+            </div>
 
             <!-- Rating (if has reviews) -->
             <div class="detalle-rating" *ngIf="totalResenas > 0">
@@ -212,17 +223,17 @@
         </div>
         <div class="sugeridos-grid">
             <article class="sug-card" *ngFor="let item of sugeridos">
-                <div class="sug-img" [routerLink]="['/producto', item.id]" role="link" tabindex="0"
+                <a class="sug-img" [routerLink]="['/producto', item.id]"
                      [attr.aria-label]="'Ver detalle de ' + item.nombre">
                     <img [src]="item.imagen" [alt]="item.nombre" loading="lazy"
                          onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=NT'">
                     <div class="sug-discount" *ngIf="getPrecioFinal(item) < item.precio">
                         -{{ (((item.precio - getPrecioFinal(item)) / item.precio) * 100) | number:'1.0-0' }}%
                     </div>
-                </div>
+                </a>
                 <div class="sug-body">
                     <div class="sug-brand">{{ item.marca || item.categoria }}</div>
-                    <h3 class="sug-name" [routerLink]="['/producto', item.id]">{{ item.nombre }}</h3>
+                    <h3 class="sug-name"><a [routerLink]="['/producto', item.id]">{{ item.nombre }}</a></h3>
                     <div class="sug-price">S/ {{ getPrecioFinal(item) | number:'1.2-2' }}</div>
                     <button class="sug-btn" type="button"
                         [disabled]="item.stock == 0"
@@ -348,14 +359,14 @@
         <div class="modal-sugeridos" *ngIf="sugeridos.length > 0">
             <p class="modal-sugeridos-label">¿Y si le sumas esto?</p>
             <div class="modal-sugeridos-row">
-                <div class="modal-sug-item" *ngFor="let item of sugeridos.slice(0, 3)"
+                <a class="modal-sug-item" *ngFor="let item of sugeridos.slice(0, 3)"
                      [routerLink]="['/producto', item.id]" (click)="displayModal = false"
-                     role="link" tabindex="0" [attr.aria-label]="'Ver ' + item.nombre">
+                     [attr.aria-label]="'Ver ' + item.nombre">
                     <img [src]="item.imagen" [alt]="item.nombre" loading="lazy"
                          onerror="this.onerror=null; this.src='https://placehold.co/80x80?text=NT'">
                     <div class="modal-sug-name">{{ item.nombre }}</div>
                     <div class="modal-sug-price">S/ {{ getPrecioFinal(item) | number:'1.2-2' }}</div>
-                </div>
+                </a>
             </div>
         </div>
     </div>

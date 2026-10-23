@@ -10,7 +10,7 @@ import { Cart, CartItem } from '../services/cart';
 import { AuthService } from '../services/auth';
 import { SalesService, SalePaymentPayload } from '../services/sales';
 import { DireccionesService, Direccion } from '../services/direcciones.service';
-import { MessageService } from 'primeng/api';
+import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { AuthModalService } from '../services/auth-modal';
 import { precioFinal } from '../core/models/product.model';
 
@@ -78,6 +78,7 @@ export class Checkout implements OnInit {
   step: 1 | 2 | 3 | 4 = 1;
   items: CartItem[]   = [];
   procesando          = false;
+  validationMessage = '';
 
   // Addresses
   misDirecciones:       Direccion[]   = [];
@@ -166,8 +167,9 @@ export class Checkout implements OnInit {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
   siguiente() {
+    this.validationMessage = '';
     if (this.step === 2 && !this.direccionSeleccionada) {
-      this.messageService.add({ severity: 'warn', summary: 'Dirección requerida', detail: 'Selecciona o agrega una dirección de envío.' });
+      this.showFeedback({ severity: 'warn', summary: 'Dirección requerida', detail: 'Selecciona o agrega una dirección de envío.' });
       return;
     }
     if (this.step < 3) {
@@ -180,6 +182,7 @@ export class Checkout implements OnInit {
   }
 
   anterior() {
+    this.validationMessage = '';
     if (this.step > 1) {
       this.step = (this.step - 1) as any;
       this.cd.detectChanges();
@@ -190,11 +193,9 @@ export class Checkout implements OnInit {
   }
 
   private focusStepHeading() {
-    // Mueve el foco al heading del nuevo step para screen readers — WCAG 2.4.3
-    setTimeout(() => {
-      const heading = document.getElementById('checkout-step-heading') as HTMLElement | null;
-      heading?.focus();
-    }, 60);
+    // detectChanges() ya creó el nuevo paso: enfocar ahora evita interrumpir
+    // una interacción de teclado posterior con un temporizador pendiente.
+    document.getElementById('checkout-step-heading')?.focus();
   }
 
   // ── Addresses ─────────────────────────────────────────────────────────────
@@ -226,14 +227,16 @@ export class Checkout implements OnInit {
   }
 
   abrirDirDialog() {
+    this.validationMessage = '';
     this.nuevaDireccion = { alias: '', destinatario: '', direccion_detallada: '', distrito: '', provincia: '', predeterminada: false };
     this.showDirDialog = true;
   }
 
   guardarDireccion() {
+    this.validationMessage = '';
     const { alias, destinatario, direccion_detallada, distrito, provincia } = this.nuevaDireccion;
     if (!alias?.trim() || !destinatario?.trim() || !direccion_detallada?.trim() || !distrito?.trim() || !provincia?.trim()) {
-      this.messageService.add({ severity: 'warn', summary: 'Campos requeridos', detail: 'Completa todos los campos obligatorios.' });
+      this.showFeedback({ severity: 'warn', summary: 'Campos requeridos', detail: 'Completa todos los campos obligatorios.' });
       return;
     }
     this.guardandoDir = true;
@@ -241,12 +244,12 @@ export class Checkout implements OnInit {
       next: () => {
         this.showDirDialog = false;
         this.guardandoDir  = false;
-        this.messageService.add({ severity: 'success', summary: 'Dirección guardada', detail: `"${alias}" fue añadida.` });
+        this.showFeedback({ severity: 'success', summary: 'Dirección guardada', detail: `"${alias}" fue añadida.` });
         this.cargarDirecciones();
       },
       error: () => {
         this.guardandoDir = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar la dirección.' });
+        this.showFeedback({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar la dirección.' });
       }
     });
   }
@@ -277,17 +280,17 @@ export class Checkout implements OnInit {
 
   private validarPago(): boolean {
     if (!this.direccionSeleccionada) {
-      this.messageService.add({ severity: 'warn', summary: 'Dirección requerida', detail: 'Selecciona una dirección de envío.' });
+      this.showFeedback({ severity: 'warn', summary: 'Dirección requerida', detail: 'Selecciona una dirección de envío.' });
       return false;
     }
 
     if (this.tipoComprobante === 'factura') {
       if (!this.documentoFiscal || this.documentoFiscal.length !== 11) {
-        this.messageService.add({ severity: 'warn', summary: 'RUC inválido', detail: 'Ingresa un RUC de 11 dígitos.' });
+        this.showFeedback({ severity: 'warn', summary: 'RUC inválido', detail: 'Ingresa un RUC de 11 dígitos.' });
         return false;
       }
       if (!this.razonSocial.trim()) {
-        this.messageService.add({ severity: 'warn', summary: 'Razón social requerida', detail: 'Ingresa la razón social.' });
+        this.showFeedback({ severity: 'warn', summary: 'Razón social requerida', detail: 'Ingresa la razón social.' });
         return false;
       }
     }
@@ -295,25 +298,25 @@ export class Checkout implements OnInit {
     if (this.metodoPagoSeleccionado === 'tarjeta') {
       const digits = this.numeroTarjeta.replace(/\s/g, '');
       if (digits.length < 13 || !this.vencimientoTarjeta || this.cvvTarjeta.length < 3 || !this.nombreTitular.trim()) {
-        this.messageService.add({ severity: 'warn', summary: 'Datos de tarjeta incompletos', detail: 'Completa todos los campos de la tarjeta.' });
+        this.showFeedback({ severity: 'warn', summary: 'Datos de tarjeta incompletos', detail: 'Completa todos los campos de la tarjeta.' });
         return false;
       }
     }
 
     if (this.metodoPagoSeleccionado === 'billetera') {
       if (!this.telefonoBilletera || !this.telefonoBilletera.startsWith('9') || this.telefonoBilletera.length < 9) {
-        this.messageService.add({ severity: 'warn', summary: 'Teléfono inválido', detail: 'Ingresa un número Yape/Plin válido (9 dígitos, comienza con 9).' });
+        this.showFeedback({ severity: 'warn', summary: 'Teléfono inválido', detail: 'Ingresa un número Yape/Plin válido (9 dígitos, comienza con 9).' });
         return false;
       }
       if (this.codigoVerificacion.length < 6) {
-        this.messageService.add({ severity: 'warn', summary: 'Código inválido', detail: 'El código de operación debe tener al menos 6 dígitos.' });
+        this.showFeedback({ severity: 'warn', summary: 'Código inválido', detail: 'El código de operación debe tener al menos 6 dígitos.' });
         return false;
       }
     }
 
     if (this.metodoPagoSeleccionado === 'transferencia') {
       if (!this.bancoTransferencia.trim() || this.nroOperacionTransferencia.trim().length < 4) {
-        this.messageService.add({ severity: 'warn', summary: 'Datos incompletos', detail: 'Ingresa el banco y número de operación.' });
+        this.showFeedback({ severity: 'warn', summary: 'Datos incompletos', detail: 'Ingresa el banco y número de operación.' });
         return false;
       }
     }
@@ -323,6 +326,7 @@ export class Checkout implements OnInit {
 
   confirmarPago() {
     if (this.procesando) return;
+    this.validationMessage = '';
     const usuario = this.auth.currentUserValue;
     if (!usuario) { this.router.navigate(['/carrito']); return; }
     if (!this.validarPago()) return;
@@ -355,9 +359,10 @@ export class Checkout implements OnInit {
           this.cart.clearCart();
           this.step = 4;
           this.cd.detectChanges();
+          this.focusStepHeading();
         },
         error: () => {
-          this.messageService.add({ severity: 'error', summary: 'Error al procesar', detail: 'Intenta nuevamente.' });
+          this.showFeedback({ severity: 'error', summary: 'Error al procesar', detail: 'Intenta nuevamente.' });
         }
       });
   }
@@ -371,6 +376,18 @@ export class Checkout implements OnInit {
       return `Yape/Plin Nro: ${this.codigoVerificacion} | Tel: ${this.telefonoBilletera}`;
     }
     return `Transferencia ${this.bancoTransferencia} Nro: ${this.nroOperacionTransferencia}`;
+  }
+
+  private showFeedback(message: ToastMessageOptions) {
+    this.messageService.add(message);
+    this.validationMessage = message.severity === 'warn' || message.severity === 'error'
+      ? `${message.summary ?? ''}. ${message.detail ?? ''}`
+      : '';
+    this.cd.detectChanges();
+    if (this.validationMessage) {
+      const id = this.showDirDialog ? 'checkout-address-feedback' : 'checkout-feedback';
+      document.getElementById(id)?.focus();
+    }
   }
 
   irAMisCompras() { this.router.navigate(['/miscompras']); }

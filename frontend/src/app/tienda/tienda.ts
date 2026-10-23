@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, OnDestroy, ElementRef, ViewChild, ViewChildren, QueryList, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -6,11 +7,13 @@ import { ProductsService, SubcategoryItem } from '../services/products';
 import { Cart } from '../services/cart';
 import { AuthService } from '../services/auth';
 import { PreferencesService } from '../services/preferences';
-import { MessageService } from 'primeng/api';
-import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, finalize, timeout } from 'rxjs';
+import { StoreAlertsService } from '../core/services/store-alerts.service';
 import { ProductModel, precioFinal, porcentajeDescuento, cuotaReferencial, tieneOferta } from '../core/models/product.model';
 import { BannersService, BannerModel } from '../services/banners';
 import { CategoriasService, CategoriaModel } from '../services/categorias';
+import { AccessibilityService } from '../core/services/accessibility.service';
+import { SpeechService } from '../core/services/speech.service';
 
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
@@ -41,6 +44,12 @@ import { SliderModule } from 'primeng/slider';
   styleUrl: './tienda.scss'
 })
 export class Tienda implements OnInit, OnDestroy {
+  @ViewChild('catalogSearch') private catalogSearch?: ElementRef<HTMLInputElement>;
+  @ViewChild('catalogTitle') private catalogTitle?: ElementRef<HTMLElement>;
+  @ViewChild('orderButton') private orderButton?: ElementRef<HTMLButtonElement>;
+  @ViewChild('orderOptions') private orderOptions?: ElementRef<HTMLElement>;
+  @ViewChild('compareClose') private compareClose?: ElementRef<HTMLButtonElement>;
+  @ViewChildren('compareRemove') private compareRemoveButtons?: QueryList<ElementRef<HTMLButtonElement>>;
   allProducts: any[] = [];
   visibleProducts: any[] = [];
   categorias: string[] = [];
@@ -79,6 +88,10 @@ export class Tienda implements OnInit, OnDestroy {
   limit: number = 12;
   totalRegistros: number = 0;
   loading: boolean = true;
+  loadError = '';
+  private catalogRequest?: Subscription;
+  private searchRequest?: Subscription;
+  private readonly destroyRef = inject(DestroyRef);
 
   precioRango: number[] = [0, 10000];
   precioMin: number = 0;
@@ -92,6 +105,11 @@ export class Tienda implements OnInit, OnDestroy {
   heroBanners: BannerModel[] = [];
   activeBannerIndex: number = 0;
   private bannerInterval: any;
+  bannerPaused = false;
+  bannerInteracting = false;
+  bannerFocused = false;
+  readonly accessibility = inject(AccessibilityService);
+  readonly speech = inject(SpeechService);
 
   categoriasData: CategoriaModel[] = [];
 
@@ -101,7 +119,7 @@ export class Tienda implements OnInit, OnDestroy {
   private preferencesService = inject(PreferencesService);
   private cd = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
-  private messageService = inject(MessageService);
+  private alerts = inject(StoreAlertsService);
   private bannersService = inject(BannersService);
   private categoriasSrv = inject(CategoriasService);
   private categoriaQuery: string = 'Todas';
@@ -115,17 +133,22 @@ export class Tienda implements OnInit, OnDestroy {
   ngOnInit() {
     this.searchSubject.pipe(
       debounceTime(400),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(searchTerm => {
-      this.aplicarBusqueda();
+      this.aplicarBusqueda(false);
     });
 
-    this.route.queryParamMap.subscribe(params => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const categoria = (params.get('categoria') || 'Todas').trim();
       this.categoriaQuery = categoria || 'Todas';
 
       if (this.allProducts.length) {
-        this.aplicarCategoriaDesdeQuery();
+        this.filtrarPorCategoria(this.categoriaQuery);
+      } else {
+        this.categoriaActual = this.categoriaQuery;
+        this.subcategoriaActual = '';
+        this.subcategoriasActuales = [];
       }
     });
 
@@ -187,6 +210,8 @@ export class Tienda implements OnInit, OnDestroy {
       || this.marcaActual !== 'Todas'
       || this.busquedaAplicada.length > 0
       || this.ordenActual !== 'relevancia'
+      || this.subcategoriaActual.length > 0
+      || this.precioMin > 0 || this.precioMax < 10000
       || this.soloDisponibles
       || this.envioRapido;
   }
@@ -198,7 +223,7 @@ export class Tienda implements OnInit, OnDestroy {
       case 'precio_asc':
         return 'Precio menor a mayor';
       default:
-        return 'Mas relevantes';
+        return 'Más relevantes';
     }
   }
 
@@ -211,14 +236,15 @@ export class Tienda implements OnInit, OnDestroy {
   }
 
   cargarBanners() {
-    this.bannersService.getBanners(true).subscribe({
+    this.bannersService.getBanners(true).pipe(timeout(15000), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         if (data && data.length > 0) {
           this.heroBanners = data;
           this.iniciarCarrusel();
           this.cd.detectChanges();
         }
-      }
+      },
+      error: () => { this.heroBanners = []; this.cd.markForCheck(); }
     });
   }
 
@@ -227,6 +253,9 @@ export class Tienda implements OnInit, OnDestroy {
     if (this.heroBanners.length <= 1) return;
 
     this.bannerInterval = setInterval(() => {
+      const preferences = this.accessibility.preferences();
+      if (this.bannerPaused || this.bannerInteracting || this.bannerFocused || preferences.reading || preferences.navigation
+          || this.accessibility.panelOpen() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       this.siguienteBanner();
     }, 10000);
   }
@@ -234,6 +263,10 @@ export class Tienda implements OnInit, OnDestroy {
   siguienteBanner() {
     this.activeBannerIndex = (this.activeBannerIndex + 1) % this.heroBanners.length;
     this.cd.detectChanges();
+  }
+
+  salirBanner(event: FocusEvent) {
+    this.bannerFocused = (event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null);
   }
 
   siguienteBannerManual() {
@@ -267,20 +300,29 @@ export class Tienda implements OnInit, OnDestroy {
   }
 
   cargarProductos() {
-    this.productsService.getProducts().subscribe({
+    this.catalogRequest?.unsubscribe();
+    this.searchRequest?.unsubscribe();
+    this.loading = true;
+    this.loadError = '';
+    this.catalogRequest = this.productsService.getProducts().pipe(
+      timeout(15000), takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (data) => {
         this.allProducts = data;
 
-        this.categoriasSrv.getCategorias().subscribe(cats => {
+        this.categorias = [...new Set(data.map(p => p.categoria).filter((value): value is string => !!value))];
+        this.categoriasSrv.getCategorias().pipe(timeout(15000), takeUntilDestroyed(this.destroyRef)).subscribe({ next: cats => {
             this.categoriasData = cats.filter(c => c.activo == 1 || c.activo == true);
             this.categorias = this.categoriasData.map(c => c.nombre);
             this.cd.detectChanges();
-        });
+        }, error: () => {} });
 
-        this.productsService.getSubcategories().subscribe(subs => {
+        this.productsService.getSubcategories().pipe(timeout(15000), takeUntilDestroyed(this.destroyRef)).subscribe({ next: subs => {
             this.todasSubcategorias = subs;
+            this.subcategoriasActuales = this.categoriaActual === 'Todas'
+              ? [] : subs.filter(s => s.categoria_nombre === this.categoriaActual);
             this.cd.detectChanges();
-        });
+        }, error: () => {} });
 
         const marcasSet = new Set(data.map((p: any) => p.marca));
         this.marcas = Array.from(marcasSet as Set<string>);
@@ -292,16 +334,31 @@ export class Tienda implements OnInit, OnDestroy {
           this.syncPreferencesFromApi();
         }
 
-        this.aplicarCategoriaDesdeQuery();
         this.aplicarFiltrosYOrden();
         
         this.cd.detectChanges();
       },
       error: (err) => {
-          console.error(err);
-          this.cd.detectChanges();
+        this.mostrarErrorCarga(err);
+        this.loading = false;
+        this.cd.detectChanges();
       }
     });
+  }
+
+  reintentarCarga() {
+    // The error button disappears during loading; keep focus on a stable heading.
+    this.catalogTitle?.nativeElement.focus();
+    this.cargarProductos();
+  }
+
+  escucharProducto(producto: ProductModel) {
+    const precio = Number(precioFinal(producto)).toLocaleString('es-PE', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+    const stock = Number(producto.stock || 0);
+    this.speech.read(`${producto.nombre}. Precio: ${precio} soles. ${stock > 0
+      ? `${stock} unidades disponibles.` : 'Producto agotado.'} Abre el producto para ver más detalles.`);
   }
 
   filtrarPorCategoria(categoria: string) {
@@ -331,19 +388,20 @@ export class Tienda implements OnInit, OnDestroy {
     this.searchSubject.next(text);
   }
 
-  aplicarBusqueda() {
+  aplicarBusqueda(cerrarSugerencias = true) {
     this.busquedaAplicada = (this.busquedaTexto || '').trim();
-    this.mostrarSugerencias = false;
-    this.sugerencias = [];
+    if (cerrarSugerencias) this.cerrarSugerencias();
     this.currentPage = 1;
     this.aplicarFiltrosYOrden();
   }
 
   limpiarBusqueda() {
+    this.catalogSearch?.nativeElement.focus();
     this.busquedaTexto = '';
     this.busquedaAplicada = '';
     this.sugerencias = [];
     this.mostrarSugerencias = false;
+    this.currentPage = 1;
     this.aplicarFiltrosYOrden();
   }
 
@@ -354,13 +412,26 @@ export class Tienda implements OnInit, OnDestroy {
     this.mostrarSugerencias = false;
     this.currentPage = 1;
     this.aplicarFiltrosYOrden();
+    this.catalogSearch?.nativeElement.focus();
+    this.cerrarSugerencias();
   }
 
-  ocultarSugerencias() {
-    setTimeout(() => {
-      this.mostrarSugerencias = false;
-      this.cd.detectChanges();
-    }, 180);
+  cerrarSugerencias(devolverFoco = false) {
+    if (devolverFoco) this.catalogSearch?.nativeElement.focus();
+    this.mostrarSugerencias = false;
+    this.sugerencias = [];
+  }
+
+  salirBusqueda(event: FocusEvent) {
+    if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) {
+      this.cerrarSugerencias();
+    }
+  }
+
+  salirOrden(event: FocusEvent) {
+    if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) {
+      this.cerrarOrdenDropdown();
+    }
   }
 
   computeSugerencias(texto: string) {
@@ -397,6 +468,9 @@ export class Tienda implements OnInit, OnDestroy {
     this.busquedaAplicada = '';
     this.soloDisponibles = false;
     this.envioRapido = false;
+    this.precioRango = [0, 10000];
+    this.precioMin = 0;
+    this.precioMax = 10000;
     this.currentPage = 1;
     this.aplicarFiltrosYOrden();
   }
@@ -444,11 +518,7 @@ export class Tienda implements OnInit, OnDestroy {
     }
 
     if (this.comparados.length >= 3) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Comparador',
-        detail: 'Solo puedes comparar hasta 3 productos a la vez.'
-      });
+      void this.alerts.info('Comparador completo', 'Puedes comparar hasta 3 productos. Quita uno para añadir otro.');
       return;
     }
 
@@ -462,13 +532,17 @@ export class Tienda implements OnInit, OnDestroy {
     this.persistComparador();
   }
 
+  quitarDelComparador(product: ProductModel, index: number) {
+    this.toggleComparar(product);
+    this.cd.detectChanges();
+    const buttons = this.compareRemoveButtons?.toArray() || [];
+    (buttons[Math.min(index, buttons.length - 1)]?.nativeElement
+      || this.compareClose?.nativeElement)?.focus();
+  }
+
   abrirComparador() {
     if (this.comparados.length < 2) {
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Comparador',
-        detail: 'Selecciona al menos 2 productos para comparar.'
-      });
+      void this.alerts.info('Elige dos productos', 'Marca el icono de comparación en al menos 2 productos para ver sus diferencias.');
       return;
     }
 
@@ -552,19 +626,26 @@ export class Tienda implements OnInit, OnDestroy {
 
   alternarOrden() {
     this.mostrarOrdenDropdown = !this.mostrarOrdenDropdown;
+    if (this.mostrarOrdenDropdown) {
+      this.cd.detectChanges();
+      this.orderOptions?.nativeElement.querySelector<HTMLButtonElement>('.selected')?.focus();
+    }
   }
 
   seleccionarOrden(orden: 'relevancia' | 'precio_desc' | 'precio_asc') {
     this.ordenActual = orden;
     this.mostrarOrdenDropdown = false;
     this.aplicarFiltrosYOrden();
+    this.orderButton?.nativeElement.focus();
   }
 
-  cerrarOrdenDropdown() {
+  cerrarOrdenDropdown(devolverFoco = false) {
     this.mostrarOrdenDropdown = false;
+    if (devolverFoco) this.orderButton?.nativeElement.focus();
   }
 
   onPageChange(event: any) {
+    this.catalogTitle?.nativeElement.focus();
     this.currentPage = (event.page || 0) + 1;
     this.limit = event.rows || 12;
     this.aplicarFiltrosYOrden();
@@ -576,16 +657,14 @@ export class Tienda implements OnInit, OnDestroy {
       // Feedback visual: checkmark durante 700ms
       this.addedIds.add(Number(producto.id));
       setTimeout(() => {
+        if (this.destroyRef.destroyed) return;
         this.addedIds.delete(Number(producto.id));
         this.cd.detectChanges();
       }, 700);
     }
-    this.messageService.add({
-      severity: result.success ? 'success' : 'warn',
-      summary: result.success ? 'Agregado' : 'Stock',
-      detail: result.success ? `${producto.nombre} añadido al carrito` : result.message,
-      life: 2000
-    });
+    this.alerts.notify(result.success ? 'success' : 'warning',
+      result.success ? 'Añadido al carrito' : 'Revisa la disponibilidad',
+      result.success ? producto.nombre : result.message);
   }
 
   isJustAdded(productId: any): boolean {
@@ -595,7 +674,7 @@ export class Tienda implements OnInit, OnDestroy {
   aplicarPrecioRango() {
     const [min, max] = this.precioRango;
     if (min > max) {
-      this.messageService.add({ severity: 'warn', summary: 'Rango inválido', detail: 'El precio mínimo no puede ser mayor al precio máximo.', life: 3000 });
+      void this.alerts.info('Revisa el rango', 'El precio mínimo no puede ser mayor que el máximo.');
       return;
     }
     this.precioMin = min;
@@ -605,8 +684,10 @@ export class Tienda implements OnInit, OnDestroy {
   }
 
   private aplicarFiltrosYOrden() {
+    this.searchRequest?.unsubscribe();
     this.loading = true;
-    this.productsService.searchProducts({
+    this.loadError = '';
+    this.searchRequest = this.productsService.searchProducts({
       query: this.busquedaAplicada,
       categoria: this.categoriaActual,
       subcategoria: this.subcategoriaActual || undefined,
@@ -617,7 +698,13 @@ export class Tienda implements OnInit, OnDestroy {
       orden: this.ordenActual,
       page: this.currentPage,
       limit: this.limit
-    }).subscribe({
+    }).pipe(
+      timeout(15000),
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => {
+        if (!this.destroyRef.destroyed) { this.loading = false; this.cd.markForCheck(); }
+      })
+    ).subscribe({
       next: (res) => {
         let data = res.data;
         if (this.envioRapido) {
@@ -630,22 +717,19 @@ export class Tienda implements OnInit, OnDestroy {
         this.cd.detectChanges();
       },
       error: (err) => {
-        console.error(err);
+        this.mostrarErrorCarga(err);
         this.loading = false;
         this.cd.detectChanges();
       }
     });
   }
 
-  private aplicarCategoriaDesdeQuery() {
-    if (this.categoriaQuery === 'Todas') {
-      this.categoriaActual = 'Todas';
-      return;
-    }
-
-    this.categoriaActual = this.categorias.includes(this.categoriaQuery)
-      ? this.categoriaQuery
-      : 'Todas';
+  private mostrarErrorCarga(error: { status?: number }) {
+    this.visibleProducts = [];
+    this.totalRegistros = 0;
+    this.loadError = error?.status === 0
+      ? 'No podemos conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.'
+      : 'No pudimos cargar los productos. Inténtalo de nuevo en unos momentos.';
   }
 
   private loadFavoritos(): number[] {

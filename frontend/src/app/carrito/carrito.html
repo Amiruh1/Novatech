@@ -1,6 +1,6 @@
 <section class="app-shell-page">
     <div class="page-intro">
-        <h1 class="page-title">Carrito de compras</h1>
+        <h1 #cartTitle class="page-title" tabindex="-1">Carrito de compras</h1>
         <p class="page-subtitle">Revisa tus productos antes de confirmar el pago.</p>
     </div>
 
@@ -20,37 +20,38 @@
                 </div>
 
                 <div class="carrito-items-list">
-                    <div class="cart-item" *ngFor="let item of items; let last = last" [class.last]="last">
+                    <div class="cart-item" *ngFor="let item of items; let last = last; trackBy: trackCartItem" [class.last]="last">
                         <!-- Imagen -->
-                        <div class="cart-item-img" [routerLink]="['/producto', item.producto.id]">
+                        <a class="cart-item-img" [routerLink]="['/producto', item.producto.id]">
                             <img [src]="item.producto.imagen" [alt]="item.producto.nombre"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='https://placehold.co/80x80?text=NT'">
-                        </div>
+                        </a>
 
                         <!-- Info -->
                         <div class="cart-item-info">
                             <div class="cart-item-brand">{{ item.producto.marca || item.producto.categoria }}</div>
-                            <div class="cart-item-name" [routerLink]="['/producto', item.producto.id]">
+                            <a #cartItemLink class="cart-item-name" [routerLink]="['/producto', item.producto.id]">
                                 {{ item.producto.nombre }}
-                            </div>
+                            </a>
                             <div class="cart-item-sku" *ngIf="item.producto.sku">SKU: {{ item.producto.sku }}</div>
                         </div>
 
                         <!-- Cantidad -->
-                        <div class="cart-item-qty" [class.qty-updated]="savedQty[item.producto.id]">
+                        <div class="cart-item-qty" role="group" [attr.aria-label]="'Cantidad de ' + item.producto.nombre" [class.qty-updated]="savedQty[item.producto.id]">
                             <button class="qty-btn" type="button"
-                                [disabled]="item.cantidad <= 1 || savedQty[item.producto.id]"
-                                (click)="actualizarCantidad(item.producto.id, item.cantidad - 1)">
+                                [disabled]="item.cantidad <= 1"
+                                [attr.aria-label]="'Reducir cantidad de ' + item.producto.nombre"
+                                (click)="actualizarCantidad(item.producto.id, item.cantidad - 1, $event)">
                                 <i class="pi pi-minus"></i>
                             </button>
-                            <span class="qty-value">
-                                <i class="pi pi-check qty-check" *ngIf="savedQty[item.producto.id]"></i>
-                                <span *ngIf="!savedQty[item.producto.id]">{{ item.cantidad }}</span>
+                            <span class="qty-value" role="status" aria-live="polite" [attr.aria-label]="'Cantidad: ' + item.cantidad">
+                                {{ item.cantidad }}
                             </span>
                             <button class="qty-btn" type="button"
-                                [disabled]="item.cantidad >= item.producto.stock || savedQty[item.producto.id]"
-                                (click)="actualizarCantidad(item.producto.id, item.cantidad + 1)">
+                                [disabled]="item.cantidad >= item.producto.stock"
+                                [attr.aria-label]="'Aumentar cantidad de ' + item.producto.nombre"
+                                (click)="actualizarCantidad(item.producto.id, item.cantidad + 1, $event)">
                                 <i class="pi pi-plus"></i>
                             </button>
                         </div>
@@ -69,7 +70,7 @@
                         <!-- Eliminar -->
                         <button class="cart-item-remove" type="button"
                             (click)="eliminar(item.producto.id)"
-                            aria-label="Eliminar producto">
+                            [attr.aria-label]="'Eliminar ' + item.producto.nombre + ' del carrito'">
                             <i class="pi pi-trash"></i>
                         </button>
                     </div>

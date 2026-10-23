@@ -270,6 +270,18 @@
   }
 }
 
+.auth-feedback {
+  margin: 0;
+  padding: 0.8rem;
+  border: 2px solid currentColor;
+  border-radius: var(--r-lg);
+  color: var(--app-text);
+  background: var(--app-surface);
+  line-height: 1.5;
+}
+
+.auth-close { align-self: flex-end; }
+
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1.5fr;

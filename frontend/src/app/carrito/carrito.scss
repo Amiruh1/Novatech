@@ -489,3 +489,11 @@
     align-self: flex-start;
   }
 }
+.cart-item-name, .cart-item-img { color: inherit; text-decoration: none; }
+
+:host-context(body.a11y-reading) .cart-item-name {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  -webkit-line-clamp: unset;
+}
