@@ -25,7 +25,6 @@ export class AccessibilityService {
         this.state.set({ reading: values['reading'] === true, navigation: values['navigation'] === true });
       }
     } catch {
-      // Invalid or unavailable storage must never prevent access to the store.
     }
     this.applyClasses();
   }

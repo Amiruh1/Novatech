@@ -57,7 +57,8 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
 
   @HostListener('keydown', ['$event'])
   onNavigationKey(event: KeyboardEvent) {
-    if (this.accessibility.preferences().navigation && !this.accessibility.panelOpen()) {
+    const isCatalog = this.router.url.split(/[?#]/)[0] === '/tienda';
+    if ((isCatalog || this.accessibility.preferences().navigation) && !this.accessibility.panelOpen()) {
       moveFocusWithArrow(event, this.element.nativeElement);
     }
   }

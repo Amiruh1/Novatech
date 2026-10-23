@@ -1,7 +1,6 @@
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 
-// Keep local Novatech separate from other projects that use port 3000.
 const child = spawn(process.execPath, [
   require.resolve('ts-node-dev/lib/bin.js'), '--respawn', '--transpile-only', 'index.ts'
 ], {

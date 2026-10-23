@@ -1,5 +1,3 @@
-// Optional sequential navigation. Native editing keys and widget navigation
-// retain their behavior; Tab remains available everywhere.
 const CONTROLS = 'button, a[href], input:not([type="hidden"]), select, textarea, summary, [tabindex]';
 const NATIVE_ARROWS = 'textarea, select, input:not([type="checkbox"]):not([type="button"]):not([type="submit"]), '
   + '[contenteditable]:not([contenteditable="false"]), [role="combobox"], [role="listbox"], '
@@ -17,7 +15,6 @@ export function moveFocusWithArrow(event: KeyboardEvent, container: HTMLElement,
   if (!(active instanceof HTMLElement) || !container.contains(active)
     || active.closest(NATIVE_ARROWS)) return false;
 
-  // An open modal remains the navigation boundary, even when mounted in the shell.
   const scope = active.closest<HTMLElement>('dialog[open], [role="dialog"], [role="alertdialog"], .p-drawer') || container;
   const viewport = document.defaultView;
   const controls = [...scope.querySelectorAll<HTMLElement>(CONTROLS)].filter(element => {
@@ -25,7 +22,6 @@ export function moveFocusWithArrow(event: KeyboardEvent, container: HTMLElement,
       || element.closest('[inert], [hidden], [aria-hidden="true"]')) return false;
     const rect = element.getBoundingClientRect();
     const visibility = viewport?.getComputedStyle(element).visibility;
-    // Offscreen items in scrollable lists remain reachable; focus scrolls them into view.
     return rect.width > 0 && rect.height > 0 && visibility !== 'hidden' && visibility !== 'collapse';
   });
   if (!controls.length) return false;
@@ -33,8 +29,6 @@ export function moveFocusWithArrow(event: KeyboardEvent, container: HTMLElement,
   const index = controls.indexOf(active);
   let next = index + direction;
   if (index < 0) {
-    // Headings and main receive programmatic focus but aren't Tab stops.
-    // Continue from their DOM position instead of jumping to the page header.
     next = -1;
     if (direction > 0) {
       next = controls.findIndex(element => !!(active.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING));

@@ -32,7 +32,6 @@ export class SpeechService {
     const pending = this.pendingRead;
     if (!pending) return;
     const voice = this.preferredVoice();
-    // Some browsers publish local voices first, then their other voices.
     if (voice && this.isLatinAmerican(voice)) {
       this.voicesSettled = true;
       this.startReading(pending.text, voice, pending.request);
@@ -41,7 +40,6 @@ export class SpeechService {
 
   constructor() {
     this.synth?.addEventListener('voiceschanged', this.onVoicesChanged);
-    // Request the list early without speaking or enabling the voice assistant.
     this.synth?.getVoices();
     this.router.events.pipe(
       filter(event => event instanceof NavigationStart),
@@ -53,7 +51,6 @@ export class SpeechService {
     });
   }
 
-  /** Only call in response to an explicit button/key activation. Never autoplay on reload. */
   read(text: string): void {
     this.stop();
     this.error.set('');
@@ -71,7 +68,6 @@ export class SpeechService {
       return;
     }
 
-    // Give asynchronously loaded Latin American voices a chance before falling back.
     const request = this.request;
     this.pendingRead = { text: content, request };
     this.loadingVoice.set(true);

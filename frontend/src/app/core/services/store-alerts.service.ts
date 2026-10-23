@@ -35,7 +35,6 @@ export class StoreAlertsService {
 
   notify(icon: SweetAlertIcon, title: string, text: string): void {
     const trigger = document.activeElement as HTMLElement | null;
-    // Routine cart feedback is non-modal and never moves keyboard focus.
     void Swal.fire({
       ...this.options(), icon, titleText: title, text,
       toast: true, position: 'bottom-end',

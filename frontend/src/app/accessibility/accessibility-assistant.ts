@@ -34,7 +34,6 @@ export class AccessibilityAssistant implements OnDestroy {
     effect(() => {
       const element = this.dialog()?.nativeElement;
       const open = this.accessibility.panelOpen();
-      // A route entry can enable a profile while the welcome is already open.
       const preferences = this.accessibility.preferences();
       if (!element) return;
       if (open) {

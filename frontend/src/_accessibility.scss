@@ -1,10 +1,7 @@
-// Optional accessibility preferences. Removing these classes restores the theme.
-// Keep this import after the existing themes and PrimeNG overrides.
 body.a11y-modal-open {
   overflow: hidden;
 }
 
-// The assistance toolbar reserves the fixed header space when it is present.
 app-accessibility-toolbar.a11y-toolbar-visible + .route-view .app-shell-page {
   padding-top: 1rem;
 }
@@ -14,8 +11,6 @@ html.a11y-reading {
 }
 
 body.a11y-reading {
-  // White / slate text = 17.9:1; muted slate / white = 7.6:1;
-  // teal / white = 7.6:1. The muted surface (#f1f5f9) also exceeds 4.5:1.
   color-scheme: light;
   --app-bg: #f1f5f9;
   --app-bg-glow-a: transparent;
@@ -54,7 +49,6 @@ body.a11y-reading {
   --text-200: #1e293b;
   --text-300: #475569;
   --surface-ground: #f1f5f9;
-  // PrimeNG uses its own theme tokens for controls and their interaction states.
   --p-primary-color: #115e59;
   --p-primary-hover-color: #134e4a;
   --p-primary-active-color: #134e4a;
@@ -82,7 +76,6 @@ body.a11y-reading {
   line-height: 1.75;
   background: var(--app-bg);
 
-  // Target textual content, not icon glyphs, badges, images, or radio widgets.
   :is(.tienda-shell, .detalle-shell, app-carrito, .checkout-shell, .auth-form) {
     :is(p, label, .field-hint, .field-req, .char-counter, .page-subtitle,
       .card-subtitle, .detalle-desc-text, .co-item-name, .cart-item-name,
@@ -145,7 +138,6 @@ body.a11y-reading {
   }
 
   .hero-btn, .hero-btn:hover {
-    // Existing hero buttons declare their transparent backgrounds !important.
     background: #ffffff !important;
     color: #0f172a !important;
   }
@@ -212,7 +204,6 @@ body.a11y-reading {
 
   :is(.tienda-shell, .detalle-shell, app-carrito, .checkout-shell,
     .auth-modal-shell, .minicart-sidebar, .shell-topbar, .shell-sidebar) {
-    // Essential loading indicators still render; only their movement is reduced.
     &, *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-delay: 0ms !important;
@@ -226,7 +217,6 @@ body.a11y-reading {
 body.a11y-navigation {
   :is(.app-shell-page, .shell-topbar, .shell-sidebar, .bottom-nav,
     .auth-modal-shell, .minicart-sidebar, .p-dialog, .checkout-mobile-bar) {
-    // Do not resize checkbox/radio inputs or the SVG/PrimeIcons inside buttons.
     :is(button, a[href], [role='button'], [role='radio'], select,
       input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
       textarea, .p-select) {
@@ -239,7 +229,6 @@ body.a11y-navigation {
       touch-action: manipulation;
     }
 
-    // Inline links need an actual hit area; exclude compound thumbnail links.
     :is(.bc-link, .rating-link) {
       display: inline-flex;
       align-items: center;
@@ -247,7 +236,6 @@ body.a11y-navigation {
     }
 
     :focus-visible {
-      // Two colors keep the ring identifiable against light and dark surfaces.
       outline: 3px solid #075985 !important;
       outline-offset: 3px;
       box-shadow: 0 0 0 3px #ffffff !important;
@@ -274,7 +262,6 @@ body.a11y-navigation {
   }
 
   .dot-btn {
-    // Keep visual dots compact within a 44px clickable target.
     background: radial-gradient(circle, #ffffff 4px, transparent 5px);
     border: 1px solid #ffffff;
     border-radius: 50%;
@@ -293,7 +280,6 @@ body.a11y-navigation {
   }
 }
 
-// Shared reflow rules only while one or both preferences are active.
 body:is(.a11y-reading, .a11y-navigation) {
   .shell-sidebar {
     overflow-y: auto;
@@ -338,8 +324,6 @@ body:is(.a11y-reading, .a11y-navigation) {
   }
 
   @media (max-width: 900px) {
-    // The sidebar already contains the same checkout action. Keeping the mobile
-    // duplicate in flow prevents it from covering focused fields and text.
     .checkout-mobile-bar {
       position: static;
       flex-wrap: wrap;

@@ -1,4 +1,3 @@
-// The local Vuexy storefront frame. Administrative routes keep their own theme.
 :host(.storefront-shell) {
   --nav-primary: #6254d8;
   --nav-soft: #efedfd;
@@ -151,6 +150,5 @@
     .topbar-actions { grid-row: 2; justify-self: end; }
     .quick-nav-wrap { width: 100%; }
   }
-  // Reserve the second header row for this storefront only, including its help toolbar.
   :host(.storefront-shell) ~ ::ng-deep .shell-main { --topbar-height: 7.5rem; }
 }

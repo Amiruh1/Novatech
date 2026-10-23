@@ -14,7 +14,7 @@ El asistente aparece al abrir o recargar la página. No vuelve a interrumpir al 
 | F, dentro del asistente | Escuchar la guía en español |
 | K o Escape, dentro del asistente | Cerrar el aviso y desactivar la voz, conservando las ayudas ya guardadas |
 | Tab / Shift + Tab | Avanzar / retroceder entre controles |
-| ↓ o → / ↑ o ← | Siguiente / anterior en el asistente; también en la tienda con Controles amplios y navegación activo |
+| ↓ o → / ↑ o ← | Siguiente / anterior en el asistente y en el catálogo; en otras páginas, con Controles amplios y navegación activo |
 | Enter | Activar botones y enlaces |
 | Espacio | Marcar o desmarcar opciones |
 | Flechas, en las direcciones de envío | Cambiar la dirección seleccionada |
