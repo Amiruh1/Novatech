@@ -6,6 +6,10 @@ app-accessibility-toolbar.a11y-toolbar-visible + .route-view .app-shell-page {
   padding-top: 1rem;
 }
 
+app-accessibility-toolbar.a11y-toolbar-visible:has(+ .route-view .tienda-shell) {
+  background: #f8f8f8;
+}
+
 html.a11y-reading {
   font-size: 20px;
 }

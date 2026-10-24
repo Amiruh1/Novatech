@@ -50,7 +50,7 @@ export class ControlNarratorService {
   readonly statusText = computed(() => {
     if (this.notice()) return this.notice();
     if (this.armedState()) return 'Narrador activado.';
-    return this.remembered() ? 'El narrador está guardado, pero en silencio hasta que pulses Reactivar narrador.' : '';
+    return this.remembered() ? 'Narrador en pausa. Pulsa Reactivar narrador para volver a escucharlo.' : '';
   });
 
   private suspended = false;
