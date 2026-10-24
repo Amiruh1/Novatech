@@ -414,6 +414,7 @@
 <!-- Quick-add address dialog -->
 <p-dialog [(visible)]="showDirDialog" [modal]="true" [draggable]="false" [resizable]="false"
     [attr.data-narrator-context]="showDirDialog ? 'nueva-direccion' : null" data-narrator-title="Nueva dirección"
+    closeAriaLabel="Cerrar nueva dirección"
     (onHide)="validationMessage = ''"
     [closable]="!guardandoDir" [closeOnEscape]="!guardandoDir" ariaLabelledBy="checkout-address-title" [style]="{ width: 'min(34rem, 96vw)' }"
     [transitionOptions]="'200ms ease-out'">

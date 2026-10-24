@@ -2,6 +2,7 @@
     [(visible)]="visible"
     [attr.data-narrator-context]="visible ? 'cuenta' : null"
     [attr.data-narrator-title]="authView === 'register' ? 'Crear cuenta' : authView === 'login' ? 'Iniciar sesión' : 'Recuperar contraseña'"
+    closeAriaLabel="Cerrar ventana de cuenta"
     [modal]="true"
     [dismissableMask]="!loading"
     [closable]="!loading"

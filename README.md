@@ -25,9 +25,22 @@ Las flechas desplazan el foco, sin activar botones ni marcar opciones. En campos
 
 Las rutas `/accesibilidad/lectura` y `/accesibilidad/navegacion` activan la ayuda correspondiente y llevan a `/tienda`. Ambas usan los mismos productos, cuenta y carrito; no hay una tienda duplicada.
 
-La voz se reproduce únicamente al solicitarla: F, **Escuchar guía**, **Escuchar ayuda de esta página** o **Escuchar producto**. Se puede detener y se cancela al cambiar de página. Usa `speechSynthesis` del navegador; la voz concreta depende del sistema. Si no está disponible, se muestra un mensaje y la guía escrita sigue funcionando. No se leen contraseñas ni datos de pago.
+La lectura por voz se reproduce únicamente al solicitarla: F, **Escuchar guía**, **Escuchar ayuda de esta página** o **Escuchar producto**. **Detener lectura** la detiene y también se cancela al cambiar de página. Usa `speechSynthesis` del navegador; la voz concreta depende del sistema. Si no está disponible, se muestra un mensaje y la guía escrita sigue funcionando. No se leen contraseñas ni datos de pago.
 
 Se priorizan voces en español de Perú, México y Latinoamérica. Se espera brevemente a que el navegador cargue las voces y se muestra el nombre elegido. Si solo hay otra variante de español, se avisa; no se instala ni descarga una voz adicional.
+
+### Narrar controles al navegar
+
+Ayuda opcional que dice el nombre, el tipo y el estado del control que recibe el foco, por ejemplo «Agregar Monitor 27 QHD al carrito, botón» o «Texto y contraste, casilla marcada». Complementa los perfiles anteriores; no reemplaza a un lector de pantalla.
+
+- **Activar:** botón **Activar narrador** en el asistente o en la barra **Tus ayudas**. Se confirma una sola vez con «Narrador activado».
+- **Silenciar:** el mismo botón pasa a **Silenciar narrador** y corta toda la voz al instante, sin decir nada. También está dentro de las ventanas de la tienda (comparador, carrito, cuenta, direcciones, producto agregado, vista ampliada y confirmaciones). **Detener lectura** solo detiene una lectura de guía o producto; el narrador sigue activo.
+- **Al recargar:** la preferencia se recuerda, pero el narrador no habla hasta pulsar **Reactivar narrador**. K, Escape, la X o **Continuar sin asistente** cierran el asistente sin voz. **Restaurar vista habitual** también lo apaga.
+- **Dónde funciona:** `/tienda`, `/producto/:id`, `/carrito` y `/checkout`, su cabecera y sus ventanas, y el propio asistente desde cualquier página. Al ir a otra página se desactiva y hay que reactivarlo al volver. Mientras está abierta la paleta Ctrl + K no narra nada.
+- **Cuándo habla:** con Tab, Shift + Tab, las flechas habilitadas y los cambios de estado del control enfocado (casillas, filtros, favoritos, Mostrar contraseña, opciones de un selector). Una lectura manual en curso tiene prioridad. No habla al pasar el ratón, al aparecer un aviso ni con la pestaña oculta.
+- **Privacidad:** nunca lee lo escrito en un campo, contraseñas, códigos ni datos de pago. Las direcciones guardadas se anuncian como «Dirección guardada 1, 2…», sin alias ni datos personales. Los textos no se guardan ni se envían a ningún servicio de la tienda; la voz la genera el navegador, que puede usar voces locales o del sistema en línea.
+
+Si el navegador no permite iniciar la voz, el narrador se apaga y muestra «Reactivar narrador»; no reintenta en cada movimiento.
 
 ## Ejecutar la web
 
@@ -52,6 +65,10 @@ npm start
 ```
 
 Abrir `http://localhost:4200` o `http://127.0.0.1:4200`. Angular envía las peticiones `/api` al backend de Novatech en el puerto **3001**, para evitar interferencias con otros proyectos en el puerto 3000. La base de datos configurada en el backend también debe estar disponible. En producción, el servidor debe dirigir `/api` al backend.
+
+### Inicio de sesión con Google
+
+El mismo Client ID de OAuth debe estar en `frontend/src/app/core/config/api.config.ts` (`GOOGLE_CLIENT_ID`) y en `backend/.env` (`GOOGLE_CLIENT_ID=...`, ver `.env.ejemplo`). En Google Cloud Console, ese cliente web debe tener como **Orígenes autorizados de JavaScript** la dirección exacta desde la que se abre la web, por ejemplo `http://localhost:4200` y `http://127.0.0.1:4200`; si falta, Google muestra `Error 400: origin_mismatch`. Tras cambiar `backend/.env`, reiniciar el backend.
 
 Para generar la versión de producción:
 
