@@ -14,6 +14,7 @@ import { BannersService, BannerModel } from '../services/banners';
 import { CategoriasService, CategoriaModel } from '../services/categorias';
 import { AccessibilityService } from '../core/services/accessibility.service';
 import { SpeechService } from '../core/services/speech.service';
+import { NarratorToggle } from '../accessibility/narrator-toggle';
 
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
@@ -38,7 +39,8 @@ import { SliderModule } from 'primeng/slider';
     DialogModule,
     RouterModule,
     SkeletonModule,
-    SliderModule
+    SliderModule,
+    NarratorToggle
   ],
   templateUrl: './tienda.html',
   styleUrl: './tienda.scss'

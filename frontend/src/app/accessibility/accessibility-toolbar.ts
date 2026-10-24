@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, computed, ElementRef, inject, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AccessibilityService } from '../core/services/accessibility.service';
+import { ControlNarratorService } from '../core/services/control-narrator.service';
 import { SpeechService } from '../core/services/speech.service';
 
 @Component({
@@ -28,14 +29,21 @@ import { SpeechService } from '../core/services/speech.service';
         <div class="a11y-voice-tools">
           <button #guideButton type="button" (click)="readGuide()"><i class="pi pi-volume-up" aria-hidden="true"></i> Escuchar ayuda de esta página</button>
           @if (speech.enabled()) {
-            <button type="button" (click)="stopVoice()">Detener voz</button>
+            <button type="button" (click)="stopVoice()">Detener lectura</button>
             <span>{{ speech.loadingVoice() ? 'Preparando voz latinoamericana…' : (speech.speaking() ? 'Leyendo…' : 'Voz disponible cuando la solicites') }}</span>
+          }
+          @if (narrator.availableHere()) {
+            <button type="button" (click)="narrator.toggle()">
+              <i class="pi" [class.pi-volume-off]="narrator.armed()" [class.pi-megaphone]="!narrator.armed()" aria-hidden="true"></i>
+              {{ narrator.toggleLabel() }}
+            </button>
           }
         </div>
         @if (speech.enabled() && !speech.loadingVoice() && speech.voiceName()) {
           <p role="status">Voz: {{ speech.voiceName() }} {{ speech.voiceNotice() }}</p>
         }
         <p role="status">{{ speech.error() || accessibility.storageNotice() }}</p>
+        <p role="status">{{ narrator.availableHere() ? narrator.statusText() : '' }}</p>
       </section>
     }
   `,
@@ -44,8 +52,10 @@ import { SpeechService } from '../core/services/speech.service';
 export class AccessibilityToolbar {
   readonly accessibility = inject(AccessibilityService);
   readonly speech = inject(SpeechService);
+  readonly narrator = inject(ControlNarratorService);
   readonly visible = computed(() => !this.accessibility.panelOpen()
-    && (this.accessibility.active() || this.speech.enabled() || !!this.speech.error()));
+    && (this.accessibility.active() || this.speech.enabled() || !!this.speech.error()
+      || (this.narrator.availableHere() && this.narrator.offered())));
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly guideButton = viewChild<ElementRef<HTMLButtonElement>>('guideButton');
@@ -53,7 +63,7 @@ export class AccessibilityToolbar {
   stopVoice(): void {
     this.speech.disable();
     requestAnimationFrame(() => {
-      const target = this.accessibility.active() ? this.guideButton()?.nativeElement
+      const target = this.visible() ? this.guideButton()?.nativeElement
         : this.document.getElementById('main-content');
       target?.focus();
     });

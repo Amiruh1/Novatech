@@ -199,7 +199,7 @@
             <article class="app-surface-card catalog-card">
                 <div class="card-head products-head">
                     <div>
-                        <h2 #catalogTitle class="card-title" tabindex="-1">{{ categoriaActual === 'Todas' ? 'Todos los productos' : categoriaActual }}</h2>
+                        <h2 #catalogTitle class="card-title" tabindex="-1" data-narrator-heading>{{ categoriaActual === 'Todas' ? 'Todos los productos' : categoriaActual }}</h2>
                         <span class="card-subtitle" role="status">{{ loading ? 'Cargando productos…' : (loadError ? 'Catálogo no disponible' : totalRegistros + ' productos encontrados') }}</span>
                     </div>
 
@@ -210,6 +210,7 @@
                                 #catalogSearch
                                 id="catalog-search"
                                 aria-label="Buscar productos por nombre, categoría, marca o SKU"
+                                data-narrator-label="Buscar productos"
                                 aria-controls="catalog-suggestions"
                                 pInputText
                                 type="text"
@@ -451,6 +452,8 @@
     </div>
 <p-dialog
     [(visible)]="comparadorVisible"
+    [attr.data-narrator-context]="comparadorVisible ? 'comparador' : null"
+    data-narrator-title="Comparador de productos"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
@@ -518,6 +521,7 @@
                 <span>Cerrar</span>
             </button>
         </div>
+        <app-narrator-toggle></app-narrator-toggle>
     </ng-template>
 </p-dialog>
 </section>

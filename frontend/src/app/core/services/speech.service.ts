@@ -2,7 +2,21 @@ import { DOCUMENT } from '@angular/common';
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationStart, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, Subject } from 'rxjs';
+
+type SpeechChannel = 'manual' | 'narration';
+
+export interface NarrationHooks {
+  onStart?: () => void;
+  onFail?: (code: string) => void;
+}
+
+interface SpeechRequest extends NarrationHooks {
+  channel: SpeechChannel;
+  text: string;
+  id: number;
+  guard?: () => boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SpeechService {
@@ -10,11 +24,14 @@ export class SpeechService {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly synth = this.document.defaultView?.speechSynthesis;
-  private current: SpeechSynthesisUtterance | null = null;
-  private pendingRead: { text: string; request: number } | null = null;
+  private current: { utterance: SpeechSynthesisUtterance; channel: SpeechChannel } | null = null;
+  private pending: SpeechRequest | null = null;
   private voiceTimer: ReturnType<typeof setTimeout> | null = null;
   private request = 0;
+  private cancellations = 0;
   private voicesSettled = false;
+  private readonly manualFinished = new Subject<void>();
+  private readonly manualStopped = new Subject<void>();
   private readonly latinAmericanRegions = new Set([
     'pe', 'mx', '419', 'ar', 'bo', 'bz', 'cl', 'co', 'cr', 'cu', 'do', 'ec',
     'sv', 'gt', 'hn', 'ni', 'pa', 'py', 'pr', 'uy', 've', 'us'
@@ -22,19 +39,23 @@ export class SpeechService {
   readonly supported = Boolean(this.synth && typeof SpeechSynthesisUtterance !== 'undefined');
   readonly enabled = signal(false);
   readonly speaking = signal(false);
+  readonly manualActive = signal(false);
+  readonly narrating = signal(false);
   readonly loadingVoice = signal(false);
   readonly voiceName = signal('');
   readonly voiceLanguage = signal('');
   readonly voiceNotice = signal('');
   readonly error = signal('');
+  readonly manualFinished$ = this.manualFinished.asObservable();
+  readonly manualStopped$ = this.manualStopped.asObservable();
 
   private readonly onVoicesChanged = (): void => {
-    const pending = this.pendingRead;
+    const pending = this.pending;
     if (!pending) return;
     const voice = this.preferredVoice();
     if (voice && this.isLatinAmerican(voice)) {
       this.voicesSettled = true;
-      this.startReading(pending.text, voice, pending.request);
+      this.speak(pending, voice);
     }
   };
 
@@ -48,8 +69,12 @@ export class SpeechService {
     this.destroyRef.onDestroy(() => {
       this.stop();
       this.synth?.removeEventListener('voiceschanged', this.onVoicesChanged);
+      this.manualFinished.complete();
+      this.manualStopped.complete();
     });
   }
+
+  get epoch(): number { return this.cancellations; }
 
   read(text: string): void {
     this.stop();
@@ -62,63 +87,43 @@ export class SpeechService {
     const content = text.replace(/\s+/g, ' ').trim().slice(0, 5000);
     if (!content) return;
     this.enabled.set(true);
-    const voice = this.preferredVoice();
-    if ((voice && this.isLatinAmerican(voice)) || this.voicesSettled) {
-      this.startReading(content, voice, this.request);
-      return;
-    }
-
-    const request = this.request;
-    this.pendingRead = { text: content, request };
-    this.loadingVoice.set(true);
-    this.voiceNotice.set('Buscando una voz en español latinoamericano…');
-    this.voiceTimer = setTimeout(() => {
-      if (request !== this.request) return;
-      this.voicesSettled = true;
-      this.startReading(content, this.preferredVoice(), request);
-    }, 1200);
+    this.manualActive.set(true);
+    this.schedule({ channel: 'manual', text: content, id: ++this.request });
   }
 
-  private startReading(content: string, voice: SpeechSynthesisVoice | undefined, request: number): void {
-    if (request !== this.request || !this.enabled() || !this.synth) return;
-    this.clearPendingRead();
-    const utterance = new SpeechSynthesisUtterance(content);
-    if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang || 'es-MX';
-    utterance.rate = 0.95;
-    this.voiceName.set(voice?.name || 'Voz del navegador');
-    this.voiceLanguage.set(voice?.lang || '');
-    this.voiceNotice.set(this.describeFallback(voice));
-    this.current = utterance;
-    this.speaking.set(true);
-    utterance.onend = () => {
-      if (this.current !== utterance) return;
-      this.current = null;
-      this.speaking.set(false);
-    };
-    utterance.onerror = event => {
-      if (this.current !== utterance) return;
-      this.current = null;
-      this.speaking.set(false);
-      if (event.error === 'canceled' || event.error === 'interrupted') return;
-      this.error.set('No se pudo reproducir la voz. Intenta de nuevo con el botón Escuchar o continúa con la guía escrita.');
-    };
-    try {
-      this.synth.speak(utterance);
-    } catch {
-      this.current = null;
-      this.speaking.set(false);
-      this.error.set('No se pudo iniciar la voz. Puedes continuar con los textos y botones.');
+  narrate(text: string, guard: () => boolean, hooks: NarrationHooks = {}): boolean {
+    if (!this.supported || !this.synth) {
+      hooks.onFail?.('unsupported');
+      return false;
     }
+    if (this.manualActive()) return false;
+    const content = text.replace(/\s+/g, ' ').trim().slice(0, 400);
+    if (!content) return false;
+    this.cancelNarration();
+    this.schedule({ channel: 'narration', text: content, id: ++this.request, guard, ...hooks });
+    return true;
+  }
+
+  cancelNarration(): void {
+    if (this.pending?.channel === 'narration') this.clearPending();
+    if (this.current?.channel !== 'narration') return;
+    this.current = null;
+    this.synth?.cancel();
+    this.narrating.set(false);
   }
 
   stop(): void {
+    const manualWasActive = this.manualActive();
     this.request += 1;
+    this.cancellations += 1;
     if (this.loadingVoice()) this.voiceNotice.set('');
-    this.clearPendingRead();
+    this.clearPending();
     this.current = null;
     this.synth?.cancel();
     this.speaking.set(false);
+    this.narrating.set(false);
+    this.manualActive.set(false);
+    if (manualWasActive) this.manualStopped.next();
   }
 
   disable(): void {
@@ -128,10 +133,89 @@ export class SpeechService {
     this.voiceNotice.set('');
   }
 
-  private clearPendingRead(): void {
+  private schedule(request: SpeechRequest): void {
+    const voice = this.preferredVoice();
+    if ((voice && this.isLatinAmerican(voice)) || this.voicesSettled) {
+      this.speak(request, voice);
+      return;
+    }
+    this.clearPending();
+    this.pending = request;
+    if (request.channel === 'manual') {
+      this.loadingVoice.set(true);
+      this.voiceNotice.set('Buscando una voz en español latinoamericano…');
+    }
+    this.voiceTimer = setTimeout(() => {
+      if (this.pending !== request) return;
+      this.voicesSettled = true;
+      this.speak(request, this.preferredVoice());
+    }, 1200);
+  }
+
+  private speak(request: SpeechRequest, voice: SpeechSynthesisVoice | undefined): void {
+    if (this.pending === request) this.clearPending();
+    if (request.id !== this.request || !this.synth) return;
+    const manual = request.channel === 'manual';
+    if (manual && !this.enabled()) {
+      this.manualActive.set(false);
+      return;
+    }
+    if (!manual && (this.manualActive() || !request.guard?.())) return;
+    const utterance = new SpeechSynthesisUtterance(request.text);
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang || 'es-MX';
+    utterance.rate = 0.95;
+    this.voiceName.set(voice?.name || 'Voz del navegador');
+    this.voiceLanguage.set(voice?.lang || '');
+    if (manual) this.voiceNotice.set(this.describeFallback(voice));
+    this.current = { utterance, channel: request.channel };
+    (manual ? this.speaking : this.narrating).set(true);
+    utterance.onstart = () => {
+      if (this.current?.utterance === utterance) request.onStart?.();
+    };
+    utterance.onend = () => {
+      if (this.current?.utterance !== utterance) return;
+      this.current = null;
+      if (manual) {
+        this.speaking.set(false);
+        this.manualActive.set(false);
+        this.manualFinished.next();
+      } else {
+        this.narrating.set(false);
+      }
+    };
+    utterance.onerror = event => {
+      if (this.current?.utterance !== utterance) return;
+      this.current = null;
+      const cancelled = event.error === 'canceled' || event.error === 'interrupted';
+      if (manual) {
+        this.speaking.set(false);
+        this.manualActive.set(false);
+        if (!cancelled) this.error.set('No se pudo reproducir la voz. Intenta de nuevo con el botón Escuchar o continúa con la guía escrita.');
+        return;
+      }
+      this.narrating.set(false);
+      if (!cancelled) request.onFail?.(event.error);
+    };
+    try {
+      this.synth.speak(utterance);
+    } catch {
+      this.current = null;
+      if (manual) {
+        this.speaking.set(false);
+        this.manualActive.set(false);
+        this.error.set('No se pudo iniciar la voz. Puedes continuar con los textos y botones.');
+      } else {
+        this.narrating.set(false);
+        request.onFail?.('synthesis-failed');
+      }
+    }
+  }
+
+  private clearPending(): void {
     if (this.voiceTimer !== null) clearTimeout(this.voiceTimer);
     this.voiceTimer = null;
-    this.pendingRead = null;
+    this.pending = null;
     this.loadingVoice.set(false);
   }
 

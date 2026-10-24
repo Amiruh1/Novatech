@@ -4,6 +4,7 @@ import { ToastModule } from 'primeng/toast';
 import { ThemeService } from './core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { AccessibilityAssistant } from './accessibility/accessibility-assistant';
+import { ControlNarratorService } from './core/services/control-narrator.service';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { AccessibilityAssistant } from './accessibility/accessibility-assistant'
 })
 export class App {
   private themeService = inject(ThemeService);
+  private readonly narrator = inject(ControlNarratorService);
   title = 'novatech-frontend';
 
   constructor() {

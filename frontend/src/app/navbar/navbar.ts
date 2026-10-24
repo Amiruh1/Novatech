@@ -19,6 +19,7 @@ import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { Drawer } from 'primeng/drawer';
+import { NarratorToggle } from '../accessibility/narrator-toggle';
 import { CartItem } from '../services/cart';
 import { precioFinal } from '../core/models/product.model';
 import { AccessibilityService } from '../core/services/accessibility.service';
@@ -68,7 +69,8 @@ interface NotificationItem {
     BadgeModule,
     TooltipModule,
     InputTextModule,
-    Drawer
+    Drawer,
+    NarratorToggle
   ],
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.scss', './navbar-storefront.scss'],

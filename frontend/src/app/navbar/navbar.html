@@ -303,6 +303,8 @@
 
 <p-drawer
     [(visible)]="cartSidebarOpen"
+    [attr.data-narrator-context]="cartSidebarOpen ? 'minicarrito' : null"
+    data-narrator-title="Mi carrito"
     position="right"
     [style]="{ width: 'min(26rem, 96vw)' }"
     styleClass="minicart-sidebar"
@@ -369,5 +371,6 @@
             <button pButton type="button" label="Ir a la tienda" icon="pi pi-shop" class="p-button-outlined" routerLink="/tienda" (click)="cartSidebarOpen = false"></button>
         </div>
     </ng-template>
+    <app-narrator-toggle></app-narrator-toggle>
 </p-drawer>
 

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { finalize, Subscription } from 'rxjs';
 import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
+import { NarratorToggle } from '../accessibility/narrator-toggle';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -37,7 +38,8 @@ declare global {
     DialogModule,
     InputTextModule,
     ButtonModule,
-    SelectModule
+    SelectModule,
+    NarratorToggle
   ],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss'

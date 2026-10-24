@@ -35,7 +35,7 @@
                 <div class="card-head">
                     <div class="step-head-icon"><i class="pi pi-list" aria-hidden="true"></i></div>
                     <div>
-                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1">Resumen del pedido</h2>
+                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1" data-narrator-heading>Resumen del pedido</h2>
                         <span class="card-subtitle">{{ totalItems }} artículo(s) · Revisa antes de continuar</span>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                 <div class="card-head">
                     <div class="step-head-icon address"><i class="pi pi-map-marker" aria-hidden="true"></i></div>
                     <div>
-                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1">Dirección de envío</h2>
+                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1" data-narrator-heading>Dirección de envío</h2>
                         <span class="card-subtitle">¿A dónde enviamos tu pedido?</span>
                     </div>
                     <button pButton type="button" icon="pi pi-plus" label="Nueva"
@@ -80,10 +80,11 @@
                     <!-- Address cards -->
                     <div class="dir-options" role="group" aria-label="Direcciones de envío" *ngIf="!loadingDirs && misDirecciones.length > 0">
                         <label class="dir-option"
-                             *ngFor="let dir of misDirecciones"
+                             *ngFor="let dir of misDirecciones; let i = index"
                              [class.selected]="direccionSeleccionada === dir.id">
                             <input class="dir-radio" type="radio" name="direccion-envio"
                                 [value]="dir.id" [checked]="direccionSeleccionada === dir.id"
+                                [attr.data-narrator-label]="'Dirección guardada ' + (i + 1)"
                                 [attr.aria-labelledby]="'dir-alias-' + dir.id"
                                 [attr.aria-describedby]="'dir-detail-' + dir.id"
                                 (change)="onDireccionChange(dir.id ?? null)" />
@@ -119,7 +120,7 @@
                 <div class="card-head">
                     <div class="step-head-icon payment"><i class="pi pi-credit-card" aria-hidden="true"></i></div>
                     <div>
-                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1">Método de pago</h2>
+                        <h2 class="card-title" id="checkout-step-heading" tabindex="-1" data-narrator-heading>Método de pago</h2>
                         <span class="card-subtitle">Elige cómo quieres pagar</span>
                     </div>
                 </div>
@@ -351,7 +352,7 @@
             <div class="success-ring"></div>
             <div class="success-check"><i class="pi pi-check"></i></div>
         </div>
-        <h1 class="success-title" id="checkout-step-heading" tabindex="-1">¡Pedido confirmado!</h1>
+        <h1 class="success-title" id="checkout-step-heading" tabindex="-1" data-narrator-heading>¡Pedido confirmado!</h1>
         <p class="success-subtitle">
             Tu pedido <strong>#{{ ventaId }}</strong> fue registrado correctamente.
             Recibirás actualizaciones sobre el estado de tu despacho.
@@ -412,6 +413,7 @@
 
 <!-- Quick-add address dialog -->
 <p-dialog [(visible)]="showDirDialog" [modal]="true" [draggable]="false" [resizable]="false"
+    [attr.data-narrator-context]="showDirDialog ? 'nueva-direccion' : null" data-narrator-title="Nueva dirección"
     (onHide)="validationMessage = ''"
     [closable]="!guardandoDir" [closeOnEscape]="!guardandoDir" ariaLabelledBy="checkout-address-title" [style]="{ width: 'min(34rem, 96vw)' }"
     [transitionOptions]="'200ms ease-out'">
@@ -474,5 +476,6 @@
                 <span>{{ guardandoDir ? 'Guardando...' : 'Guardar dirección' }}</span>
             </button>
         </div>
+        <app-narrator-toggle></app-narrator-toggle>
     </ng-template>
 </p-dialog>

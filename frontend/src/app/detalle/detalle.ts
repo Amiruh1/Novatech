@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -9,6 +9,7 @@ import { PreferencesService } from '../services/preferences';
 import { MessageService } from 'primeng/api';
 import { ProductModel, precioFinal, porcentajeDescuento, cuotaReferencial, tieneOferta } from '../core/models/product.model';
 import { SpeechService } from '../core/services/speech.service';
+import { NarratorToggle } from '../accessibility/narrator-toggle';
 
 import { ButtonModule }      from 'primeng/button';
 import { DialogModule }      from 'primeng/dialog';
@@ -31,12 +32,13 @@ interface ProductReview {
   imports: [
     CommonModule, ButtonModule, DialogModule,
     FormsModule, RouterModule, RatingModule,
-    TextareaModule, SkeletonModule
+    TextareaModule, SkeletonModule, NarratorToggle
   ],
   templateUrl: './detalle.html',
   styleUrl: './detalle.scss'
 })
 export class Detalle implements OnInit, OnDestroy {
+  @ViewChild('zoomDialog', { read: ElementRef }) private zoomDialog?: ElementRef<HTMLElement>;
   readonly speech = inject(SpeechService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
@@ -177,6 +179,11 @@ export class Detalle implements OnInit, OnDestroy {
   irAlCarro()       { this.displayModal = false; this.router.navigate(['/carrito']); }
   seguirComprando() { this.displayModal = false; this.router.navigate(['/tienda']); }
   abrirZoomImagen() { this.displayImageZoom = true; }
+
+  enfocarCierreZoom() {
+    setTimeout(() => this.zoomDialog?.nativeElement
+      .querySelector<HTMLElement>('.p-dialog-close-button, .p-dialog-header-actions button')?.focus());
+  }
 
   escucharProducto() {
     if (!this.product) return;

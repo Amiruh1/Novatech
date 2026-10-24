@@ -1,0 +1,26 @@
+:host { display: block; }
+
+.narrator-toggle {
+  min-height: 44px;
+  margin-top: .5rem;
+  padding: .35rem .5rem;
+  border: 0;
+  background: transparent;
+  color: #6254d8;
+  font: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  &:focus-visible { outline: 3px solid #6254d8; outline-offset: 3px; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .narrator-toggle:hover { color: #5748ca; }
+}
+
+@media (forced-colors: active) {
+  .narrator-toggle { color: LinkText; }
+}

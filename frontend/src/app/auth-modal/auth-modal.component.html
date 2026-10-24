@@ -1,5 +1,7 @@
 <p-dialog
     [(visible)]="visible"
+    [attr.data-narrator-context]="visible ? 'cuenta' : null"
+    [attr.data-narrator-title]="authView === 'register' ? 'Crear cuenta' : authView === 'login' ? 'Iniciar sesión' : 'Recuperar contraseña'"
     [modal]="true"
     [dismissableMask]="!loading"
     [closable]="!loading"
@@ -174,7 +176,7 @@
                 <!-- Google Sign-In — botón oficial (renderButton, compatible con todos los navegadores) -->
                 <div class="auth-divider"><span>o continúa con</span></div>
                 <div class="google-btn-wrap">
-                    <div id="google-btn-login"></div>
+                    <div id="google-btn-login" data-narrator-label="Continuar con Google"></div>
                 </div>
             </ng-container>
 
@@ -206,6 +208,8 @@
                         <label for="am-document-type">Tipo de documento</label>
                         <p-select
                             inputId="am-document-type"
+                            data-narrator-label="Tipo de documento"
+                            data-narrator-options="publicas"
                             [options]="tiposDocumento"
                             [(ngModel)]="registerTipoDocumento"
                             [disabled]="loading"
@@ -274,7 +278,7 @@
                 <!-- Google Sign-In — botón oficial (renderButton, compatible con todos los navegadores) -->
                 <div class="auth-divider"><span>o regístrate con</span></div>
                 <div class="google-btn-wrap">
-                    <div id="google-btn-register"></div>
+                    <div id="google-btn-register" data-narrator-label="Continuar con Google"></div>
                 </div>
             </ng-container>
 
@@ -383,6 +387,7 @@
                 </div>
             </ng-container>
 
+            <app-narrator-toggle></app-narrator-toggle>
         </section>
     </div>
 </p-dialog>

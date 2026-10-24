@@ -104,7 +104,7 @@
                 </button>
                 <button type="button" class="product-speech-btn" *ngIf="speech.enabled()" (click)="speech.stop()">
                     <i class="pi pi-stop" aria-hidden="true"></i>
-                    Detener voz
+                    Detener lectura
                 </button>
             </div>
 
@@ -333,6 +333,7 @@
 
 <!-- ── Dialog: "Producto agregado" ──────────────────────────────── -->
 <p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
+    [attr.data-narrator-context]="displayModal ? 'producto-agregado' : null" data-narrator-title="Producto agregado"
     [style]="{ width: 'min(48rem, 96vw)' }" [transitionOptions]="'200ms ease-out'"
     aria-labelledby="modal-added-title">
     <ng-template pTemplate="header">
@@ -382,11 +383,14 @@
                 <span>Ver carrito</span>
             </button>
         </div>
+        <app-narrator-toggle></app-narrator-toggle>
     </ng-template>
 </p-dialog>
 
 <!-- ── Dialog: Zoom de imagen ─────────────────────────────────────── -->
-<p-dialog [(visible)]="displayImageZoom" [modal]="true" [draggable]="false" [resizable]="false"
+<p-dialog #zoomDialog [(visible)]="displayImageZoom" [modal]="true" [draggable]="false" [resizable]="false"
+    [attr.data-narrator-context]="displayImageZoom ? 'vista-ampliada' : null" data-narrator-title="Vista ampliada"
+    [focusOnShow]="false" (onShow)="enfocarCierreZoom()"
     [style]="{ width: 'min(70rem, 98vw)' }" [transitionOptions]="'200ms ease-out'"
     aria-labelledby="modal-zoom-title">
     <ng-template pTemplate="header">
@@ -401,6 +405,7 @@
     <div class="zoom-container" *ngIf="product">
         <img [src]="product?.imagen" [alt]="product?.nombre + ' — vista ampliada'" class="zoom-image">
     </div>
+    <app-narrator-toggle></app-narrator-toggle>
 </p-dialog>
 
 <!-- ── Mobile sticky buy bar ──────────────────────────────────────── -->

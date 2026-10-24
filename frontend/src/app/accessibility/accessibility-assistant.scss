@@ -94,6 +94,13 @@
 
 .a11y-voice-details { margin-top: .75rem !important; font-size: .75rem; line-height: 1.6; overflow-wrap: anywhere; }
 .a11y-voice-details span { display: block; }
+.a11y-narrator-box { margin-top: .75rem; }
+.a11y-narrator-status {
+  color: var(--a11y-action);
+  font-size: .75rem;
+  line-height: 1.6;
+  &:not(:empty) { margin-top: .75rem; }
+}
 
 .a11y-options {
   display: grid;

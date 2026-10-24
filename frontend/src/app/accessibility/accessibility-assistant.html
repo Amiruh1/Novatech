@@ -4,7 +4,7 @@
     <i class="pi pi-times" aria-hidden="true"></i>
   </button>
   <div class="a11y-heading">
-    <h1 #heading id="a11y-title" tabindex="-1" autofocus>¿Cómo prefieres navegar?</h1>
+    <h1 #heading id="a11y-title" tabindex="-1" autofocus data-narrator-heading>¿Cómo prefieres navegar?</h1>
     <p id="a11y-intro">Elige las ayudas que necesites. Puedes activar ambas.</p>
   </div>
   <div class="a11y-voice-box">
@@ -20,7 +20,7 @@
       {{ speech.enabled() ? 'Repetir guía' : 'Escuchar guía' }}
     </button>
     @if (speech.enabled()) {
-      <button type="button" class="a11y-button a11y-secondary" (click)="disableVoice()">Detener voz</button>
+      <button type="button" class="a11y-button a11y-secondary" (click)="disableVoice()">Detener lectura</button>
     }
   </div>
   @if (speech.enabled()) {
@@ -30,6 +30,20 @@
       @if (!speech.loadingVoice() && speech.voiceNotice()) { <span>{{ speech.voiceNotice() }}</span> }
     </p>
   }
+  <div class="a11y-voice-box a11y-narrator-box">
+    <div class="a11y-voice-copy">
+      <span class="a11y-voice-icon" aria-hidden="true"><i class="pi pi-megaphone"></i></span>
+      <div>
+        <strong>Narrar controles al navegar</strong>
+        <p id="a11y-narrator-help">Escucha el nombre de cada control al moverte por la página.</p>
+      </div>
+    </div>
+    <button type="button" class="a11y-button a11y-voice" aria-describedby="a11y-narrator-help" (click)="toggleNarrator()">
+      <i class="pi" [class.pi-volume-off]="narrator.armed()" [class.pi-megaphone]="!narrator.armed()" aria-hidden="true"></i>
+      {{ narrator.toggleLabel() }}
+    </button>
+  </div>
+  <p class="a11y-narrator-status" role="status">{{ narrator.statusText() }}</p>
   <p class="a11y-message" role="status">{{ speech.error() || notice() || accessibility.storageNotice() }}</p>
   <fieldset class="a11y-options">
     <legend>Elige tus ayudas</legend>
@@ -39,7 +53,7 @@
         <strong>Texto y contraste</strong>
         <span id="a11y-reading-description">Letras más grandes y colores fáciles de distinguir.</span>
       </span>
-      <input type="checkbox" [checked]="reading()" (change)="reading.set($any($event.target).checked)" aria-describedby="a11y-reading-description">
+      <input type="checkbox" [checked]="reading()" (change)="reading.set($any($event.target).checked)" aria-describedby="a11y-reading-description" data-narrator-label="Texto y contraste">
     </label>
     <label class="a11y-option" [class.a11y-selected]="navigation()">
       <span class="a11y-option-icon" aria-hidden="true"><i class="pi pi-arrows-alt"></i></span>
@@ -47,7 +61,7 @@
         <strong>Controles amplios y navegación</strong>
         <span id="a11y-navigation-description">Botones más grandes y navegación con Tab o las flechas.</span>
       </span>
-      <input type="checkbox" [checked]="navigation()" (change)="navigation.set($any($event.target).checked)" aria-describedby="a11y-navigation-description">
+      <input type="checkbox" [checked]="navigation()" (change)="navigation.set($any($event.target).checked)" aria-describedby="a11y-navigation-description" data-narrator-label="Controles amplios y navegación">
     </label>
   </fieldset>
   <p class="a11y-keyboard-help"><kbd>Tab</kbd> avanza · <kbd>Shift + Tab</kbd> retrocede · <kbd>Espacio</kbd> marca · <kbd>Enter</kbd> activa botones.</p>

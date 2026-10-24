@@ -30,6 +30,20 @@ div.swal2-container.nt-alert-container {
     cursor: pointer;
   }
   .nt-alert-cancel { color: #5e5873; border-color: #b5b0c3; background: #fff; }
+  .nt-alert-narrator {
+    flex-basis: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: .35rem .5rem;
+    border: 0;
+    background: transparent;
+    color: #6254d8;
+    font: 500 .875rem/1.4 'NT Accessibility Montserrat', Helvetica, Arial, sans-serif;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .nt-alert-narrator[hidden] { display: none; }
   .nt-alert-close { width: 44px; height: 44px; color: #5e5873; font-family: inherit; }
   :is(button, a):focus-visible { outline: 3px solid #6254d8; outline-offset: 3px; box-shadow: none; }
   .swal2-icon.swal2-info, .swal2-icon.swal2-question { color: #6254d8; border-color: #d4cffb; }

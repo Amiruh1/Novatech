@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, effect, ElementRef, inject, OnDestroy, signal, untracked, viewChild } from '@angular/core';
 import { AccessibilityService } from '../core/services/accessibility.service';
+import { ControlNarratorService } from '../core/services/control-narrator.service';
 import { SpeechService } from '../core/services/speech.service';
 import { moveFocusWithArrow } from './arrow-navigation';
 
@@ -8,6 +9,7 @@ const GUIDE = 'Guía por voz activada. Usa Tab para avanzar y Shift más Tab par
   + 'También puedes usar flecha abajo o derecha para avanzar, y arriba o izquierda para retroceder en este asistente. '
   + 'Activa el botón seleccionado con Enter y marca las ayudas con Espacio. '
   + 'Puedes elegir Texto y contraste, Controles amplios y navegación, o ambas opciones. '
+  + 'Si prefieres escuchar el nombre de cada control al moverte, usa Activar narrador. '
   + 'Después activa Aplicar y continuar. La tecla K o Escape cierra esta guía y detiene la voz. '
   + 'En la tienda encontrarás botones Escuchar para leer información de los productos.';
 
@@ -20,6 +22,7 @@ const GUIDE = 'Guía por voz activada. Usa Tab para avanzar y Shift más Tab par
 export class AccessibilityAssistant implements OnDestroy {
   readonly accessibility = inject(AccessibilityService);
   readonly speech = inject(SpeechService);
+  readonly narrator = inject(ControlNarratorService);
   private readonly document = inject(DOCUMENT);
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('welcome');
   private readonly title = viewChild<ElementRef<HTMLElement>>('heading');
@@ -34,12 +37,12 @@ export class AccessibilityAssistant implements OnDestroy {
     effect(() => {
       const element = this.dialog()?.nativeElement;
       const open = this.accessibility.panelOpen();
-      const preferences = this.accessibility.preferences();
       if (!element) return;
       if (open) {
-        this.reading.set(preferences.reading);
-        this.navigation.set(preferences.navigation);
         if (!element.open) {
+          const preferences = untracked(() => this.accessibility.preferences());
+          this.reading.set(preferences.reading);
+          this.navigation.set(preferences.navigation);
           this.returnFocus = this.document.activeElement instanceof HTMLElement
             && this.document.activeElement !== this.document.body ? this.document.activeElement : null;
           this.notice.set('');
@@ -62,6 +65,11 @@ export class AccessibilityAssistant implements OnDestroy {
     requestAnimationFrame(() => this.voiceButton()?.nativeElement.focus());
   }
 
+  toggleNarrator(): void {
+    this.notice.set('');
+    this.narrator.toggle();
+  }
+
   apply(): void {
     this.accessibility.setPreferences({ reading: this.reading(), navigation: this.navigation() });
     this.speech.stop();
@@ -69,6 +77,7 @@ export class AccessibilityAssistant implements OnDestroy {
   }
 
   skip(): void {
+    this.narrator.disarm();
     this.speech.disable();
     this.accessibility.closePanel();
   }
@@ -81,7 +90,8 @@ export class AccessibilityAssistant implements OnDestroy {
   reset(): void {
     this.reading.set(false);
     this.navigation.set(false);
-    this.accessibility.setPreferences({ reading: false, navigation: false });
+    this.narrator.reset();
+    this.accessibility.setPreferences({ reading: false, navigation: false, narrator: false });
     this.speech.disable();
     this.notice.set('Vista habitual restaurada. Puedes elegir otras ayudas o continuar.');
   }

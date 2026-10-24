@@ -19,6 +19,7 @@ import { SelectModule }      from 'primeng/select';
 import { InputTextModule }   from 'primeng/inputtext';
 import { TextareaModule }    from 'primeng/textarea';
 import { DialogModule }      from 'primeng/dialog';
+import { NarratorToggle } from '../accessibility/narrator-toggle';
 
 interface MetodoPagoOption {
   label: string;
@@ -57,7 +58,7 @@ const successAnim = trigger('successAnim', [
   imports: [
     CommonModule, FormsModule, RouterModule,
     ButtonModule, SelectModule, InputTextModule,
-    TextareaModule, DialogModule
+    TextareaModule, DialogModule, NarratorToggle
   ],
   templateUrl: './checkout.html',
   styleUrl:    './checkout.scss',
