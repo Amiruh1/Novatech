@@ -12,6 +12,8 @@ El asistente aparece al abrir o recargar la página. No vuelve a interrumpir al 
 | Tecla | Acción |
 | --- | --- |
 | F, dentro del asistente | Escuchar la guía en español |
+| N, dentro del asistente | Cerrar el asistente y conversar por voz con Nova |
+| Alt + N, en la tienda | Abrir Nova y empezar o terminar la conversación por voz |
 | K o Escape, dentro del asistente | Cerrar el aviso y desactivar la voz, conservando las ayudas ya guardadas |
 | Tab / Shift + Tab | Avanzar / retroceder entre controles |
 | ↓ o → / ↑ o ← | Siguiente / anterior en el asistente y en el catálogo; en otras páginas, con Controles amplios y navegación activo |
@@ -41,6 +43,20 @@ Ayuda opcional que dice el nombre, el tipo y el estado del control que recibe el
 - **Privacidad:** nunca lee lo escrito en un campo, contraseñas, códigos ni datos de pago. Las direcciones guardadas se anuncian como «Dirección guardada 1, 2…», sin alias ni datos personales. Los textos no se guardan ni se envían a ningún servicio de la tienda; la voz la genera el navegador, que puede usar voces locales o del sistema en línea.
 
 Si el navegador no permite iniciar la voz, el narrador se apaga y muestra «Reactivar narrador»; no reintenta en cada movimiento.
+
+### Nova, asistente de la tienda
+
+El botón **Hablar con Nova** aparece en `/tienda`, `/producto/:id`, `/carrito` y `/checkout`. Abre un panel lateral donde se escriben preguntas sobre la tienda y el catálogo, por ejemplo «monitor de menos de 1500 soles», «¿cuál de esos cuesta menos?» o «¿cómo pago mi pedido?».
+
+- **Respuestas:** las dudas de uso salen de guías verificadas con el flujo real de la tienda. Los productos, precios y stock salen siempre del catálogo; Nova no inventa precios, envíos ni políticas y, si no tiene un dato, lo dice.
+- **IA:** con `OPENAI_API_KEY` en `backend/.env`, el backend usa OpenAI solo para entender preguntas libres y explicar conceptos generales de tecnología. El servidor valida categorías, marcas y temas antes de consultar el catálogo. Sin clave, o si OpenAI falla o tarda más de 12 segundos, Nova responde con sus reglas propias.
+- **Botones:** las respuestas pueden ofrecer acciones como Ver carrito, Abrir accesibilidad o Ir al buscador. Nova no compra, no vacía el carrito ni modifica datos.
+- **Botones:** el botón **+** abre preguntas rápidas y accesos directos, y después de cada respuesta aparecen preguntas de seguimiento; basta tocarlas para enviarlas.
+- **Conversación por voz:** **Hablar**, la tecla **N** del asistente de accesibilidad o **Alt + N** inician una conversación sin manos, pensada también para personas ciegas: Nova saluda, suena un tono cuando es tu turno y responde con una voz algo más rápida. Nova envía la pregunta cuando dejas de hablar 3 segundos, responde en voz alta con el micrófono cerrado y vuelve a escucharte. Decir «terminar» o «adiós», pulsar **Terminar** o **Alt + N** la cierra, y decir «repite» vuelve a leer la última respuesta; también se cierra al cerrar el panel, al ocultar la pestaña o tras unos 20 segundos sin oír nada. Funciona en navegadores con reconocimiento de voz, como Chrome o Edge, que procesan el audio con sus propios servicios. Mientras dura, el narrador se pausa.
+- **Privacidad:** antes de enviar una pregunta a OpenAI se ocultan correos y números largos. La conversación vive solo en la pestaña: **Borrar conversación** la elimina y no se guarda en la base de datos.
+- **Límites:** preguntas de hasta 1000 caracteres y 20 preguntas por minuto por equipo.
+
+Configuración en `backend/.env` (ver `.env.ejemplo`): `OPENAI_API_KEY` y, opcionalmente, `OPENAI_MODEL` (por defecto `gpt-4.1-mini`). Después de cambiarlos, reiniciar el backend. Conviene fijar un límite de gasto mensual en la cuenta de OpenAI.
 
 ## Ejecutar la web
 

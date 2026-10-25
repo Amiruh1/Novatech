@@ -12,6 +12,7 @@ import direccionesRoutes from './src/routes/direcciones.routes';
 import bannersRoutes from './src/routes/banners.routes';
 import categoriesRoutes from './src/routes/categories.routes';
 import marcasRoutes from './src/routes/marcas.routes';
+import assistantRoutes from './src/routes/assistant.routes';
 import { errorHandler, notFoundHandler } from './src/middlewares/error.middleware';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api', direccionesRoutes);
 app.use('/api/banners', bannersRoutes);
 app.use('/api', categoriesRoutes);
 app.use('/api', marcasRoutes);
+app.use('/api', assistantRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

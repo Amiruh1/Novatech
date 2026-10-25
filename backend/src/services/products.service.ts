@@ -101,6 +101,15 @@ export async function listProducts(options: { query?: string; categoria?: string
   return { data: rows, total };
 }
 
+export async function listProductsByIds(ids: number[]) {
+  if (!ids.length) return [];
+  const [rows] = await db.query(
+    `SELECT ${CATALOG_COLUMNS} FROM vw_productos_catalogo WHERE activo = 1 AND id IN (?)`,
+    [ids]
+  );
+  return rows as any[];
+}
+
 export async function listSubcategories() {
   const [rows] = await db.query(
     `SELECT sc.id, sc.nombre, sc.slug, c.nombre AS categoria_nombre

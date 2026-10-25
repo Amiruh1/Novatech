@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationStart, Router } from '@angular/router';
 import { filter, Subject } from 'rxjs';
 
-type SpeechChannel = 'manual' | 'narration';
+type SpeechChannel = 'manual' | 'narration' | 'conversation';
 
 export interface NarrationHooks {
   onStart?: () => void;
@@ -41,6 +41,7 @@ export class SpeechService {
   readonly speaking = signal(false);
   readonly manualActive = signal(false);
   readonly narrating = signal(false);
+  readonly conversing = signal(false);
   readonly loadingVoice = signal(false);
   readonly voiceName = signal('');
   readonly voiceLanguage = signal('');
@@ -91,6 +92,21 @@ export class SpeechService {
     this.schedule({ channel: 'manual', text: content, id: ++this.request });
   }
 
+  converse(text: string): boolean {
+    this.stop();
+    if (!this.supported || !this.synth) return false;
+    const content = text.replace(/\s+/g, ' ').trim().slice(0, 2000);
+    if (!content) return false;
+    this.manualActive.set(true);
+    this.conversing.set(true);
+    this.schedule({ channel: 'conversation', text: content, id: ++this.request });
+    return true;
+  }
+
+  stopConversation(): void {
+    if (this.conversing()) this.stop();
+  }
+
   narrate(text: string, guard: () => boolean, hooks: NarrationHooks = {}): boolean {
     if (!this.supported || !this.synth) {
       hooks.onFail?.('unsupported');
@@ -122,6 +138,7 @@ export class SpeechService {
     this.synth?.cancel();
     this.speaking.set(false);
     this.narrating.set(false);
+    this.conversing.set(false);
     this.manualActive.set(false);
     if (manualWasActive) this.manualStopped.next();
   }
@@ -155,8 +172,9 @@ export class SpeechService {
   private speak(request: SpeechRequest, voice: SpeechSynthesisVoice | undefined): void {
     if (this.pending === request) this.clearPending();
     if (request.id !== this.request || !this.synth) return;
-    const manual = request.channel === 'manual';
-    if (manual && !this.enabled()) {
+    const manual = request.channel !== 'narration';
+    const conversation = request.channel === 'conversation';
+    if (request.channel === 'manual' && !this.enabled()) {
       this.manualActive.set(false);
       return;
     }
@@ -164,7 +182,7 @@ export class SpeechService {
     const utterance = new SpeechSynthesisUtterance(request.text);
     if (voice) utterance.voice = voice;
     utterance.lang = voice?.lang || 'es-MX';
-    utterance.rate = 0.95;
+    utterance.rate = conversation ? 1.15 : 0.95;
     this.voiceName.set(voice?.name || 'Voz del navegador');
     this.voiceLanguage.set(voice?.lang || '');
     if (manual) this.voiceNotice.set(this.describeFallback(voice));
@@ -178,6 +196,7 @@ export class SpeechService {
       this.current = null;
       if (manual) {
         this.speaking.set(false);
+        this.conversing.set(false);
         this.manualActive.set(false);
         this.manualFinished.next();
       } else {
@@ -190,8 +209,9 @@ export class SpeechService {
       const cancelled = event.error === 'canceled' || event.error === 'interrupted';
       if (manual) {
         this.speaking.set(false);
+        this.conversing.set(false);
         this.manualActive.set(false);
-        if (!cancelled) this.error.set('No se pudo reproducir la voz. Intenta de nuevo con el botón Escuchar o continúa con la guía escrita.');
+        if (!cancelled && !conversation) this.error.set('No se pudo reproducir la voz. Intenta de nuevo con el botón Escuchar o continúa con la guía escrita.');
         return;
       }
       this.narrating.set(false);
@@ -203,8 +223,9 @@ export class SpeechService {
       this.current = null;
       if (manual) {
         this.speaking.set(false);
+        this.conversing.set(false);
         this.manualActive.set(false);
-        this.error.set('No se pudo iniciar la voz. Puedes continuar con los textos y botones.');
+        if (!conversation) this.error.set('No se pudo iniciar la voz. Puedes continuar con los textos y botones.');
       } else {
         this.narrating.set(false);
         request.onFail?.('synthesis-failed');

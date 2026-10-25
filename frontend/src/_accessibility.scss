@@ -207,7 +207,7 @@ body.a11y-reading {
   }
 
   :is(.tienda-shell, .detalle-shell, app-carrito, .checkout-shell,
-    .auth-modal-shell, .minicart-sidebar, .shell-topbar, .shell-sidebar) {
+    .auth-modal-shell, .minicart-sidebar, .shell-topbar, .shell-sidebar, app-nova-assistant) {
     &, *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-delay: 0ms !important;
@@ -220,7 +220,7 @@ body.a11y-reading {
 
 body.a11y-navigation {
   :is(.app-shell-page, .shell-topbar, .shell-sidebar, .bottom-nav,
-    .auth-modal-shell, .minicart-sidebar, .p-dialog, .checkout-mobile-bar) {
+    .auth-modal-shell, .minicart-sidebar, .p-dialog, .checkout-mobile-bar, app-nova-assistant) {
     :is(button, a[href], [role='button'], [role='radio'], select,
       input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
       textarea, .p-select) {

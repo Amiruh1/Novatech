@@ -12,7 +12,7 @@
       <span class="a11y-voice-icon" aria-hidden="true"><i class="pi pi-volume-up"></i></span>
       <div>
         <strong>Guía por voz</strong>
-        <p id="a11y-keys"><kbd>F</kbd> para escuchar · <kbd>K</kbd> para continuar sin voz.</p>
+        <p id="a11y-keys"><kbd>F</kbd> para escuchar · <kbd>N</kbd> para hablar con Nova · <kbd>K</kbd> para continuar sin voz.</p>
       </div>
     </div>
     <button #voiceButton type="button" class="a11y-button a11y-voice" aria-keyshortcuts="F" (click)="enableVoice()">
@@ -30,6 +30,19 @@
       @if (!speech.loadingVoice() && speech.voiceNotice()) { <span>{{ speech.voiceNotice() }}</span> }
     </p>
   }
+  <div class="a11y-voice-box a11y-narrator-box">
+    <div class="a11y-voice-copy">
+      <span class="a11y-voice-icon" aria-hidden="true"><i class="pi pi-comments"></i></span>
+      <div>
+        <strong>Conversar con Nova por voz</strong>
+        <p id="a11y-nova-help">Pregunta por productos o por cómo usar la tienda, sin teclado ni ratón. En la tienda también funciona <kbd>Alt + N</kbd>.</p>
+      </div>
+    </div>
+    <button type="button" class="a11y-button a11y-voice" aria-keyshortcuts="N" aria-describedby="a11y-nova-help" (click)="talkToNova()">
+      <i class="pi pi-microphone" aria-hidden="true"></i>
+      Hablar con Nova
+    </button>
+  </div>
   <div class="a11y-voice-box a11y-narrator-box">
     <div class="a11y-voice-copy">
       <span class="a11y-voice-icon" aria-hidden="true"><i class="pi pi-megaphone"></i></span>

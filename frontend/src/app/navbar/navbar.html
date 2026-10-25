@@ -53,6 +53,7 @@
         icon="pi pi-sign-in"
         class="logout-btn p-button-rounded p-button-help"
         [label]="!isCollapsedDesktop ? 'Iniciar sesion' : ''"
+        [attr.aria-label]="isCollapsedDesktop ? 'Iniciar sesión' : null"
         [pTooltip]="isCollapsedDesktop ? 'Iniciar sesion' : ''"
         tooltipPosition="right"
         (click)="goToLogin()"
@@ -65,6 +66,7 @@
         icon="pi pi-sign-out"
         class="logout-btn p-button-rounded p-button-danger"
         [label]="!isCollapsedDesktop ? 'Salir' : ''"
+        [attr.aria-label]="isCollapsedDesktop ? 'Cerrar sesión' : null"
         [pTooltip]="isCollapsedDesktop ? 'Cerrar sesion' : ''"
         tooltipPosition="right"
         (click)="logout()"
@@ -246,6 +248,7 @@
                         type="button"
                         class="notification-item"
                         *ngFor="let notification of filteredNotifications"
+                        [attr.data-narrator-label]="notification.title"
                         [class.unread]="!notification.read"
                         (click)="openNotification(notification)"
                     >

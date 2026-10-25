@@ -15,6 +15,7 @@ import { MessageService }     from 'primeng/api';
 import { AccessibilityToolbar } from '../../accessibility/accessibility-toolbar';
 import { AccessibilityService } from '../../core/services/accessibility.service';
 import { moveFocusWithArrow } from '../../accessibility/arrow-navigation';
+import { NovaAssistant } from '../../assistant/nova-assistant';
 
 // ── Route transition animation ────────────────────────────────────────────────
 // Sólo anima el :enter para evitar flashes de layout durante el :leave.
@@ -35,7 +36,7 @@ const routeAnim = trigger('routeAnim', [
 @Component({
   selector: 'app-shell-layout',
   standalone: true,
-  imports: [Navbar, RouterOutlet, RouterModule, AuthModalComponent, BottomNav, CommandPalette, AccessibilityToolbar],
+  imports: [Navbar, RouterOutlet, RouterModule, AuthModalComponent, BottomNav, CommandPalette, AccessibilityToolbar, NovaAssistant],
   templateUrl: './shell-layout.component.html',
   styleUrl:    './shell-layout.component.scss',
   animations:  [routeAnim]

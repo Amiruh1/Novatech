@@ -1,0 +1,178 @@
+@if (onStoreRoute()) {
+  <button #launcher type="button" class="nova-launcher" [style.bottom.px]="lift()"
+    [attr.aria-expanded]="open()" aria-keyshortcuts="Alt+N" title="Alt + N: conversar por voz"
+    data-narrator-label="Hablar con Nova. Atajo para conversar por voz: Alt más N" (click)="openPanel()">
+    <i class="pi pi-comments" aria-hidden="true"></i>
+    <span class="nova-launcher-text">Hablar con Nova</span>
+    <kbd class="nova-launcher-kbd" aria-hidden="true">Alt + N</kbd>
+  </button>
+}
+
+<div class="nova-host" [attr.data-narrator-context]="open() ? 'nova' : null" data-narrator-title="Nova, asistente de la tienda">
+  <p-drawer
+    [visible]="open()"
+    (visibleChange)="open.set($event)"
+    position="right"
+    styleClass="nova-drawer"
+    [style]="{ width: 'min(28rem, 100vw)' }"
+    ariaCloseLabel="Cerrar Nova"
+    [blockScroll]="true"
+    (onShow)="onShow()"
+    (onHide)="onHide()"
+  >
+    <ng-template #header>
+      <div class="nova-header">
+        <span class="nova-avatar" aria-hidden="true"><i class="pi pi-sparkles"></i></span>
+        <div>
+          <h2 id="nova-title">Nova</h2>
+          <p>Asistente de NovaTech</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <div class="nova-body">
+      <div #log class="nova-log" role="log" aria-labelledby="nova-title" (scroll)="onLogScroll()">
+        <div class="nova-msg nova-msg--assistant">
+          <p>Hola, soy Nova. Puedo ayudarte a usar NovaTech y a encontrar productos.</p>
+        </div>
+
+        @for (message of conversation.messages(); track message.id) {
+          <div class="nova-msg" [class.nova-msg--user]="message.role === 'user'"
+            [class.nova-msg--assistant]="message.role === 'assistant'" [class.nova-msg--failed]="message.failed">
+            <span class="sr-only">{{ message.role === 'user' ? 'Tú dijiste:' : 'Nova:' }}</span>
+            @for (line of lines(message); track $index) {
+              <p>{{ line }}</p>
+            }
+
+            @if (message.products.length) {
+              <ul class="nova-products">
+                @for (product of message.products; track product.id) {
+                  <li>
+                    <a class="nova-product" [routerLink]="['/producto', product.id]" (click)="closeForLink()">
+                      @if (product.imagen) {
+                        <img [src]="product.imagen" alt="" loading="lazy">
+                      }
+                      <span class="nova-product-copy">
+                        <strong>{{ product.nombre }}</strong>
+                        <span class="nova-product-price">
+                          S/ {{ product.precioFinal | number:'1.2-2' }}
+                          @if (product.enOferta) {
+                            <s><span class="sr-only">antes </span>S/ {{ product.precio | number:'1.2-2' }}</s>
+                          }
+                        </span>
+                        <small [class.nova-out]="!product.disponible">{{ product.disponible ? 'Disponible' : 'Sin stock' }}</small>
+                      </span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (message.actions.length) {
+              <div class="nova-actions">
+                @for (action of message.actions; track action.id + '-' + (action.productId ?? '')) {
+                  <button type="button" (click)="run(action)">{{ action.label }}</button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (!conversation.messages().length) {
+          <div class="nova-chips" role="group" aria-label="Preguntas sugeridas">
+            @for (suggestion of suggestions; track suggestion) {
+              <button type="button" (click)="ask(suggestion)">{{ suggestion }}</button>
+            }
+          </div>
+        }
+
+        @if (followUps().length) {
+          <div class="nova-chips" role="group" aria-label="Siguientes preguntas sugeridas">
+            @for (option of followUps(); track option) {
+              <button type="button" (click)="ask(option)">{{ option }}</button>
+            }
+          </div>
+        }
+
+        @if (conversation.loading()) {
+          <div class="nova-msg nova-msg--assistant nova-typing">
+            <span class="nova-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <p>Nova está buscando…</p>
+          </div>
+        }
+      </div>
+
+      @if (quickOpen()) {
+        <div id="nova-quick" class="nova-quick" (keydown)="closeQuick($event)">
+          <p class="nova-quick-title">Pregúntale a Nova</p>
+          <div class="nova-chips" role="group" aria-label="Preguntas rápidas">
+            @for (question of quickQuestions; track question) {
+              <button type="button" [disabled]="conversation.loading()" (click)="ask(question)">{{ question }}</button>
+            }
+          </div>
+          <p class="nova-quick-title">Ir directo a</p>
+          <div class="nova-chips nova-chips--actions" role="group" aria-label="Accesos directos">
+            @for (action of quickActions; track action.id) {
+              <button type="button" (click)="runQuick(action)">{{ action.label }}</button>
+            }
+          </div>
+        </div>
+      }
+
+      <form class="nova-compose" (submit)="submit($event)">
+        <button #quickToggle type="button" class="nova-plus" [class.nova-plus--on]="quickOpen()"
+          aria-label="Opciones rápidas" aria-controls="nova-quick" [attr.aria-expanded]="quickOpen()" (click)="toggleQuick()">
+          <i class="pi pi-plus" aria-hidden="true"></i>
+        </button>
+        @if (voice.supported) {
+          <button type="button" class="nova-mic" [class.nova-mic--on]="handsFree()" [class.nova-mic--live]="phase() === 'listening'"
+            [disabled]="!handsFree() && conversation.loading()" (click)="toggleMic()">
+            <i class="pi" [class.pi-microphone]="!handsFree()" [class.pi-stop-circle]="handsFree()" aria-hidden="true"></i>
+            <span>{{ handsFree() ? 'Terminar' : 'Hablar' }}</span>
+          </button>
+        }
+        <label class="sr-only" for="nova-input">Escribe tu pregunta para Nova</label>
+        <input #input id="nova-input" type="text" maxlength="1000" autocomplete="off"
+          placeholder="Escribe tu pregunta…" [value]="draft()" (input)="draft.set(input.value)">
+        <button type="submit" class="nova-send" [disabled]="!draft().trim() || conversation.loading()">
+          <i class="pi pi-send" aria-hidden="true"></i>
+          <span>Enviar</span>
+        </button>
+      </form>
+
+      <div class="nova-voice" [class.nova-voice--on]="handsFree()">
+        <p class="nova-voice-status" role="status">{{ voiceStatus() }}</p>
+        @if (phase() === 'listening' && voice.transcript()) {
+          @for (tick of [voice.heardTick()]; track tick) {
+            <span class="nova-silence" aria-hidden="true" [style.animation-duration.s]="silenceSeconds"></span>
+          }
+          <p class="nova-voice-hint">Se envía cuando dejes de hablar {{ silenceSeconds }} segundos.</p>
+        }
+      </div>
+
+      <div class="nova-tools">
+        @if (conversation.loading()) {
+          <button type="button" (click)="conversation.cancel()">Cancelar consulta</button>
+        }
+        @if (speech.supported) {
+          <button type="button" class="nova-toggle" [attr.aria-pressed]="readAloud()" (click)="toggleReadAloud()">
+            <i class="pi" [class.pi-volume-up]="readAloud()" [class.pi-volume-off]="!readAloud()" aria-hidden="true"></i>
+            Leer respuestas en voz alta
+          </button>
+        }
+        @if (speech.conversing()) {
+          <button type="button" (click)="speech.stopConversation()">Detener respuesta</button>
+        }
+        <button type="button" (click)="clearConversation()" [disabled]="!conversation.messages().length">Borrar conversación</button>
+        <app-narrator-toggle></app-narrator-toggle>
+      </div>
+
+      <p class="nova-note">
+        Precios y stock salen del catálogo de la tienda. Para entender tus preguntas, Nova usa un servicio de IA externo: no escribas datos personales.
+        @if (voice.supported) {
+          Con «Hablar», Nova te escucha, envía tu pregunta cuando dejas de hablar {{ silenceSeconds }} segundos, responde en voz alta y vuelve a escucharte hasta que pulses «Terminar». El navegador convierte tu voz en texto (en Chrome, con servicios de Google).
+        }
+      </p>
+    </div>
+  </p-drawer>
+</div>

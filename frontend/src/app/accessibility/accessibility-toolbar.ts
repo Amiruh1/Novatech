@@ -80,7 +80,7 @@ export class AccessibilityToolbar {
 
   readGuide(): void {
     const path = this.router.url;
-    let text = 'Usa Tab para avanzar, Shift más Tab para retroceder y Enter para activar botones. ';
+    let text = 'Usa Tab para avanzar, Shift más Tab para retroceder y Enter para activar botones. Para conversar por voz con Nova, el asistente de la tienda, pulsa Alt más N. ';
     if (path.split(/[?#]/)[0] === '/tienda' || this.accessibility.preferences().navigation) {
       text += 'También puedes recorrer los controles con las flechas: abajo o derecha para avanzar, arriba o izquierda para retroceder. '
         + 'Dentro de campos, listas y rangos, las flechas mantienen su función habitual. Usa Tab para salir de ellos. ';

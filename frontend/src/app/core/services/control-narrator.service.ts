@@ -53,7 +53,7 @@ export class ControlNarratorService {
     return this.remembered() ? 'Narrador en pausa. Pulsa Reactivar narrador para volver a escucharlo.' : '';
   });
 
-  private suspended = false;
+  private readonly suspensions = new Set<string>();
   private generation = 0;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private observer: MutationObserver | null = null;
@@ -122,10 +122,13 @@ export class ControlNarratorService {
     });
 
     this.palette.isOpen$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(open => {
-      if (open === this.suspended) return;
-      this.suspended = open;
-      this.invalidate();
-      if (open && this.armedState()) this.stopAll();
+      if (!open) {
+        this.release('palette');
+        return;
+      }
+      if (this.suspensions.has('palette')) return;
+      this.suspend('palette');
+      if (this.armedState()) this.stopAll();
     });
 
     this.speech.manualFinished$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.resumeAfterManual());
@@ -196,6 +199,16 @@ export class ControlNarratorService {
     this.disarm();
     this.usedState.set(false);
     this.notice.set('');
+  }
+
+  suspend(reason: string): void {
+    if (this.suspensions.has(reason)) return;
+    this.suspensions.add(reason);
+    this.invalidate();
+  }
+
+  release(reason: string): void {
+    if (this.suspensions.delete(reason)) this.invalidate();
   }
 
   registerAlert(popup: HTMLElement, title: string): void {
@@ -295,7 +308,7 @@ export class ControlNarratorService {
         titleElement: assistant.querySelector('#a11y-title')
       };
     }
-    if (!this.routeState() || this.suspended) return null;
+    if (!this.routeState() || this.suspensions.size > 0) return null;
     const alert = this.openAlert();
     if (alert) {
       if (!alert.popup.contains(owner)) return null;
@@ -364,7 +377,7 @@ export class ControlNarratorService {
   }
 
   private isCurrent(element: HTMLElement, generation: number, epoch: number): boolean {
-    return this.armedState() && !this.suspended && generation === this.generation && epoch === this.speech.epoch
+    return this.armedState() && this.suspensions.size === 0 && generation === this.generation && epoch === this.speech.epoch
       && this.pageVisible() && element.isConnected && this.document.activeElement === element && this.isShown(element);
   }
 

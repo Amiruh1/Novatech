@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, effect, ElementRef, inject, OnDestroy, signal, untracked, viewChild } from '@angular/core';
 import { AccessibilityService } from '../core/services/accessibility.service';
 import { ControlNarratorService } from '../core/services/control-narrator.service';
+import { ConversationService } from '../core/services/conversation.service';
 import { SpeechService } from '../core/services/speech.service';
 import { moveFocusWithArrow } from './arrow-navigation';
 
@@ -10,6 +11,7 @@ const GUIDE = 'Guía por voz activada. Usa Tab para avanzar y Shift más Tab par
   + 'Activa el botón seleccionado con Enter y marca las ayudas con Espacio. '
   + 'Puedes elegir Texto y contraste, Controles amplios y navegación, o ambas opciones. '
   + 'Si prefieres escuchar el nombre de cada control al moverte, usa Activar narrador. '
+  + 'Para conversar con Nova, el asistente de la tienda, pulsa N: te escuchará y te responderá por voz. En la tienda también funciona Alt más N. '
   + 'Después activa Aplicar y continuar. La tecla K o Escape cierra esta guía y detiene la voz. '
   + 'En la tienda encontrarás botones Escuchar para leer información de los productos.';
 
@@ -23,6 +25,7 @@ export class AccessibilityAssistant implements OnDestroy {
   readonly accessibility = inject(AccessibilityService);
   readonly speech = inject(SpeechService);
   readonly narrator = inject(ControlNarratorService);
+  private readonly conversation = inject(ConversationService);
   private readonly document = inject(DOCUMENT);
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('welcome');
   private readonly title = viewChild<ElementRef<HTMLElement>>('heading');
@@ -76,6 +79,13 @@ export class AccessibilityAssistant implements OnDestroy {
     this.accessibility.closePanel();
   }
 
+  talkToNova(): void {
+    this.accessibility.setPreferences({ reading: this.reading(), navigation: this.navigation() });
+    this.speech.stop();
+    this.accessibility.closePanel();
+    this.conversation.requestVoice();
+  }
+
   skip(): void {
     this.narrator.disarm();
     this.speech.disable();
@@ -126,6 +136,10 @@ export class AccessibilityAssistant implements OnDestroy {
       event.preventDefault();
       event.stopPropagation();
       this.enableVoice();
+    } else if (event.key.toLowerCase() === 'n') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.talkToNova();
     } else if (event.key.toLowerCase() === 'k') {
       event.preventDefault();
       event.stopPropagation();

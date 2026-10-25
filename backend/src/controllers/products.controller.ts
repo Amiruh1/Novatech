@@ -11,6 +11,12 @@ import {
 } from '../services/products.service';
 import db from '../config/db';
 
+const PUBLIC_PRODUCT_COLUMNS = `
+  id, sku, nombre, slug, descripcion, categoria_id, subcategoria_id, marca_id,
+  categoria, marca, precio, precio_oferta, stock, imagen, galeria_json,
+  activo, destacado, creado_en, actualizado_en
+`;
+
 function parsePrice(value: unknown): number | null {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 99999999.99) {
@@ -35,7 +41,7 @@ export async function getProductById(req: Request, res: Response) {
     return res.status(400).json({ message: 'ID de producto inválido.' });
   }
   try {
-    const [rows]: any = await db.query('SELECT * FROM productos WHERE id = ?', [id]);
+    const [rows]: any = await db.query(`SELECT ${PUBLIC_PRODUCT_COLUMNS} FROM productos WHERE id = ?`, [id]);
     const producto = Array.isArray(rows) ? rows[0] : null;
     if (!producto) {
       return res.status(404).json({ message: 'Producto no encontrado.' });
