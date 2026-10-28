@@ -80,7 +80,9 @@ export class NovaAssistant {
   readonly voiceNotice = signal('');
   readonly voiceStatus = computed(() => {
     switch (this.phase()) {
-      case 'listening': return this.voice.transcript()
+      case 'listening': return this.voice.starting()
+        ? 'Preparando el micrófono. Si el navegador pide permiso, elige Permitir para este sitio.'
+        : this.voice.transcript()
         ? `Te escucho: «${this.voice.transcript()}»`
         : 'Te escucho… habla cuando quieras.';
       case 'thinking': return 'Enviando tu pregunta…';

@@ -47,7 +47,7 @@
                 </div>
                 <div class="stat-trend" [class.positive]="trendIngresos >= 0" [class.negative]="trendIngresos < 0"
                      *ngIf="trendIngresos !== 0; else ingresosNeutral">
-                    <i class="pi" [class.pi-trending-up]="trendIngresos >= 0" [class.pi-trending-down]="trendIngresos < 0" aria-hidden="true"></i>
+                    <i class="pi" [class.pi-arrow-up-right]="trendIngresos >= 0" [class.pi-arrow-down-right]="trendIngresos < 0" aria-hidden="true"></i>
                     {{ trendIngresosLabel }}
                 </div>
                 <ng-template #ingresosNeutral>
@@ -68,7 +68,7 @@
                 <div class="stat-value counter-value">{{ displayTotalPedidos }}</div>
                 <div class="stat-trend" [class.positive]="trendPedidos >= 0" [class.negative]="trendPedidos < 0"
                      *ngIf="trendPedidos !== 0; else pedidosNeutral">
-                    <i class="pi" [class.pi-trending-up]="trendPedidos >= 0" [class.pi-trending-down]="trendPedidos < 0" aria-hidden="true"></i>
+                    <i class="pi" [class.pi-arrow-up-right]="trendPedidos >= 0" [class.pi-arrow-down-right]="trendPedidos < 0" aria-hidden="true"></i>
                     {{ trendPedidosLabel }}
                 </div>
                 <ng-template #pedidosNeutral>

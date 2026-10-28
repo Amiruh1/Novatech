@@ -94,13 +94,14 @@ export class SpeechService {
 
   converse(text: string): boolean {
     this.stop();
+    this.error.set('');
     if (!this.supported || !this.synth) return false;
     const content = text.replace(/\s+/g, ' ').trim().slice(0, 2000);
     if (!content) return false;
     this.manualActive.set(true);
     this.conversing.set(true);
     this.schedule({ channel: 'conversation', text: content, id: ++this.request });
-    return true;
+    return this.conversing();
   }
 
   stopConversation(): void {
@@ -211,7 +212,9 @@ export class SpeechService {
         this.speaking.set(false);
         this.conversing.set(false);
         this.manualActive.set(false);
-        if (!cancelled && !conversation) this.error.set('No se pudo reproducir la voz. Intenta de nuevo con el botón Escuchar o continúa con la guía escrita.');
+        if (!cancelled) this.error.set(event.error === 'not-allowed'
+          ? 'El navegador bloqueó la voz. Permite el sonido en los permisos de este sitio y vuelve a intentarlo.'
+          : 'No se pudo reproducir la voz. Puedes seguir leyendo las respuestas o intentarlo de nuevo.');
         return;
       }
       this.narrating.set(false);
@@ -225,7 +228,7 @@ export class SpeechService {
         this.speaking.set(false);
         this.conversing.set(false);
         this.manualActive.set(false);
-        if (!conversation) this.error.set('No se pudo iniciar la voz. Puedes continuar con los textos y botones.');
+        this.error.set('No se pudo iniciar la voz. Puedes continuar con los textos y botones.');
       } else {
         this.narrating.set(false);
         request.onFail?.('synthesis-failed');

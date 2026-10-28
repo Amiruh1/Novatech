@@ -15,8 +15,8 @@ const MAX_TURN_MS = 45_000;
 const MAX_RESTARTS = 6;
 
 const ERROR_MESSAGES: Record<string, string> = {
-  'not-allowed': 'No se permitió usar el micrófono. Puedes escribir tu pregunta.',
-  'service-not-allowed': 'No se permitió usar el micrófono. Puedes escribir tu pregunta.',
+  'not-allowed': 'El micrófono está bloqueado para este sitio. Abre los permisos junto a la dirección, permite el micrófono y vuelve a pulsar Hablar.',
+  'service-not-allowed': 'El navegador bloqueó el servicio de dictado. Prueba en Chrome o Edge, o escribe tu pregunta.',
   'audio-capture': 'No se encontró un micrófono. Puedes escribir tu pregunta.',
   network: 'El dictado necesita conexión a internet. Puedes escribir tu pregunta.',
   'language-not-supported': 'El navegador no puede dictar en español. Puedes escribir tu pregunta.'
@@ -34,6 +34,7 @@ export class VoiceInputService {
   private silenceTimer: ReturnType<typeof setTimeout> | null = null;
   private session = 0;
   readonly supported = !!this.constructorRef;
+  readonly starting = signal(false);
   readonly listening = signal(false);
   readonly transcript = signal('');
   readonly heardTick = signal(0);
@@ -72,6 +73,13 @@ export class VoiceInputService {
       else handlers.onIdle?.();
     };
 
+    recognition.onstart = () => {
+      if (session !== this.session || done) return;
+      this.starting.set(false);
+      this.listening.set(true);
+      if (this.silenceTimer === null) this.silenceTimer = setTimeout(end, IDLE_MS);
+      if (this.turnTimer === null) this.turnTimer = setTimeout(end, MAX_TURN_MS);
+    };
     recognition.onresult = (event: any) => {
       if (session !== this.session || done) return;
       current = Array.from(event.results as ArrayLike<any>).map(result => result[0]?.transcript ?? '').join(' ');
@@ -108,16 +116,15 @@ export class VoiceInputService {
       }
     };
 
+    this.recognition = recognition;
+    this.starting.set(true);
     try {
       recognition.start();
     } catch {
+      this.stop();
       this.error.set('No se pudo iniciar el micrófono. Puedes escribir tu pregunta.');
       return false;
     }
-    this.recognition = recognition;
-    this.listening.set(true);
-    this.silenceTimer = setTimeout(end, IDLE_MS);
-    this.turnTimer = setTimeout(end, MAX_TURN_MS);
     return true;
   }
 
@@ -128,6 +135,7 @@ export class VoiceInputService {
     this.clearSilence();
     if (this.turnTimer !== null) clearTimeout(this.turnTimer);
     this.turnTimer = null;
+    this.starting.set(false);
     this.listening.set(false);
     try {
       recognition?.abort();

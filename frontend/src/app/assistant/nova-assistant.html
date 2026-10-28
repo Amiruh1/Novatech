@@ -125,7 +125,7 @@
           <i class="pi pi-plus" aria-hidden="true"></i>
         </button>
         @if (voice.supported) {
-          <button type="button" class="nova-mic" [class.nova-mic--on]="handsFree()" [class.nova-mic--live]="phase() === 'listening'"
+          <button type="button" class="nova-mic" [class.nova-mic--on]="handsFree()" [class.nova-mic--live]="voice.listening()"
             [disabled]="!handsFree() && conversation.loading()" (click)="toggleMic()">
             <i class="pi" [class.pi-microphone]="!handsFree()" [class.pi-stop-circle]="handsFree()" aria-hidden="true"></i>
             <span>{{ handsFree() ? 'Terminar' : 'Hablar' }}</span>
@@ -142,6 +142,9 @@
 
       <div class="nova-voice" [class.nova-voice--on]="handsFree()">
         <p class="nova-voice-status" role="status">{{ voiceStatus() }}</p>
+        @if (speech.error()) {
+          <p class="nova-voice-status" role="status">{{ speech.error() }}</p>
+        }
         @if (phase() === 'listening' && voice.transcript()) {
           @for (tick of [voice.heardTick()]; track tick) {
             <span class="nova-silence" aria-hidden="true" [style.animation-duration.s]="silenceSeconds"></span>
