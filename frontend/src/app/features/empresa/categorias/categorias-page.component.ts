@@ -12,6 +12,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ImageUploadComponent } from '../../../shared/image-upload/image-upload.component';
 
 @Component({
   selector: 'app-categorias-page',
@@ -26,7 +27,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     CheckboxModule,
     TagModule,
     TooltipModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ImageUploadComponent
   ],
   templateUrl: './categorias-page.component.html',
   styleUrl: './categorias-page.component.scss'
@@ -41,6 +43,7 @@ export class CategoriasPage implements OnInit {
   categorias: CategoriaModel[] = [];
   loading: boolean = true;
   guardando: boolean = false;
+  subiendoImagen = false;
 
   mostrarDialog: boolean = false;
   catActual: Partial<CategoriaModel> = {};
@@ -79,6 +82,7 @@ export class CategoriasPage implements OnInit {
   }
 
   guardar() {
+    if (this.subiendoImagen) return;
     if (!this.catActual.nombre) {
       this.messageService.add({ severity: 'warn', summary: 'Cuidado', detail: 'El nombre es obligatorio' });
       return;

@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import crypto from 'crypto';
 import { createUser, deactivateUser, listUsers, updateUser, setUserActivo } from '../services/users.service';
 import { sendEmail, buildWelcomeEmail } from '../utils/email.utils';
-import db from '../config/db';
+import * as usersService from '../services/users.service';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -38,12 +37,7 @@ export async function postUser(req: Request, res: Response) {
   try {
     const result = (await createUser({ nombre, email, password, rol: rol as any })) as { insertId: number };
 
-    const setupToken = crypto.randomBytes(32).toString('hex');
-    const expiry = new Date(Date.now() + 72 * 60 * 60 * 1000);
-    await db.query(
-      'UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
-      [setupToken, expiry, result.insertId]
-    );
+    const setupToken = await usersService.issueAccountSetupToken(result.insertId);
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
     const setupLink = `${frontendUrl}/reset-password?token=${setupToken}`;

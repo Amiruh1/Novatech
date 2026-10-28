@@ -1,5 +1,6 @@
-import db from '../config/db';
+import * as usersRepository from '../repositories/users.repository';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export interface UserInput {
   nombre: string;
@@ -9,9 +10,7 @@ export interface UserInput {
 }
 
 export async function listUsers() {
-  const [rows] = await db.query(
-    'SELECT id, nombre, email, rol, activo, creado_en, actualizado_en FROM usuarios ORDER BY id DESC'
-  );
+  const rows = await usersRepository.findUsers();
   return rows;
 }
 
@@ -22,10 +21,7 @@ export async function createUser(input: UserInput) {
   }
   const hash = await bcrypt.hash(input.password.trim(), 10);
 
-  const [result] = await db.query(
-    'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
-    [input.nombre, input.email, hash, rol]
-  );
+  const result = await usersRepository.insertUser(input.nombre, input.email, hash, rol);
 
   return result;
 }
@@ -33,28 +29,24 @@ export async function createUser(input: UserInput) {
 export async function updateUser(id: number, input: UserInput) {
   if (input.password && input.password.trim().length >= 8) {
     const hash = await bcrypt.hash(input.password.trim(), 10);
-    await db.query(
-      'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, password = ? WHERE id = ?',
-      [input.nombre, input.email, input.rol || 'cliente', hash, id]
-    );
+    await usersRepository.updateUserWithPassword(input.nombre, input.email, input.rol || 'cliente', hash, id);
   } else {
-    await db.query(
-      'UPDATE usuarios SET nombre = ?, email = ?, rol = ? WHERE id = ?',
-      [input.nombre, input.email, input.rol || 'cliente', id]
-    );
+    await usersRepository.updateUser(input.nombre, input.email, input.rol || 'cliente', id);
   }
 }
 
 export async function deactivateUser(id: number) {
-  await db.query(
-    'UPDATE usuarios SET activo = 0, actualizado_en = CURRENT_TIMESTAMP WHERE id = ?',
-    [id]
-  );
+  await usersRepository.deactivateUser(id);
 }
 
 export async function setUserActivo(id: number, activo: boolean) {
-  await db.query(
-    'UPDATE usuarios SET activo = ?, actualizado_en = CURRENT_TIMESTAMP WHERE id = ?',
-    [activo ? 1 : 0, id]
-  );
+  await usersRepository.setActive(activo ? 1 : 0, id);
+}
+
+export async function issueAccountSetupToken(userId: number): Promise<string> {
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
+  await usersRepository.saveAccountSetupToken(tokenHash, expiresAt, userId);
+  return token;
 }

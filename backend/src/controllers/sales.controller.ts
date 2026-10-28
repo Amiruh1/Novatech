@@ -10,7 +10,7 @@ import {
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { sendEmail, sendEmailWithAttachment, buildOrderConfirmationEmail } from '../utils/email.utils';
 import { buildComprobantePDF, ComprobanteItem } from '../utils/pdf.utils';
-import db from '../config/db';
+import * as salesService from '../services/sales.service';
 
 type MetodoPagoKey = 'tarjeta' | 'billetera' | 'transferencia' | 'no-definido';
 
@@ -137,18 +137,12 @@ export async function postSale(req: AuthRequest, res: Response) {
     if (userId > 0) {
       (async () => {
         try {
-          const [userRows] = await db.query('SELECT email FROM usuarios WHERE id = ?', [userId]);
+          const userRows = await salesService.findReceiptRecipient(userId);
           const userEmail = (userRows as any[])[0]?.email || '';
           if (!userEmail) return;
 
           const productIds = detalleValidado.map(d => d.id);
-          const [productRows] = await db.query(
-            `SELECT p.id, p.nombre, p.precio, p.precio_oferta, c.nombre AS categoria_nombre
-             FROM productos p
-             LEFT JOIN categorias c ON c.id = p.categoria_id
-             WHERE p.id IN (?)`,
-            [productIds]
-          );
+          const productRows = await salesService.findReceiptProducts(productIds);
           const productsMap = new Map((productRows as any[]).map(p => [p.id, p]));
           const itemsConInfo: ComprobanteItem[] = detalleValidado.map(d => {
             const p = productsMap.get(d.id);
@@ -166,7 +160,7 @@ export async function postSale(req: AuthRequest, res: Response) {
           const subtotalSinIGV = Number((subtotalItems / 1.18).toFixed(2));
           const igvMonto       = Number((subtotalItems - subtotalSinIGV).toFixed(2));
           
-          const [dirRows] = await db.query('SELECT * FROM direcciones_usuario WHERE id = ?', [pagoValidado.direccion_envio_id]);
+          const dirRows = await salesService.findReceiptAddress(pagoValidado.direccion_envio_id);
           const dir = (dirRows as any[])[0];
           const fullDirStr = dir ? `${dir.direccion_linea1}${dir.distrito ? `, ${dir.distrito}` : ''}${dir.provincia ? `, ${dir.provincia}` : ''}` : undefined;
 
@@ -284,24 +278,7 @@ export async function getComprobantePDF(req: AuthRequest, res: Response) {
   if (!idVenta)    return res.status(400).json({ message: 'ID de venta inválido' });
 
   try {
-    const [ventaRows] = await db.query(
-      `SELECT v.id, v.id_usuario, v.nombre_usuario, v.fecha, v.subtotal, v.impuesto,
-              v.costo_envio, v.total, v.detalle, v.tipo_comprobante,
-              v.documento_fiscal, v.razon_social, v.referencia_pago, v.observaciones,
-              v.direccion_envio_id,
-              u.email,
-              COALESCE(
-                CASE WHEN JSON_VALID(v.observaciones)
-                  THEN NULLIF(JSON_UNQUOTE(JSON_EXTRACT(v.observaciones, '$.metodo_label')), '')
-                  ELSE NULL END,
-                mp.nombre, 'No especificado'
-              ) AS metodo_pago_nombre
-       FROM ventas v
-       INNER JOIN usuarios u ON u.id = v.id_usuario
-       LEFT JOIN metodos_pago mp ON mp.id = v.metodo_pago_id
-       WHERE v.id = ?`,
-      [idVenta]
-    );
+    const ventaRows = await salesService.findSaleReceipt(idVenta);
 
     const venta = (ventaRows as any[])[0];
     if (!venta) return res.status(404).json({ message: 'Venta no encontrada' });
@@ -316,13 +293,7 @@ export async function getComprobantePDF(req: AuthRequest, res: Response) {
     let itemsConInfo: ComprobanteItem[] = [];
 
     if (productIds.length) {
-      const [productRows] = await db.query(
-        `SELECT p.id, p.nombre, p.precio, p.precio_oferta, c.nombre AS categoria_nombre
-         FROM productos p
-         LEFT JOIN categorias c ON c.id = p.categoria_id
-         WHERE p.id IN (?)`,
-        [productIds]
-      );
+      const productRows = await salesService.findReceiptProducts(productIds);
       const productsMap = new Map((productRows as any[]).map(p => [p.id, p]));
       itemsConInfo = detalle.map((d: any) => {
         const p = productsMap.get(d.id);
@@ -343,7 +314,7 @@ export async function getComprobantePDF(req: AuthRequest, res: Response) {
 
     let fullDirStr: string | undefined;
     if (venta.direccion_envio_id) {
-      const [dirRows] = await db.query('SELECT * FROM direcciones_usuario WHERE id = ?', [venta.direccion_envio_id]);
+      const dirRows = await salesService.findReceiptAddress(venta.direccion_envio_id);
       const dir = (dirRows as any[])[0];
       if (dir) fullDirStr = `${dir.direccion_detallada || dir.direccion_linea1 || ''}${dir.distrito ? `, ${dir.distrito}` : ''}${dir.provincia ? `, ${dir.provincia}` : ''}`;
     }

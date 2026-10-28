@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import db from '../config/db';
+import * as authService from '../services/auth.service';
 import {
   loginWithCredentials,
   registerCustomerAccount,
@@ -306,20 +305,15 @@ export async function changePassword(req: any, res: any) {
   }
 
   try {
-    const [rows] = await db.query('SELECT password FROM usuarios WHERE id = ? AND activo = 1 LIMIT 1', [userId]);
-    const user = (rows as any[])[0];
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    const outcome = await authService.changeAccountPassword(userId, passActual, passNueva);
+    if (outcome === 'USER_NOT_FOUND') return res.status(404).json({ message: 'Usuario no encontrado' });
 
-    const match = await bcrypt.compare(passActual, user.password);
-    if (!match) return res.status(401).json({ message: 'La contraseña actual es incorrecta' });
+    if (outcome === 'INVALID_CURRENT_PASSWORD') return res.status(401).json({ message: 'La contraseña actual es incorrecta' });
 
-    const isSameAsOld = await bcrypt.compare(passNueva, user.password);
-    if (isSameAsOld) {
+    if (outcome === 'PASSWORD_UNCHANGED') {
       return res.status(400).json({ message: 'La nueva contraseña debe ser diferente a la actual' });
     }
 
-    const hash = await bcrypt.hash(passNueva, 10);
-    await db.query('UPDATE usuarios SET password = ?, actualizado_en = CURRENT_TIMESTAMP WHERE id = ?', [hash, userId]);
     return res.json({ message: 'Contraseña actualizada' });
   } catch (err: any) {
     return res.status(500).json({ message: err.message });
@@ -360,10 +354,7 @@ export async function updateProfile(req: any, res: Response) {
   }
 
   try {
-    const [userRows] = await db.query(
-      'SELECT email, numero_documento FROM usuarios WHERE id = ?',
-      [userId]
-    );
+    const userRows = await authService.findProfile(userId);
     const currentUser = (userRows as any[])[0];
 
     let emailTrim: string | null = null;
@@ -371,10 +362,7 @@ export async function updateProfile(req: any, res: Response) {
       emailTrim = email.trim().toLowerCase();
       const emailErr = validateEmail(emailTrim);
       if (emailErr) return res.status(400).json({ message: emailErr });
-      const [existing] = await db.query(
-        'SELECT id FROM usuarios WHERE email = ? AND id != ?',
-        [emailTrim, userId]
-      );
+      const existing = await authService.findEmailConflict(emailTrim, userId);
       if ((existing as any[]).length > 0) {
         return res.status(409).json({ message: 'El correo ya está en uso por otra cuenta.' });
       }
@@ -390,17 +378,7 @@ export async function updateProfile(req: any, res: Response) {
     }
 
     const finalEmail = emailTrim ?? currentUser?.email;
-    await db.query(
-      `UPDATE usuarios
-       SET nombre = ?,
-           telefono = ?,
-           email = ?,
-           tipo_documento = COALESCE(tipo_documento, ?),
-           numero_documento = COALESCE(numero_documento, ?),
-           actualizado_en = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [nombre.trim(), telefonoSanitizado, finalEmail, tipoDocSanitizado, numDocSanitizado, userId]
-    );
+    await authService.updateProfile(nombre.trim(), telefonoSanitizado, finalEmail, tipoDocSanitizado, numDocSanitizado, userId);
 
     return res.json({ message: 'Perfil actualizado' });
   } catch (err: any) {

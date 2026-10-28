@@ -9,13 +9,9 @@ import {
   updateProduct,
   updateProductStock
 } from '../services/products.service';
-import db from '../config/db';
+import * as productsService from '../services/products.service';
 
-const PUBLIC_PRODUCT_COLUMNS = `
-  id, sku, nombre, slug, descripcion, categoria_id, subcategoria_id, marca_id,
-  categoria, marca, precio, precio_oferta, stock, imagen, galeria_json,
-  activo, destacado, creado_en, actualizado_en
-`;
+
 
 function parsePrice(value: unknown): number | null {
   const parsed = Number(value);
@@ -41,7 +37,7 @@ export async function getProductById(req: Request, res: Response) {
     return res.status(400).json({ message: 'ID de producto inválido.' });
   }
   try {
-    const [rows]: any = await db.query(`SELECT ${PUBLIC_PRODUCT_COLUMNS} FROM productos WHERE id = ?`, [id]);
+    const rows: any = await productsService.findProductDetails(id);
     const producto = Array.isArray(rows) ? rows[0] : null;
     if (!producto) {
       return res.status(404).json({ message: 'Producto no encontrado.' });
@@ -212,16 +208,7 @@ export async function adjustStock(req: Request, res: Response) {
   }
 
   try {
-    const [current] = await db.query('SELECT stock FROM productos WHERE id = ?', [id]);
-    const stockAnterior = (current as any[])[0]?.stock ?? 0;
-
-    await updateProductStock(id, stockParsed);
-
-    await db.query(
-      `INSERT INTO inventario_movimientos (producto_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo, usuario_id)
-       VALUES (?, 'AJUSTE', ?, ?, ?, ?, ?)`,
-      [id, Math.abs(stockParsed - stockAnterior), stockAnterior, stockParsed, motivo.trim(), userId]
-    );
+    const stockAnterior = await productsService.adjustStockWithMovement(id, stockParsed, motivo, userId);
 
     return res.json({ message: 'Stock ajustado', stock_anterior: stockAnterior, stock_nuevo: stockParsed });
   } catch (error) {
@@ -273,14 +260,7 @@ export async function getProductMovements(req: Request, res: Response) {
   }
 
   try {
-    const [rows] = await db.query(
-      `SELECT m.*, u.nombre as usuario_nombre
-       FROM inventario_movimientos m
-       LEFT JOIN usuarios u ON m.usuario_id = u.id
-       WHERE m.producto_id = ?
-       ORDER BY m.creado_en DESC`,
-      [id]
-    );
+    const rows = await productsService.findProductMovements(id);
 
     return res.json(rows);
   } catch (error) {

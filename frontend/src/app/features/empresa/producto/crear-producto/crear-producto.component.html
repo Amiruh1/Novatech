@@ -5,8 +5,8 @@
   [draggable]="false"
   [resizable]="false"
   [style]="{ width: 'min(52rem, 96vw)' }"
-  [closable]="!guardando"
-  [dismissableMask]="!guardando"
+  [closable]="!guardando && !subiendoImagen"
+  [dismissableMask]="!guardando && !subiendoImagen"
   [transitionOptions]="'200ms ease-out'"
 >
   <ng-template pTemplate="header">
@@ -110,7 +110,10 @@
     <div class="form-field full">
       <label>URL de imagen</label>
       <input pInputText formControlName="imagen" placeholder="https://..." class="w-full" />
-      <small class="help">Usa una URL pública (https://...) para previsualización del producto.</small>
+      <app-image-upload [disabled]="guardando"
+        (busyChange)="subiendoImagen = $event"
+        (uploaded)="form.patchValue({ imagen: $event })" />
+      <small class="help">También puedes pegar una URL pública de imagen.</small>
       <!-- Image preview -->
       <div class="img-preview-wrap" *ngIf="form.get('imagen')?.value?.startsWith('http')">
         <img [src]="form.get('imagen')?.value"
@@ -125,11 +128,11 @@
 
   <ng-template pTemplate="footer">
     <div class="btn-modal-footer">
-      <button class="btn-modal-cancelar" [disabled]="guardando" (click)="cerrarDialogo()">
+      <button class="btn-modal-cancelar" [disabled]="guardando || subiendoImagen" (click)="cerrarDialogo()">
         <i class="pi pi-times"></i>
         <span>Cancelar</span>
       </button>
-      <button class="btn-modal-guardar" [disabled]="guardando || form.errors?.['ofertaMayorQuePrecio']" (click)="guardar()">
+      <button class="btn-modal-guardar" [disabled]="guardando || subiendoImagen || form.errors?.['ofertaMayorQuePrecio']" (click)="guardar()">
         <i class="pi pi-spin pi-spinner" *ngIf="guardando"></i>
         <i class="pi pi-check" *ngIf="!guardando"></i>
         <span>{{ guardando ? 'Guardando...' : 'Guardar producto' }}</span>

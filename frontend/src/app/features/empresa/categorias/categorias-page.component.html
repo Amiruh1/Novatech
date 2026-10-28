@@ -63,6 +63,8 @@
 
 <p-dialog
     [(visible)]="mostrarDialog"
+    [closable]="!guardando && !subiendoImagen"
+    [dismissableMask]="!guardando && !subiendoImagen"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
@@ -118,16 +120,19 @@
             <small class="help text-500 mt-1 block">
                 <b>Tip:</b> Busca imágenes referenciales cuadradas.
             </small>
+            <app-image-upload [disabled]="guardando"
+                (busyChange)="subiendoImagen = $event"
+                (uploaded)="catActual.imagen = $event" />
         </div>
     </div>
 
     <ng-template pTemplate="footer">
         <div class="btn-modal-footer">
-            <button class="btn-modal-cancelar" [disabled]="guardando" (click)="mostrarDialog = false">
+            <button class="btn-modal-cancelar" [disabled]="guardando || subiendoImagen" (click)="mostrarDialog = false">
                 <i class="pi pi-times"></i>
                 <span>Cancelar</span>
             </button>
-            <button class="btn-modal-guardar" [disabled]="guardando" (click)="guardar()">
+            <button class="btn-modal-guardar" [disabled]="guardando || subiendoImagen" (click)="guardar()">
                 <i class="pi pi-spin pi-spinner" *ngIf="guardando"></i>
                 <i class="pi pi-check" *ngIf="!guardando"></i>
                 <span>{{ guardando ? 'Guardando...' : 'Aplicar' }}</span>

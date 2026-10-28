@@ -11,9 +11,10 @@ function createTransporter() {
     host,
     port,
     secure: isSecure,
+    requireTLS: !isSecure,
     auth: user && pass ? { user, pass } : undefined,
     tls: {
-      rejectUnauthorized: false
+      rejectUnauthorized: true
     }
   });
 }

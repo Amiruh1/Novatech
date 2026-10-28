@@ -179,6 +179,8 @@
 
 <p-dialog
     [(visible)]="mostrarBannerDialog"
+    [closable]="!guardandoBanner && !subiendoBanner"
+    [dismissableMask]="!guardandoBanner && !subiendoBanner"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
@@ -216,6 +218,9 @@
     <div class="form-field" style="grid-column: span 2;">
         <label>URL de Imagen *</label>
         <input pInputText [(ngModel)]="bannerActual.imagen" placeholder="https://unsplash.com/..." class="w-full" />
+        <app-image-upload [disabled]="guardandoBanner"
+            (busyChange)="subiendoBanner = $event"
+            (uploaded)="bannerActual.imagen = $event" />
     </div>
 
     <div class="form-field w-full">
@@ -254,11 +259,11 @@
 
   <ng-template pTemplate="footer">
       <div class="btn-modal-footer">
-          <button class="btn-modal-cancelar" [disabled]="guardandoBanner" (click)="mostrarBannerDialog = false">
+          <button class="btn-modal-cancelar" [disabled]="guardandoBanner || subiendoBanner" (click)="mostrarBannerDialog = false">
               <i class="pi pi-times"></i>
               <span>Cancelar</span>
           </button>
-          <button class="btn-modal-guardar" [disabled]="guardandoBanner" (click)="guardarBanner()">
+          <button class="btn-modal-guardar" [disabled]="guardandoBanner || subiendoBanner" (click)="guardarBanner()">
               <i class="pi pi-spin pi-spinner" *ngIf="guardandoBanner"></i>
               <i class="pi pi-check" *ngIf="!guardandoBanner"></i>
               <span>{{ guardandoBanner ? 'Guardando...' : 'Aplicar' }}</span>

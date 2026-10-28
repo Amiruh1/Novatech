@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import db from '../config/db';
+import { isAccountActive } from '../services/auth.service';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -31,11 +31,7 @@ export async function verifyToken(req: AuthRequest, res: Response, next: NextFun
   }
 
   try {
-    const [rows] = await db.query(
-      'SELECT id FROM usuarios WHERE id = ? AND activo = 1 LIMIT 1',
-      [decoded.id]
-    );
-    if (!(rows as any[]).length) {
+    if (!(await isAccountActive(decoded.id))) {
       return res.status(401).json({ message: 'Cuenta desactivada o inexistente' });
     }
   } catch {

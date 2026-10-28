@@ -1,4 +1,4 @@
-import db from '../config/db';
+import * as marcasRepository from '../repositories/marcas.repository';
 
 export interface MarcaModel {
   id?: number;
@@ -15,7 +15,7 @@ function toSlug(text: string): string {
 }
 
 export async function listMarcas() {
-  const [rows] = await db.query('SELECT id, nombre, slug, activo FROM marcas ORDER BY nombre ASC');
+  const rows = await marcasRepository.findBrands();
   return rows;
 }
 
@@ -23,31 +23,20 @@ export async function createMarca(input: MarcaModel) {
   const nombre = input.nombre.trim();
   const slug = toSlug(nombre);
   const activo = input.activo !== undefined ? (input.activo ? 1 : 0) : 1;
-  const [result] = await db.query(
-    'INSERT INTO marcas (nombre, slug, activo) VALUES (?, ?, ?)',
-    [nombre, slug, activo]
-  );
+  const result = await marcasRepository.insertBrand(nombre, slug, activo);
   return result;
 }
 
 export async function updateMarca(id: number, input: Partial<MarcaModel>) {
-  const fields: string[] = [];
-  const params: any[] = [];
-
+  const changes: { nombre?: string; slug?: string; activo?: number } = {};
   if (input.nombre !== undefined) {
-    fields.push('nombre = ?', 'slug = ?');
-    params.push(input.nombre.trim(), toSlug(input.nombre.trim()));
+    changes.nombre = input.nombre.trim();
+    changes.slug = toSlug(changes.nombre);
   }
-  if (input.activo !== undefined) {
-    fields.push('activo = ?');
-    params.push(input.activo ? 1 : 0);
-  }
-
-  if (!fields.length) return;
-  params.push(id);
-  await db.query(`UPDATE marcas SET ${fields.join(', ')} WHERE id = ?`, params);
+  if (input.activo !== undefined) changes.activo = input.activo ? 1 : 0;
+  await marcasRepository.updateBrand(id, changes);
 }
 
 export async function deleteMarca(id: number) {
-  await db.query('DELETE FROM marcas WHERE id = ?', [id]);
+  await marcasRepository.deleteBrand(id);
 }

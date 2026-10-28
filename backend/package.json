@@ -14,6 +14,7 @@
     "migrate:passwords:dry": "ts-node --transpile-only src/scripts/migrate-passwords.ts --dry-run"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1158.0",
     "@types/pdfkit": "^0.17.6",
     "bcryptjs": "^3.0.3",
     "body-parser": "^1.20.2",
@@ -25,7 +26,7 @@
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.9.7",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^10.2.1",
     "pdfkit": "^0.18.0"
   },
   "devDependencies": {

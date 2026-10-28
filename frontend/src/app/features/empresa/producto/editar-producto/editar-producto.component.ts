@@ -8,6 +8,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { OptionWithIcon } from '../productos.types';
+import { ImageUploadComponent } from '../../../../shared/image-upload/image-upload.component';
 
 @Component({
   selector: 'app-editar-producto',
@@ -20,7 +21,8 @@ import { OptionWithIcon } from '../productos.types';
     TextareaModule,
     InputNumberModule,
     SelectModule,
-    ButtonModule
+    ButtonModule,
+    ImageUploadComponent
   ],
   templateUrl: './editar-producto.component.html',
   styleUrl: './editar-producto.component.scss'
@@ -31,6 +33,7 @@ export class EditarProducto {
   @Input() categoryOptions: OptionWithIcon[] = [];
   @Input() brandOptions: OptionWithIcon[] = [];
   @Input() guardando: boolean = false;
+  subiendoImagen = false;
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() saveRequested = new EventEmitter<void>();
@@ -48,17 +51,17 @@ export class EditarProducto {
   }
 
   actualizarVisibilidad(visible: boolean) {
-    this.visibleChange.emit(visible);
+    if (!this.subiendoImagen) this.visibleChange.emit(visible);
   }
 
   cerrarDialogo() {
-    if (!this.guardando) {
+    if (!this.guardando && !this.subiendoImagen) {
       this.visibleChange.emit(false);
     }
   }
 
   guardar() {
-    this.saveRequested.emit();
+    if (!this.subiendoImagen) this.saveRequested.emit();
   }
 }
 

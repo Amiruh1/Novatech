@@ -44,6 +44,7 @@ import { CrearProducto } from './crear-producto/crear-producto.component';
 import { EditarProducto } from './editar-producto/editar-producto.component';
 import { AjustarStock } from './ajustar-stock/ajustar-stock.component';
 import { MovimientosStock } from './movimientos-stock/movimientos-stock.component';
+import { ImageUploadComponent } from '../../../shared/image-upload/image-upload.component';
 
 @Component({
   selector: 'app-producto-page',
@@ -65,7 +66,8 @@ import { MovimientosStock } from './movimientos-stock/movimientos-stock.componen
     CheckboxModule,
     DialogModule,
     InputTextModule,
-    TooltipModule
+    TooltipModule,
+    ImageUploadComponent
   ],
   templateUrl: './producto-page.component.html',
   styleUrl: './producto-page.component.scss'
@@ -94,6 +96,7 @@ export class ProductoPage implements OnInit {
   mostrarBannerDialog = false;
   bannerActual: Partial<BannerModel> = {};
   guardandoBanner = false;
+  subiendoBanner = false;
 
   categoryOptions: OptionWithIcon[] = [];
   brandOptions: OptionWithIcon[] = [];
@@ -724,6 +727,7 @@ export class ProductoPage implements OnInit {
   }
 
   guardarBanner() {
+    if (this.subiendoBanner) return;
     if (!this.bannerActual.imagen?.trim() || !this.bannerActual.titulo?.trim()) {
       this.messageService.add({ severity: 'warn', summary: 'Faltan datos', detail: 'La imagen y el título son obligatorios.' });
       return;

@@ -13,15 +13,36 @@ import bannersRoutes from './src/routes/banners.routes';
 import categoriesRoutes from './src/routes/categories.routes';
 import marcasRoutes from './src/routes/marcas.routes';
 import assistantRoutes from './src/routes/assistant.routes';
+import mediaRoutes from './src/routes/media.routes';
 import { errorHandler, notFoundHandler } from './src/middlewares/error.middleware';
+import db from './src/config/db';
 
 dotenv.config();
 
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:4200')
+const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:4200')
   .split(',')
-  .map(o => o.trim());
+  .map(o => o.trim())
+  .filter(Boolean);
 
 const app = express();
+
+const trustProxy = Number(process.env.TRUST_PROXY);
+if (Number.isInteger(trustProxy) && trustProxy > 0) app.set('trust proxy', trustProxy);
+
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.get('/ready', async (_req, res) => {
+  try {
+    // Comprueba conexión, permisos y esquema; /health solo comprueba el proceso.
+    await db.query({ sql: 'SELECT 1 FROM productos LIMIT 1', timeout: 3000 });
+    res.json({ status: 'ready' });
+  } catch {
+    res.status(503).json({ status: 'not_ready' });
+  }
+});
+
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
@@ -44,11 +65,14 @@ app.use('/api/banners', bannersRoutes);
 app.use('/api', categoriesRoutes);
 app.use('/api', marcasRoutes);
 app.use('/api', assistantRoutes);
+app.use('/api', mediaRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 const port = Number(process.env.PORT || 3000);
-app.listen(port, () => {
-    console.log(`Servidor TypeScript corriendo en http://localhost:${port}`);
+const server = app.listen(port, () => {
+    const address = server.address();
+    const actualPort = typeof address === 'object' && address ? address.port : port;
+    console.log(`Servidor TypeScript corriendo en http://localhost:${actualPort}`);
 });

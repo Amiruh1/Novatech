@@ -1,4 +1,4 @@
-import db from '../config/db';
+import * as salesRepository from '../repositories/sales.repository';
 
 interface SaleDetailItem {
   id: number;
@@ -51,9 +51,7 @@ async function resolveMetodoPagoId(metodoKey: string): Promise<number | null> {
     return null;
   }
 
-  const [rows] = await db.query(
-    'SELECT id, nombre FROM metodos_pago WHERE activo = 1'
-  );
+  const rows = await salesRepository.findActivePaymentMethods();
 
   const methods = rows as Array<{ id: number; nombre: string }>;
   const target = methods.find((method) => names.includes(String(method.nombre || '').toLowerCase().trim()));
@@ -69,11 +67,7 @@ export async function createSale(input: {
 }) {
   const detalleJson = JSON.stringify(input.detalle || []);
 
-  const [rows] = await db.query('CALL sp_registrar_venta(?, ?, ?)', [
-    Number(input.id_usuario),
-    input.nombre_usuario || null,
-    detalleJson
-  ]);
+  const rows = await salesRepository.registerSale(Number(input.id_usuario), input.nombre_usuario || null, detalleJson);
 
   const callData = rows as Array<Array<{ id_venta: number; total_venta: number }>>;
   const firstResult = callData?.[0]?.[0];
@@ -81,34 +75,28 @@ export async function createSale(input: {
 
   if (ventaId > 0) {
     const costoEnvio = Number(input.costo_envio || 0);
-    await db.query(
-      `UPDATE ventas
-       SET impuesto = ROUND(subtotal - ROUND(subtotal / 1.18, 2), 2),
-           costo_envio = ?,
-           total = ROUND(subtotal + ?, 2),
-           actualizado_en = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [costoEnvio, costoEnvio, ventaId]
-    );
+    await salesRepository.updateSaleTotals(costoEnvio, costoEnvio, ventaId);
 
     for (const item of input.detalle) {
       try {
-        const [stockRows] = await db.query('SELECT stock FROM productos WHERE id = ?', [item.id]);
+        const stockRows = await salesRepository.findProductStock(item.id);
         const stockNuevo    = Number((stockRows as any[])[0]?.stock ?? 0);
         const stockAnterior = stockNuevo + Number(item.cantidad);
 
-        await db.query(
-          `INSERT INTO inventario_movimientos
-             (producto_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo, referencia_tabla, referencia_id, usuario_id)
-           VALUES (?, 'VENTA', ?, ?, ?, ?, 'ventas', ?, ?)`,
-          [item.id, Number(item.cantidad), stockAnterior, stockNuevo,
-           `Venta #${ventaId}`, ventaId, input.id_usuario]
+        await salesRepository.insertSaleMovement(
+          item.id,
+          Number(item.cantidad),
+          stockAnterior,
+          stockNuevo,
+          `Venta #${ventaId}`,
+          ventaId,
+          input.id_usuario
         );
       } catch {
       }
     }
 
-    const [updated] = await db.query('SELECT total FROM ventas WHERE id = ?', [ventaId]);
+    const updated = await salesRepository.findSaleTotal(ventaId);
     const newTotal = (updated as any[])[0]?.total || 0;
     return {
       id_venta: ventaId,
@@ -150,138 +138,36 @@ export async function saveSalePaymentMetadata(
     tipo_despacho: input?.tipo_despacho || 'envio'
   });
 
-  await db.query(
-    `UPDATE ventas
-     SET metodo_pago_id = ?,
-         referencia_pago = ?,
-         observaciones = ?,
-         tipo_comprobante = ?,
-         documento_fiscal = ?,
-         razon_social = ?,
-         direccion_envio_id = ?,
-         actualizado_en = CURRENT_TIMESTAMP
-     WHERE id = ?`,
-    [methodId, reference, observaciones, input?.tipo_comprobante || 'boleta', input?.documento_fiscal || null, input?.razon_social || null, input?.direccion_envio_id || null, safeSaleId]
+  await salesRepository.updatePaymentMetadata(
+    methodId,
+    reference,
+    observaciones,
+    input?.tipo_comprobante || 'boleta',
+    input?.documento_fiscal || null,
+    input?.razon_social || null,
+    input?.direccion_envio_id || null,
+    safeSaleId
   );
 
-  await db.query('DELETE FROM ventas_pagos WHERE venta_id = ?', [safeSaleId]);
+  await salesRepository.deletePayments(safeSaleId);
 
   const requiresManualReview = ['billetera', 'transferencia'].includes(metodoKey);
 
   if (requiresManualReview) {
-    await db.query(
-      `INSERT INTO ventas_pagos (
-        venta_id, metodo_pago_id, monto, moneda, referencia, estado
-      ) VALUES (?, ?, ?, 'PEN', ?, 'pendiente')`,
-      [safeSaleId, methodId, amount, reference]
-    );
+    await salesRepository.insertPendingPayment(safeSaleId, methodId, amount, reference);
   } else {
-    await db.query(
-      `INSERT INTO ventas_pagos (
-        venta_id, metodo_pago_id, monto, moneda, referencia, estado, pagado_en
-      ) VALUES (?, ?, ?, 'PEN', ?, 'confirmado', CURRENT_TIMESTAMP)`,
-      [safeSaleId, methodId, amount, reference]
-    );
+    await salesRepository.insertConfirmedPayment(safeSaleId, methodId, amount, reference);
   }
 }
 
 export async function listSalesByUser(idUsuario: number) {
-  const [rows] = await db.query(
-    `SELECT
-      v.id,
-      v.id_usuario,
-      v.nombre_usuario,
-      u.nombre AS nombre_cliente,
-      v.fecha,
-      v.subtotal,
-      v.impuesto,
-      v.costo_envio,
-      v.total,
-      v.detalle,
-      v.estado,
-      v.tipo_comprobante,
-      v.documento_fiscal,
-      v.razon_social,
-      v.direccion_envio_id,
-      v.metodo_pago_id,
-      COALESCE(
-        CASE
-          WHEN JSON_VALID(v.observaciones) THEN NULLIF(JSON_UNQUOTE(JSON_EXTRACT(v.observaciones, '$.metodo_label')), '')
-          ELSE NULL
-        END,
-        mp.nombre,
-        'No especificado'
-      ) AS metodo_pago_nombre,
-      COALESCE(vp.monto, v.total) AS monto_pagado,
-      COALESCE(v.referencia_pago, vp.referencia) AS referencia_pago,
-      vp.estado AS pago_estado,
-      v.observaciones
-     FROM ventas v
-     INNER JOIN usuarios u ON u.id = v.id_usuario
-     LEFT JOIN metodos_pago mp ON mp.id = v.metodo_pago_id
-     LEFT JOIN (
-       SELECT vp1.venta_id, vp1.monto, vp1.referencia, vp1.estado
-       FROM ventas_pagos vp1
-       INNER JOIN (
-         SELECT venta_id, MAX(id) AS max_id
-         FROM ventas_pagos
-         GROUP BY venta_id
-       ) vp2 ON vp2.max_id = vp1.id
-     ) vp ON vp.venta_id = v.id
-     WHERE v.id_usuario = ?
-     ORDER BY v.fecha DESC`,
-    [idUsuario]
-  );
+  const rows = await salesRepository.findSalesByUser(idUsuario);
 
   return rows;
 }
 
 export async function listAdminSales() {
-  const [rows] = await db.query(
-    `SELECT
-      v.id,
-      v.id_usuario,
-      v.nombre_usuario,
-      u.nombre AS nombre_cliente,
-      v.fecha,
-      v.subtotal,
-      v.impuesto,
-      v.costo_envio,
-      v.total,
-      v.detalle,
-      v.estado,
-      v.tipo_comprobante,
-      v.documento_fiscal,
-      v.razon_social,
-      v.direccion_envio_id,
-      v.codigo,
-      v.metodo_pago_id,
-      COALESCE(
-        CASE
-          WHEN JSON_VALID(v.observaciones) THEN NULLIF(JSON_UNQUOTE(JSON_EXTRACT(v.observaciones, '$.metodo_label')), '')
-          ELSE NULL
-        END,
-        mp.nombre,
-        'No especificado'
-      ) AS metodo_pago_nombre,
-      COALESCE(vp.monto, v.total) AS monto_pagado,
-      COALESCE(v.referencia_pago, vp.referencia) AS referencia_pago,
-      vp.estado AS pago_estado,
-      v.observaciones
-     FROM ventas v
-     INNER JOIN usuarios u ON u.id = v.id_usuario
-     LEFT JOIN metodos_pago mp ON mp.id = v.metodo_pago_id
-     LEFT JOIN (
-       SELECT vp1.venta_id, vp1.monto, vp1.referencia, vp1.estado
-       FROM ventas_pagos vp1
-       INNER JOIN (
-         SELECT venta_id, MAX(id) AS max_id
-         FROM ventas_pagos
-         GROUP BY venta_id
-       ) vp2 ON vp2.max_id = vp1.id
-     ) vp ON vp.venta_id = v.id
-     ORDER BY v.fecha DESC`
-  );
+  const rows = await salesRepository.findAdminSales();
 
   return rows;
 }
@@ -301,7 +187,7 @@ export async function updateSaleStatus(idVenta: number, estado: string, userId: 
     throw new Error('Estado de venta no permitido');
   }
 
-  const [existing] = await db.query('SELECT id, estado, detalle FROM ventas WHERE id = ?', [idVenta]);
+  const existing = await salesRepository.findSaleStatus(idVenta);
   const venta = (existing as any[])[0];
 
   if (!venta) {
@@ -320,12 +206,9 @@ export async function updateSaleStatus(idVenta: number, estado: string, userId: 
     }));
   }
 
-  await db.query(
-    'UPDATE ventas SET estado = ?, actualizado_en = CURRENT_TIMESTAMP WHERE id = ?',
-    [estado, idVenta]
-  );
+  await salesRepository.updateStatus(estado, idVenta);
 
-  if (TRANSICIONES_VALIDAS[estado]?.length === 0) {
+  if (estado === 'cancelado' || estado === 'reembolsado') {
     let detalle: Array<{ id: number; cantidad: number }> = [];
     try {
       const raw = typeof venta.detalle === 'string' ? JSON.parse(venta.detalle) : venta.detalle;
@@ -342,55 +225,47 @@ export async function updateSaleStatus(idVenta: number, estado: string, userId: 
         const cantidad  = Number(item.cantidad || 0);
         if (!productId || !cantidad) continue;
 
-        const [stockRows] = await db.query('SELECT stock FROM productos WHERE id = ?', [productId]);
+        const stockRows = await salesRepository.findProductStock(productId);
         const stockAnterior = Number((stockRows as any[])[0]?.stock ?? 0);
         const stockNuevo    = stockAnterior + cantidad;
 
-        await db.query(
-          'UPDATE productos SET stock = ?, actualizado_en = CURRENT_TIMESTAMP WHERE id = ?',
-          [stockNuevo, productId]
-        );
+        await salesRepository.updateProductStock(stockNuevo, productId);
 
-        await db.query(
-          `INSERT INTO inventario_movimientos
-             (producto_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo, referencia_tabla, referencia_id, usuario_id)
-           VALUES (?, 'DEVOLUCION', ?, ?, ?, ?, 'ventas', ?, ?)`,
-          [productId, cantidad, stockAnterior, stockNuevo, motivo, idVenta, userId]
-        );
+        await salesRepository.insertReturnMovement(productId, cantidad, stockAnterior, stockNuevo, motivo, idVenta, userId);
       } catch {}
     }
   }
 
   try {
-    await db.query(
-      `INSERT INTO auditoria (usuario_id, accion, tabla, registro_id, valores_nuevos)
-       VALUES (?, 'UPDATE_ESTADO', 'ventas', ?, JSON_OBJECT('estado', ?))`,
-      [userId, String(idVenta), estado]
-    );
+    await salesRepository.insertStatusAudit(userId, String(idVenta), estado);
   } catch {}
 }
 
 export async function confirmSalePayment(idVenta: number, userId: number) {
-  const [existing] = await db.query(
-    'SELECT id FROM ventas_pagos WHERE venta_id = ? AND estado = "pendiente" LIMIT 1',
-    [idVenta]
-  );
+  const existing = await salesRepository.findPendingPayment(idVenta);
   const rows = existing as any[];
 
   if (!rows.length) {
     throw new Error('No hay pago pendiente para esta venta o ya fue confirmado');
   }
 
-  await db.query(
-    `UPDATE ventas_pagos
-     SET estado = 'confirmado', pagado_en = CURRENT_TIMESTAMP
-     WHERE venta_id = ? AND estado = 'pendiente'`,
-    [idVenta]
-  );
+  await salesRepository.confirmPayment(idVenta);
 
-  await db.query(
-    `INSERT INTO auditoria (usuario_id, accion, tabla, registro_id, valores_nuevos)
-     VALUES (?, 'CONFIRMAR_PAGO', 'ventas_pagos', ?, JSON_OBJECT('venta_id', ?, 'confirmado_por', ?))`,
-    [userId, String(idVenta), idVenta, userId]
-  );
+  await salesRepository.insertPaymentAudit(userId, String(idVenta), idVenta, userId);
+}
+
+export async function findReceiptRecipient(userId: number) {
+  return salesRepository.findReceiptRecipient(userId);
+}
+
+export async function findReceiptProducts(ids: number[]) {
+  return salesRepository.findReceiptProducts(ids);
+}
+
+export async function findReceiptAddress(id: number | null | undefined) {
+  return salesRepository.findReceiptAddress(id);
+}
+
+export async function findSaleReceipt(saleId: number) {
+  return salesRepository.findSaleReceipt(saleId);
 }
