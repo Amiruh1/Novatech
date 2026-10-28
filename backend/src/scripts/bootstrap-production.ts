@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import type { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
-import db from '../config/db';
-import { ensureProductionSchema } from '../repositories/production-schema.repository';
+import db from '../access-data/config/db';
+import { ensureProductionSchema } from '../access-data/repositories/production-schema.repository';
 
 // Identifica únicamente las cuentas y el hash publicados en el SQL de ejemplo.
 // Si alguien cambió su contraseña, este script no modifica esa cuenta.

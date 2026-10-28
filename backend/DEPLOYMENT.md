@@ -1,6 +1,6 @@
 # Arranque en AWS
 
-La imagen usa Node 22 y ejecuta el backend como usuario `node`. `/health` comprueba el proceso; `/ready` comprueba también la conexión y la tabla de productos. La conexión RDS utiliza `DB_SSL=rds` para cifrar y verificar el certificado.
+La imagen usa Node 22 y ejecuta el backend como usuario `node`. El código se organiza en `src/application`, `src/business` y `src/access-data`; el flujo y las responsabilidades se explican en [ARQUITECTURA.md](ARQUITECTURA.md). `/health` comprueba el proceso; `/ready` comprueba también la conexión y la tabla de productos. La conexión RDS utiliza `DB_SSL=rds` para cifrar y verificar el certificado.
 
 El despliegue obtiene la configuración desde Secrets Manager. `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` y las variables SMTP se pasan al contenedor. `FRONTEND_URL` es una sola URL para los enlaces del correo; `CORS_ORIGINS` admite varios orígenes separados por coma. SMTP requiere TLS y un certificado válido.
 
@@ -34,7 +34,7 @@ Solo descarga desde `picsum.photos`, `fastly.picsum.photos` e `images.unsplash.c
 ```sh
 npm ci
 npm run build
-node --test tests/layers.test.cjs
+node --test tests/layers.test.cjs tests/external-gateways.test.cjs tests/notification-google.test.cjs
 node scripts/test-media.cjs
 node scripts/test-media-migration.cjs
 node scripts/test-bootstrap-production.cjs

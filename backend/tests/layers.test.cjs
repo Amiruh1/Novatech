@@ -8,7 +8,7 @@ const path = require('node:path');
 const bcrypt = require('bcryptjs');
 
 let queryHandler = () => { throw new Error('Unexpected database access'); };
-const dbPath = require.resolve('../dist/src/config/db');
+const dbPath = require.resolve('../dist/src/access-data/config/db');
 require.cache[dbPath] = {
   id: dbPath,
   filename: dbPath,
@@ -16,11 +16,11 @@ require.cache[dbPath] = {
   exports: { __esModule: true, default: { query: (...args) => queryHandler(...args) } }
 };
 
-const auth = require('../dist/src/services/auth.service');
-const products = require('../dist/src/services/products.service');
-const sales = require('../dist/src/services/sales.service');
-const users = require('../dist/src/services/users.service');
-const categories = require('../dist/src/services/categories.service');
+const auth = require('../dist/src/business/services/auth.service');
+const products = require('../dist/src/business/services/products.service');
+const sales = require('../dist/src/business/services/sales.service');
+const users = require('../dist/src/business/services/users.service');
+const categories = require('../dist/src/business/services/categories.service');
 
 async function withDatabase(steps, run) {
   const remaining = [...steps];
@@ -47,14 +47,56 @@ async function withDatabase(steps, run) {
   }
 }
 
-test('application and business layers do not import the database or run SQL', () => {
-  for (const folder of ['controllers', 'middlewares', 'services']) {
-    for (const file of fs.readdirSync(path.join(__dirname, '../src', folder))) {
-      if (!file.endsWith('.ts')) continue;
-      const source = fs.readFileSync(path.join(__dirname, '../src', folder, file), 'utf8');
-      assert.doesNotMatch(source, /from\s+['"][^'"]*config\/db['"]|\bdb\.(?:query|execute|getConnection)\s*\(/, `${folder}/${file}`);
+function sourceFiles(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const file = path.join(directory, entry.name);
+    return entry.isDirectory() ? sourceFiles(file) : file.endsWith('.ts') ? [file] : [];
+  });
+}
+
+test('the three layers respect their dependency direction and isolate external access', () => {
+  const src = path.resolve(__dirname, '../src');
+  for (const layer of ['application', 'business', 'access-data']) {
+    const files = sourceFiles(path.join(src, layer));
+    assert.ok(files.length, `Missing layer: ${layer}`);
+    for (const file of files) {
+      const source = fs.readFileSync(file, 'utf8');
+      const label = path.relative(src, file);
+      if (layer !== 'access-data') {
+        assert.doesNotMatch(source, /\bdb\.(?:query|execute|getConnection)\s*\(|\bfetch\s*\(/, label);
+      }
+      for (const [, imported] of source.matchAll(/(?:from\s+|require\s*\(\s*)['"]([^'"]+)['"]/g)) {
+        if (!imported.startsWith('.')) {
+          if (layer !== 'access-data') {
+            assert.doesNotMatch(imported, /^(?:mysql2(?:\/|$)|@aws-sdk\/|nodemailer$|google-auth-library$)/, label);
+          }
+          continue;
+        }
+        const target = path.relative(src, path.resolve(path.dirname(file), imported)).split(path.sep)[0];
+        if (layer === 'application') assert.notEqual(target, 'access-data', label);
+        if (layer === 'business') assert.notEqual(target, 'application', label);
+        if (layer === 'access-data') assert.ok(!['application', 'business'].includes(target), label);
+      }
     }
   }
+  assert.doesNotMatch(fs.readFileSync(path.resolve(__dirname, '../index.ts'), 'utf8'), /access-data|\bdb\.(?:query|execute)/);
+});
+
+test('readiness reports database failure without exposing the database error', async () => {
+  const healthRepository = require('../dist/src/access-data/repositories/health.repository');
+  const health = require('../dist/src/application/controllers/health.controller');
+  const originalProbe = healthRepository.probeDatabase;
+  const response = { code: 200, body: null, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } };
+  try {
+    healthRepository.probeDatabase = async () => {};
+    await health.getReadiness({}, response);
+    assert.equal(response.code, 200);
+    assert.deepEqual(response.body, { status: 'ready' });
+    healthRepository.probeDatabase = async () => { throw new Error('internal connection details'); };
+    await health.getReadiness({}, response);
+    assert.equal(response.code, 503);
+    assert.deepEqual(response.body, { status: 'not_ready' });
+  } finally { healthRepository.probeDatabase = originalProbe; }
 });
 
 test('login normalizes email, verifies bcrypt and excludes the password', async () => {

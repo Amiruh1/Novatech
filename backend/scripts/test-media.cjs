@@ -5,7 +5,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const { Readable } = require('node:stream');
-const { imageExtension, uploadImage, MAX_IMAGE_BYTES } = require('../dist/src/services/media.service');
+const { imageExtension, uploadImage, MAX_IMAGE_BYTES } = require('../dist/src/business/services/media.service');
 
 async function main() {
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1sAAAAASUVORK5CYII=', 'base64');
@@ -27,9 +27,9 @@ async function main() {
 
   process.env.JWT_SECRET = randomBytes(32).toString('hex');
   delete process.env.MEDIA_BUCKET;
-  const router = require('../dist/src/routes/media.routes').default;
-  const authService = require('../dist/src/services/auth.service');
-  const mediaRepository = require('../dist/src/repositories/media.repository');
+  const router = require('../dist/src/application/routes/media.routes').default;
+  const authService = require('../dist/src/business/services/auth.service');
+  const mediaRepository = require('../dist/src/access-data/repositories/media.repository');
   const originalReadImage = mediaRepository.readImage;
   let reads = 0;
   mediaRepository.readImage = async () => {
@@ -88,7 +88,7 @@ async function main() {
   nodemailer.createTransport = (config) => { options = config; return { sendMail: async () => ({ messageId: 'local' }) }; };
   process.env.NODE_ENV = 'production'; process.env.SMTP_PORT = '587';
   try {
-    const email = require('../dist/src/utils/email.utils');
+    const email = require('../dist/src/access-data/integrations/email.gateway');
     await email.sendEmail('receiver@example.test', 'Prueba', '<p>Prueba local</p>');
     assert.equal(options.requireTLS, true); assert.equal(options.tls.rejectUnauthorized, true);
     await email.sendEmailWithAttachment('receiver@example.test', 'Prueba', '<p>Prueba local</p>', []);

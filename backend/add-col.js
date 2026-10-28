@@ -1,4 +1,4 @@
-const db = require('./src/config/db').default;
+const db = require('./src/access-data/config/db').default;
 async function test() {
   await db.query("UPDATE categorias SET imagen = 'https://images.unsplash.com/photo-1531297172814-af26767dd395?q=80&w=400&auto=format&fit=crop' WHERE nombre = 'Computo'");
   await db.query("UPDATE categorias SET imagen = 'https://images.unsplash.com/photo-1527814050087-379381547996?q=80&w=400&auto=format&fit=crop' WHERE nombre = 'Perifericos'");

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import db from '../config/db';
+import db from '../access-data/config/db';
 
 dotenv.config();
 

@@ -1,4 +1,4 @@
-import db from '../src/config/db';
+import db from '../src/access-data/config/db';
 
 async function up() {
   console.log('[Migración] Iniciando migración de Banners Promocionales...');

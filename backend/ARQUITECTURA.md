@@ -1,16 +1,23 @@
 # Capas del backend
 
-NovaTech organiza el backend en tres capas. Se mantienen los nombres de carpetas del proyecto para que sea fácil encontrar cada parte.
+NovaTech organiza el backend en tres carpetas que corresponden a las capas solicitadas:
+
+```text
+src/
+  application/   Rutas, controllers, permisos HTTP y presentación de documentos
+  business/      Casos de uso, reglas, servicios y plantillas de notificaciones
+  access-data/   Repositorios, conexión MySQL y adaptadores de servicios externos
+```
 
 | Capa | Carpetas | Responsabilidad |
 | --- | --- | --- |
-| Application | `src/routes`, `src/controllers`, `src/middlewares` | Recibir peticiones HTTP, validar su formato, comprobar permisos y devolver respuestas. |
-| Business | `src/services` | Ejecutar los casos de uso: autenticación, contraseñas, reglas de pago, cambios de estado, preferencias y movimientos de stock. |
-| Access data | `src/repositories` | Consultar y modificar MySQL; construir consultas y acceder al almacenamiento de imágenes en S3. |
+| Application | `src/application` | Recibir peticiones HTTP, validar su formato, comprobar permisos y devolver respuestas. |
+| Business | `src/business` | Ejecutar los casos de uso: autenticación, contraseñas, reglas de pago, cambios de estado, preferencias y movimientos de stock. |
+| Access data | `src/access-data` | Consultar y modificar MySQL, almacenar imágenes en S3 y comunicarse con SMTP, Google y OpenAI. |
 
-El flujo es `ruta → controller → service → repository`. Los controllers y servicios no importan el pool de MySQL ni ejecutan SQL. Cada repositorio expone operaciones concretas, como buscar un usuario, registrar una venta o actualizar existencias. Los valores se envían como parámetros; los campos y órdenes de las consultas dinámicas usan opciones conocidas.
+El flujo es **Application → Business → Access data**: `ruta → controller → service → repository/adaptador`. Application no llama directamente a los repositorios; Business no conoce Express ni ejecuta SQL o peticiones HTTP externas; Access data no importa las capas superiores. Cada repositorio expone operaciones concretas, como buscar un usuario, registrar una venta o actualizar existencias. Los valores SQL se envían como parámetros; los campos y órdenes de las consultas dinámicas usan opciones conocidas.
 
-Por ejemplo, un ajuste de inventario entra por `products.controller.ts`. El servicio calcula la diferencia y prepara el movimiento; `products.repository.ts` consulta y guarda los datos. En autenticación, el servicio comprueba bcrypt y genera los hashes; el repositorio solamente los persiste. Las imágenes siguen el mismo recorrido mediante los módulos `media` y se almacenan en S3.
+Por ejemplo, un ajuste de inventario entra por `application/controllers/products.controller.ts`. El servicio de Business calcula la diferencia y prepara el movimiento; `access-data/repositories/products.repository.ts` consulta y guarda los datos. En autenticación, el servicio comprueba bcrypt y genera los hashes; el repositorio solamente los persiste. Las imágenes y la comprobación `/ready` siguen el mismo recorrido. Las instrucciones de Nova se preparan en Business y su adaptador de Access data realiza la petición a OpenAI.
 
 ## Transacciones
 
@@ -18,7 +25,7 @@ El registro principal de una venta usa `sp_registrar_venta`, definido en `sql/no
 
 El alcance transaccional existente se conserva: el coste de envío, los metadatos de pago, los movimientos adicionales y los cambios posteriores de estado se guardan en operaciones separadas. Un ajuste manual de stock también conserva sus operaciones separadas. Si se necesita atomicidad de todo ese flujo, debe ampliarse expresamente la transacción; tener tres capas por sí solo no la proporciona.
 
-Los scripts de instalación y migración son herramientas operativas, fuera del flujo HTTP. La conexión se configura en `src/config/db.ts`; las credenciales de producción se entregan desde AWS Secrets Manager al desplegar y no deben incluirse en el repositorio.
+`src/scripts` contiene las herramientas operativas de instalación y migración, fuera del flujo HTTP. Conservan sus rutas para que el despliegue existente pueda ejecutarlas. La conexión se configura en `src/access-data/config/db.ts`; las credenciales de producción se entregan desde AWS Secrets Manager al desplegar y no deben incluirse en el repositorio.
 
 ## Comprobación
 
@@ -26,7 +33,7 @@ Desde `backend`:
 
 ```powershell
 npm run build
-node --test tests/layers.test.cjs
+node --test tests/layers.test.cjs tests/external-gateways.test.cjs tests/notification-google.test.cjs
 ```
 
-Las pruebas cubren autenticación, recuperación de contraseña, enlaces de activación, filtros del catálogo, creación de productos, ajustes de stock, registro de ventas, pagos y cambios de estado. Sustituyen la conexión de MySQL por un doble de prueba: no modifican la base de datos ni reemplazan las pruebas de integración del despliegue. También comprueban que las capas application y business no vuelvan a acceder directamente al pool.
+Las pruebas cubren autenticación, recuperación de contraseña, enlaces de activación, filtros del catálogo, creación de productos, ajustes de stock, registro de ventas, pagos, cambios de estado y disponibilidad. Sustituyen la conexión de MySQL por un doble de prueba: no modifican la base de datos ni reemplazan las pruebas de integración del despliegue. También recorren las tres carpetas para impedir dependencias en sentido contrario, consultas desde las capas superiores o conexiones externas fuera de Access data.

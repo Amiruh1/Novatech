@@ -1,6 +1,6 @@
-import db from '../config/db';
-import { createMediaMigrationRepository } from '../repositories/media-migration.repository';
-import { migrateMedia } from '../services/media-migration.service';
+import db from '../access-data/config/db';
+import { createMediaMigrationRepository } from '../access-data/repositories/media-migration.repository';
+import { migrateMedia } from '../business/services/media-migration.service';
 
 async function main() {
   try {

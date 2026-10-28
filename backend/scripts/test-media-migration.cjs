@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
-const { downloadSeedImage, isAllowedImageSource, migrateMedia } = require('../dist/src/services/media-migration.service');
-const { createMediaMigrationRepository } = require('../dist/src/repositories/media-migration.repository');
-const { MAX_IMAGE_BYTES } = require('../dist/src/services/media.service');
+const { downloadSeedImage, isAllowedImageSource, migrateMedia } = require('../dist/src/business/services/media-migration.service');
+const { createMediaMigrationRepository } = require('../dist/src/access-data/repositories/media-migration.repository');
+const { MAX_IMAGE_BYTES } = require('../dist/src/business/services/media.service');
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1sAAAAASUVORK5CYII=', 'base64');
 const downloaded = { content: png, contentType: 'image/png', extension: 'png' };
 
