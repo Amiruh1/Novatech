@@ -19,6 +19,12 @@ El flujo es **Application → Business → Access data**: `ruta → controller �
 
 Por ejemplo, un ajuste de inventario entra por `application/controllers/products.controller.ts`. El servicio de Business calcula la diferencia y prepara el movimiento; `access-data/repositories/products.repository.ts` consulta y guarda los datos. En autenticación, el servicio comprueba bcrypt y genera los hashes; el repositorio solamente los persiste. Las imágenes y la comprobación `/ready` siguen el mismo recorrido. Las instrucciones de Nova se preparan en Business y su adaptador de Access data realiza la petición a OpenAI.
 
+## Autenticación prevista con Amazon Cognito
+
+En una siguiente etapa usaremos **Amazon Cognito** para el registro, inicio de sesión y recuperación de cuentas. Por ahora, NovaTech mantiene su autenticación propia con JWT; Cognito está planificado y todavía no está implementado.
+
+La integración conservará las tres capas: **Application** recibirá las solicitudes de acceso, **Business** aplicará las reglas de usuarios y permisos, y **Access data** incluirá el adaptador de Cognito. La migración de las cuentas actuales se definirá al implementar esa etapa.
+
 ## Transacciones
 
 El registro principal de una venta usa `sp_registrar_venta`, definido en `sql/novatech_erp_full.sql`. Ese procedimiento contiene la transacción, el bloqueo de existencias y el rollback ante un error. El repositorio es el único punto desde el backend que lo invoca.

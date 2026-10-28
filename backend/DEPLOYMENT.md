@@ -14,6 +14,10 @@ Necesita `NODE_ENV=production`, `BOOTSTRAP_ADMIN_EMAIL` y `BOOTSTRAP_ADMIN_PASSW
 
 El SQL completo se importa únicamente en una base vacía: contiene instrucciones para recrear tablas. No se debe ejecutar sobre una base con datos.
 
+# Autenticación futura
+
+Está previsto usar **Amazon Cognito** en una próxima etapa para gestionar el registro, el inicio de sesión y la recuperación de cuentas. El despliegue actual utiliza la autenticación propia con JWT. Cognito todavía no está configurado ni se requiere para ejecutar esta versión.
+
 # Imágenes
 
 Configurar `MEDIA_BUCKET`, `AWS_REGION` y `MEDIA_BASE_URL`. El bucket es privado y el rol de EC2 necesita `s3:PutObject` y `s3:GetObject` sobre `images/*`, sin access keys en el código. Actualmente la URL base es `https://novatech.apicesarmeza.lat/api/media`; puede sustituirse por una distribución CloudFront cuando esté disponible.
