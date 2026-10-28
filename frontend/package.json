@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "test": "node --test scripts/test-voice.cjs tests/service-worker.test.cjs",
     "watch": "ng build --watch --configuration development"
   },
   "prettier": {

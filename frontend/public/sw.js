@@ -1,5 +1,5 @@
 
-const CACHE_NAME    = 'novatech-v3';
+const CACHE_NAME    = 'novatech-v4';
 const STATIC_ASSETS = ['/', '/tienda', '/favicon.svg?v=novatech-1', '/favicon.ico?v=novatech-1', '/icons/icon-192.png', '/icons/icon-512.png'];
 const LOCAL_DEVELOPMENT = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname);
 
@@ -27,6 +27,21 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) return;
 
   if (event.request.method === 'GET') {
+    if (event.request.mode === 'navigate') {
+      event.respondWith(
+        fetch(event.request, { cache: 'no-cache' }).then(async response => {
+          if (response.ok) {
+            try {
+              const cache = await caches.open(CACHE_NAME);
+              await cache.put(event.request, response.clone());
+            } catch {}
+          }
+          return response;
+        }, () => caches.match(event.request).then(cached => cached || new Response('Offline', { status: 503 })))
+      );
+      return;
+    }
+
     event.respondWith(
       caches.match(event.request).then(cached => {
         if (cached) return cached;
