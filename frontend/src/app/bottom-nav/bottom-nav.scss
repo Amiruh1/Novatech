@@ -1,9 +1,4 @@
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  Bottom Navigation 2026 — Mobile only                       ║
-// ║  Inspired by: HyperOS · Xiaomi Store · Mercado Libre       ║
-// ╚══════════════════════════════════════════════════════════════╝
 
-// Solo visible en mobile
 .bottom-nav {
   display: none;
 }
@@ -25,7 +20,6 @@
   }
 }
 
-// ── Tab item ──────────────────────────────────────────────────────────────────
 .bn-item {
   flex: 1;
   display: flex;
@@ -41,10 +35,9 @@
   color: var(--app-muted);
   position: relative;
   transition: color var(--dur-base) var(--ease-smooth);
-  min-height: 44px; // WCAG mínimo táctil
+  min-height: 44px;
   min-width: 44px;
 
-  // Ripple on tap
   &::after {
     content: '';
     position: absolute;
@@ -68,7 +61,6 @@
   }
 }
 
-// ── Icon wrapper ──────────────────────────────────────────────────────────────
 .bn-icon-wrap {
   position: relative;
   display: flex;
@@ -81,7 +73,6 @@
   i { font-size: 1.2rem; }
 }
 
-// ── Cart button — pill indicator when active ──────────────────────────────────
 .bn-cart {
   &.active .bn-icon-wrap {
     background: var(--app-primary);
@@ -94,7 +85,6 @@
   }
 }
 
-// ── Count badge ───────────────────────────────────────────────────────────────
 .bn-badge {
   position: absolute;
   top: -5px;
@@ -114,7 +104,6 @@
   animation: scaleIn var(--dur-fast) var(--ease-spring) both;
 }
 
-// ── Label ─────────────────────────────────────────────────────────────────────
 .bn-label {
   font-size: 0.62rem;
   font-weight: 700;
@@ -123,7 +112,6 @@
   transition: color var(--dur-base) var(--ease-smooth);
 }
 
-// ── Active indicator dot ──────────────────────────────────────────────────────
 .bn-item.active::before {
   content: '';
   position: absolute;
@@ -137,7 +125,6 @@
   animation: scaleIn var(--dur-base) var(--ease-spring) both;
 }
 
-// ── prefers-reduced-motion ────────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   .bn-item,
   .bn-icon-wrap,

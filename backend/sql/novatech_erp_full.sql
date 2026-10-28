@@ -1,17 +1,4 @@
-﻿-- ================================================================
--- NOVATECH ECOMMERCE - BASE INSTALL SCRIPT (MySQL 8.0+)
--- ================================================================
--- Objetivo:
--- 1) Mantener compatibilidad con el e-commerce actual.
--- 2) Adoptar arquitectura limpia inspirada en SISTEMA-DE-VENTAS.V2.
--- 3) Dejar base lista para escalamiento (roles/permisos, catalogo, carrito, checkout).
---
--- Nota de seguridad:
--- Este script deja passwords con hash BCrypt.
--- Si existen usuarios legacy en texto plano, el backend los migra a hash al iniciar sesion.
--- ================================================================
-
-SET NAMES utf8mb4;
+﻿SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
 CREATE DATABASE IF NOT EXISTS novatech_db
@@ -20,9 +7,6 @@ CREATE DATABASE IF NOT EXISTS novatech_db
 
 USE novatech_db;
 
--- ------------------------------------------------
--- 0) RESET CONTROLLED
--- ------------------------------------------------
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP VIEW IF EXISTS vw_productos_catalogo;
@@ -56,9 +40,6 @@ DROP TABLE IF EXISTS roles;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- ------------------------------------------------
--- 1) SEGURIDAD (RBAC)
--- ------------------------------------------------
 CREATE TABLE roles (
   role_codigo VARCHAR(30) PRIMARY KEY,
   role_nombre VARCHAR(80) NOT NULL,
@@ -97,7 +78,7 @@ CREATE TABLE usuarios (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(120) NOT NULL,
   email VARCHAR(140) NOT NULL,
-  password VARCHAR(255) NOT NULL COMMENT 'Se almacena con hash BCrypt.',
+  password VARCHAR(255) NOT NULL,
   rol VARCHAR(30) NOT NULL DEFAULT 'cliente',
   tipo_documento VARCHAR(20) NOT NULL DEFAULT 'DNI',
   numero_documento VARCHAR(20) NOT NULL DEFAULT '00000000',
@@ -134,9 +115,6 @@ CREATE TABLE preferencias_usuario (
     ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------
--- 2) MAESTROS E-COMMERCE
--- ------------------------------------------------
 CREATE TABLE metodos_pago (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   codigo VARCHAR(30) NOT NULL,
@@ -232,8 +210,8 @@ CREATE TABLE productos (
   categoria_id INT UNSIGNED NULL,
   subcategoria_id INT UNSIGNED NULL,
   marca_id INT UNSIGNED NULL,
-  categoria VARCHAR(100) NULL COMMENT 'Compatibilidad con frontend legado',
-  marca VARCHAR(100) NULL COMMENT 'Compatibilidad con frontend legado',
+  categoria VARCHAR(100) NULL,
+  marca VARCHAR(100) NULL,
   precio DECIMAL(12,2) NOT NULL DEFAULT 0,
   precio_compra DECIMAL(12,2) NULL,
   precio_oferta DECIMAL(12,2) NULL,
@@ -271,9 +249,6 @@ CREATE INDEX idx_productos_marca_id ON productos (marca_id);
 CREATE INDEX idx_productos_activo ON productos (activo);
 CREATE INDEX idx_productos_destacado ON productos (destacado);
 
--- ------------------------------------------------
--- 3) CARRITO Y CHECKOUT
--- ------------------------------------------------
 CREATE TABLE carritos (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT UNSIGNED NOT NULL,
@@ -324,7 +299,7 @@ CREATE TABLE ventas (
   descuento DECIMAL(12,2) NOT NULL DEFAULT 0,
   costo_envio DECIMAL(12,2) NOT NULL DEFAULT 0,
   total DECIMAL(12,2) NOT NULL DEFAULT 0,
-  detalle TEXT NULL COMMENT 'JSON textual para compatibilidad con frontend actual',
+  detalle TEXT NULL,
   estado ENUM('pendiente', 'pagado', 'preparando', 'en camino', 'entregado', 'cancelado', 'reembolsado') NOT NULL DEFAULT 'pendiente',
   canal_venta ENUM('WEB', 'POS') NOT NULL DEFAULT 'WEB',
   metodo_pago_id INT UNSIGNED NULL,
@@ -415,9 +390,6 @@ CREATE TABLE ventas_pagos (
 
 CREATE INDEX idx_ventas_pagos_venta_estado ON ventas_pagos (venta_id, estado);
 
--- ------------------------------------------------
--- 4) INVENTARIO, ALERTAS, AUDITORIA
--- ------------------------------------------------
 CREATE TABLE inventario_movimientos (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   producto_id INT UNSIGNED NOT NULL,
@@ -480,9 +452,6 @@ CREATE TABLE auditoria (
 
 CREATE INDEX idx_auditoria_fecha ON auditoria (creado_en DESC);
 
--- ------------------------------------------------
--- 5) VISTA DE CATALOGO (READY FOR API)
--- ------------------------------------------------
 CREATE VIEW vw_productos_catalogo AS
 SELECT
   p.id,
@@ -506,9 +475,6 @@ LEFT JOIN categorias c ON c.id = p.categoria_id
 LEFT JOIN subcategorias sc ON sc.id = p.subcategoria_id
 LEFT JOIN marcas m ON m.id = p.marca_id;
 
--- ------------------------------------------------
--- 6) TRIGGERS DE SINCRONIZACION DE NOMBRES
--- ------------------------------------------------
 DELIMITER $$
 
 CREATE TRIGGER trg_productos_bi_sync_names
@@ -595,9 +561,6 @@ END$$
 
 DELIMITER ;
 
--- ------------------------------------------------
--- 7) PROCEDURE: REGISTRO TRANSACCIONAL DE VENTA
--- ------------------------------------------------
 DROP PROCEDURE IF EXISTS sp_registrar_venta;
 DELIMITER $$
 
@@ -691,7 +654,6 @@ BEGIN
 
   START TRANSACTION;
 
-  -- Bloquea filas de productos para evitar sobreventa por concurrencia.
   SELECT COUNT(*)
     INTO v_locked_rows
   FROM productos p
@@ -884,9 +846,6 @@ END$$
 
 DELIMITER ;
 
--- ------------------------------------------------
--- 8) PROCEDURE: CHECKOUT DESDE CARRITO
--- ------------------------------------------------
 DROP PROCEDURE IF EXISTS sp_checkout_desde_carrito;
 DELIMITER $$
 
@@ -961,9 +920,6 @@ END$$
 
 DELIMITER ;
 
--- ------------------------------------------------
--- 9) PROCEDURE: ACTUALIZAR ESTADO DE VENTA
--- ------------------------------------------------
 DROP PROCEDURE IF EXISTS sp_actualizar_estado_venta;
 DELIMITER $$
 
@@ -1087,9 +1043,6 @@ END$$
 
 DELIMITER ;
 
--- ------------------------------------------------
--- 10) DATA SEED (MINIMO FUNCIONAL)
--- ------------------------------------------------
 INSERT INTO roles (role_codigo, role_nombre, role_descripcion)
 VALUES
   ('admin', 'Administrador', 'Control total del e-commerce'),
@@ -1325,5 +1278,3 @@ VALUES
 INSERT INTO carritos (usuario_id, estado)
 VALUES
   ((SELECT id FROM usuarios WHERE email = 'cliente@novatech.com'), 'activo');
-
--- Fin del script

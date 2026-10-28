@@ -1,8 +1,6 @@
-// ── Lista Usuarios ────────────────────────────────────────────────────────────
 
 .table-shell { padding-top: 0.75rem; }
 
-// ── Acciones — pill alineado a la derecha (mismo patrón que productos) ────────
 :host ::ng-deep .p-datatable-thead th:last-child {
   text-align: right !important;
 }
@@ -20,12 +18,11 @@
   padding: 0.2rem 0.35rem;
 }
 
-// ── Celda nombre + avatar ─────────────────────────────────────────────────────
 .user-name-cell {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  min-width: 0; // permite truncar
+  min-width: 0;
 }
 
 .user-avatar {
@@ -46,7 +43,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  min-width: 0; // permite truncar hijos
+  min-width: 0;
 
   strong {
     max-width: 18rem;
@@ -64,7 +61,6 @@
   }
 }
 
-// ── Celda email — truncación con tooltip nativo (title) ───────────────────────
 .user-email-cell {
   display: block;
   max-width: 18rem;
@@ -75,7 +71,6 @@
   color: var(--app-text-2);
 }
 
-// ── Badges de rol — sin hardcode ─────────────────────────────────────────────
 .badge-admin {
   background: var(--app-danger-soft);
   color: var(--app-danger);

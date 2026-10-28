@@ -27,11 +27,6 @@ interface MetodoPagoOption {
   icon: string;
 }
 
-// Anima cada step al aparecer: fade + slide sutil desde abajo.
-// Sólo :enter — el step saliente desaparece instantáneamente para
-// evitar que dos cards ocupen espacio simultáneamente.
-// prefers-reduced-motion: la media query global de styles.scss
-// colapsa animation-duration a 0.01ms automáticamente.
 const stepAnim = trigger('stepAnim', [
   transition(':enter', [
     style({ opacity: 0, transform: 'translateY(14px) scale(0.99)' }),
@@ -75,24 +70,20 @@ export class Checkout implements OnInit {
   private router           = inject(Router);
   private cd               = inject(ChangeDetectorRef);
 
-  // ── State ──────────────────────────────────────────────────────────────────
   step: 1 | 2 | 3 | 4 = 1;
   items: CartItem[]   = [];
   procesando          = false;
   validationMessage = '';
 
-  // Addresses
   misDirecciones:       Direccion[]   = [];
   direccionSeleccionada: number | null = null;
   costoEnvio           = 0;
   loadingDirs          = false;
 
-  // Quick-add address dialog
   showDirDialog        = false;
   guardandoDir         = false;
   nuevaDireccion: Partial<Direccion> = {};
 
-  // Payment
   metodoPagoSeleccionado = 'tarjeta';
   telefonoBilletera      = '';
   codigoVerificacion     = '';
@@ -103,13 +94,11 @@ export class Checkout implements OnInit {
   bancoTransferencia     = '';
   nroOperacionTransferencia = '';
 
-  // Receipt
   tipoComprobante: 'boleta' | 'factura' = 'boleta';
   documentoFiscal  = '';
   razonSocial      = '';
   comentarioPago   = '';
 
-  // Success state
   ventaId:    number | null = null;
   ventaFecha  = '';
   ventaMetodo = '';
@@ -128,7 +117,6 @@ export class Checkout implements OnInit {
     'ate': 15, 'villa el salvador': 16, 'chorrillos': 14, 'default': 20
   };
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
   ngOnInit() {
     const user = this.auth.currentUserValue;
     if (!user) {
@@ -146,7 +134,6 @@ export class Checkout implements OnInit {
     this.cargarDirecciones();
   }
 
-  // ── Computed ───────────────────────────────────────────────────────────────
   get subtotal() { return this.cart.getSubtotal(); }
   get igv()      { return this.cart.getIGV(); }
   get total()    { return this.cart.getTotal(this.costoEnvio); }
@@ -166,7 +153,6 @@ export class Checkout implements OnInit {
     return this.misDirecciones.find(d => d.id === this.direccionSeleccionada);
   }
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
   siguiente() {
     this.validationMessage = '';
     if (this.step === 2 && !this.direccionSeleccionada) {
@@ -194,12 +180,9 @@ export class Checkout implements OnInit {
   }
 
   private focusStepHeading() {
-    // detectChanges() ya creó el nuevo paso: enfocar ahora evita interrumpir
-    // una interacción de teclado posterior con un temporizador pendiente.
     document.getElementById('checkout-step-heading')?.focus();
   }
 
-  // ── Addresses ─────────────────────────────────────────────────────────────
   cargarDirecciones() {
     this.loadingDirs = true;
     this.direccionesService.getDirecciones().pipe(
@@ -255,7 +238,6 @@ export class Checkout implements OnInit {
     });
   }
 
-  // ── Payment ────────────────────────────────────────────────────────────────
   onNumeroTarjetaChange(v: string) {
     const d = v.replace(/\D/g, '').slice(0, 16);
     this.numeroTarjeta = d.replace(/(.{4})/g, '$1 ').trim();

@@ -1,6 +1,5 @@
 <section class="app-shell-page">
 
-    <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
     <header class="user-hero-header">
         <div class="user-profile-info">
             <div class="user-avatar-large">{{ getInitial(usuario?.nombre) }}</div>
@@ -11,7 +10,6 @@
         </div>
     </header>
 
-    <!-- ── KPI Cards ──────────────────────────────────────────────────────────── -->
     <div class="stats-grid compras-kpi mb-5">
         <article class="stat-card">
             <div>
@@ -43,7 +41,6 @@
         </article>
     </div>
 
-    <!-- ── Order List ─────────────────────────────────────────────────────────── -->
     <div class="orders-section">
         <div class="orders-section-head">
             <div>
@@ -54,7 +51,6 @@
             </div>
         </div>
 
-        <!-- Skeleton -->
         <div class="orders-list" *ngIf="loading">
             <div class="order-card-skeleton" *ngFor="let s of [1,2,3,4]">
                 <div class="ocs-row">
@@ -66,7 +62,6 @@
             </div>
         </div>
 
-        <!-- Empty -->
         <div class="orders-empty" *ngIf="!loading && compras.length === 0">
             <div class="orders-empty-icon"><i class="pi pi-shopping-bag"></i></div>
             <strong>Aún no tienes pedidos</strong>
@@ -74,14 +69,12 @@
             <button pButton type="button" label="Ir a la tienda" icon="pi pi-shopping-cart" routerLink="/tienda"></button>
         </div>
 
-        <!-- Order cards -->
         <div class="orders-list" *ngIf="!loading && compras.length > 0">
             <article class="order-card"
                      *ngFor="let venta of comprasPaginadas; let i = index"
                      [class.order-card--open]="isDetalleAbierto(venta)"
                      [style.animation-delay]="(i * 0.04) + 's'">
 
-                <!-- ── Header row (siempre visible) ──────────────────────── -->
                 <div class="order-card-header" (click)="toggleDetalle(venta)" role="button"
                      [attr.aria-expanded]="isDetalleAbierto(venta)">
 
@@ -119,10 +112,8 @@
                     </div>
                 </div>
 
-                <!-- ── Detalle expandible ─────────────────────────────────── -->
                 <div class="order-card-detail" *ngIf="isDetalleAbierto(venta)">
 
-                    <!-- Tracking -->
                     <div class="order-detail-section" *ngIf="!isTerminalState(venta.estado)">
                         <span class="order-detail-label">Seguimiento</span>
                         <div class="tracking-timeline">
@@ -145,7 +136,6 @@
                         </div>
                     </div>
 
-                    <!-- Payment pills -->
                     <div class="order-detail-section" *ngIf="venta.pago as pago">
                         <span class="order-detail-label">Pago y envío</span>
                         <div class="payment-summary">
@@ -172,7 +162,6 @@
                         </div>
                     </div>
 
-                    <!-- Products -->
                     <div class="order-detail-section">
                         <span class="order-detail-label">Productos</span>
                         <div class="order-products-grid" *ngIf="venta.productos?.length; else emptyProducts">
@@ -195,7 +184,6 @@
             </article>
         </div>
 
-        <!-- Paginador -->
         <div class="orders-paginator" *ngIf="!loading && compras.length > pageSize">
             <p-paginator
                 [rows]="pageSize"

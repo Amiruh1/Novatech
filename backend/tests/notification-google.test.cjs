@@ -1,4 +1,3 @@
-// Ejecutar después de npm run build. No se conecta a SMTP, Google ni MySQL.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const mailGateway = require('../dist/src/access-data/integrations/email.gateway');

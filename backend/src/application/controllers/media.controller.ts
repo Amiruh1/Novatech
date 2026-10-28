@@ -35,7 +35,6 @@ export async function postImage(req: Request, res: Response) {
     return res.status(201).json(image);
   } catch (error) {
     if (error instanceof InvalidImageError) return res.status(400).json({ message: error.message });
-    // Los errores del SDK pueden contener detalles de infraestructura o credenciales.
     console.error('No se pudo guardar la imagen en el almacenamiento.');
     return res.status(503).json({ message: 'No se pudo subir la imagen. Inténtalo de nuevo en unos momentos.' });
   }

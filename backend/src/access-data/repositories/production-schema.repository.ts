@@ -1,6 +1,5 @@
 import type { Pool, RowDataPacket } from 'mysql2/promise';
 
-// Completa las dos migraciones que faltan en el SQL inicial, sin recrear tablas.
 export async function ensureProductionSchema(pool: Pool) {
   const [columns] = await pool.query<RowDataPacket[]>(
     `SELECT COLUMN_NAME FROM information_schema.COLUMNS

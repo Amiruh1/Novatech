@@ -12,8 +12,6 @@ export function isOpenAIConfigured(): boolean {
   return !!process.env.OPENAI_API_KEY?.trim();
 }
 
-// El adaptador conoce el protocolo del proveedor, pero no los temas ni las
-// reglas de Nova. Devuelve el texto para que business lo interprete.
 export async function requestStructuredCompletion(
   input: StructuredCompletionRequest,
   signal?: AbortSignal,

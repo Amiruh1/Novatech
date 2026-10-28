@@ -1,8 +1,6 @@
-// ── Configuración — layout modular, premium, adaptable a temas ────────────────
 
 .config-page { padding-bottom: var(--sp-10); }
 
-// ── Grid — 2 columnas: izquierda estrecha (seguridad), derecha amplia ────────
 .config-grid {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
@@ -11,7 +9,6 @@
 
 .cfg-card--wide { grid-column: 1 / -1; }
 
-// ── Card base — usa tokens de tema ───────────────────────────────────────────
 .cfg-card {
   background: var(--app-surface);
   border: 1px solid var(--app-border);
@@ -30,7 +27,6 @@
   }
 }
 
-// ── Card header — franja superior con icono + título ─────────────────────────
 .cfg-card-header {
   display: flex;
   align-items: center;
@@ -40,7 +36,6 @@
   background: linear-gradient(to right, var(--app-surface-muted), var(--app-surface));
   position: relative;
 
-  // línea de acento izquierda como indicador de módulo
   &::before {
     content: '';
     position: absolute;
@@ -85,7 +80,6 @@
   margin-top: 0.1rem;
 }
 
-// ── Profile banner ────────────────────────────────────────────────────────────
 .cfg-profile-banner {
   display: flex;
   align-items: center;
@@ -152,7 +146,6 @@
   i { font-size: 0.65rem; }
 }
 
-// ── Card body ─────────────────────────────────────────────────────────────────
 .cfg-body {
   padding: var(--sp-5);
   display: flex;
@@ -161,14 +154,10 @@
   flex: 1;
 }
 
-// ── p-password: input full-width + ojo pegado al borde ────────────────────────
-// PrimeNG 21 renderiza: <p-password> > <p-iconfield> > <input> + <p-inputicon>
 :host ::ng-deep .cfg-body {
 
-  // 1. host element del componente
   p-password { display: block !important; width: 100% !important; }
 
-  // 2. wrapper con clase .p-password
   .p-password {
     width: 100% !important;
     display: flex !important;
@@ -176,7 +165,6 @@
     position: relative !important;
   }
 
-  // 3. p-iconfield — contenedor interno que agrupa input + icono
   p-iconfield,
   .p-iconfield {
     display: flex !important;
@@ -187,7 +175,6 @@
     align-items: center !important;
   }
 
-  // 4. el <input> dentro — padding derecho para que el ojo no lo tape
   .p-password .p-inputtext {
     flex: 1 !important;
     width: 100% !important;
@@ -195,7 +182,6 @@
     padding-right: 2.8rem !important;
   }
 
-  // 5. icono del ojo — posicionado sobre el input, NO sobre el card
   .p-inputicon,
   .p-icon-wrapper,
   .p-password-toggle-mask-icon {
@@ -232,7 +218,6 @@
   .form-group:nth-child(2) { grid-column: 2; }
 }
 
-// ── Forms ─────────────────────────────────────────────────────────────────────
 .form-group {
   display: flex;
   flex-direction: column;
@@ -247,7 +232,6 @@
   }
 }
 
-// Hint / error / counter — solo aparecen cuando hay contenido relevante
 .field-req {
   font-size: 0.72rem;
   color: var(--app-muted);
@@ -317,7 +301,6 @@
   }
 }
 
-// ── Botones ───────────────────────────────────────────────────────────────────
 .cfg-btn-primary {
   justify-content: center;
   background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong)) !important;
@@ -348,7 +331,6 @@
   pointer-events: none;
 }
 
-// ── Password strength ─────────────────────────────────────────────────────────
 .pass-strength-wrap {
   display: flex;
   align-items: center;
@@ -383,7 +365,6 @@
   &.strong { color: var(--app-success); }
 }
 
-// ── Direction grid ────────────────────────────────────────────────────────────
 .dir-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
@@ -522,16 +503,14 @@
   gap: var(--sp-4);
 }
 
-// Meta-row dentro de form-group del dialog dirección
 .dir-field-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-2);
-  min-height: 1rem; // evita que el layout salte cuando aparece/desaparece el error
+  min-height: 1rem;
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 900px) {
   .config-grid    { grid-template-columns: 1fr; }
   .cfg-card--wide { grid-column: auto; }

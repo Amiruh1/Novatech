@@ -1,4 +1,3 @@
-// Ejecutar después de npm run build. No envía archivos a AWS ni correos reales.
 const assert = require('node:assert/strict');
 const { randomBytes } = require('node:crypto');
 const express = require('express');

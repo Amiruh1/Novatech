@@ -39,8 +39,6 @@ export async function readImage(key: string): Promise<StoredImage | null> {
   }
 }
 
-// La cadena de credenciales predeterminada utiliza el rol IAM de EC2.
-// La aplicación no necesita ni almacena access keys de AWS.
 export async function storeImage(input: ImageObject): Promise<string> {
   const { bucket, client } = storage();
   const baseUrl = process.env.MEDIA_BASE_URL;

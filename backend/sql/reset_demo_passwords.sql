@@ -1,14 +1,3 @@
--- ------------------------------------------------
--- Reset de credenciales demo (solo desarrollo / QA local)
--- ------------------------------------------------
--- Password demo: NovaTech123!
--- Usuarios afectados:
---   - admin@novatech.com
---   - cliente@novatech.com
---
--- ADVERTENCIA:
--- No ejecutar este script en produccion.
--- Cambia la clave inmediatamente si lo usas fuera de local.
 
 START TRANSACTION;
 

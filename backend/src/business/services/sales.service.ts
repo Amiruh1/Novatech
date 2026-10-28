@@ -123,7 +123,6 @@ export async function saveSalePaymentMetadata(
 
   const metodoKey = String(input?.metodo_key || 'no-definido').toLowerCase();
   const metodoLabel = normalizeText(input?.metodo_label, 80);
-  // H7: monto_pagado del cliente se ignora; el monto autorizado es siempre el total calculado en backend
   const amount = normalizeMoney(saleTotal) ?? 0;
   const reference = normalizeText(input?.referencia_pago, 120);
   const comment = normalizeText(input?.comentario_pago, 300);

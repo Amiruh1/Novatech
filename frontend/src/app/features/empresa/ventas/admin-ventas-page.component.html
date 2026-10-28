@@ -20,7 +20,6 @@
         </div>
     </div>
 
-    <!-- ── KPI Mini Cards ────────────────────────────────────────────────────── -->
     <div class="stats-grid ventas-kpi mb-4">
         <article class="stat-card">
             <div><div class="stat-label">Pedidos visibles</div>
@@ -58,7 +57,6 @@
             <button pButton type="button" icon="pi pi-filter-slash" class="p-button-text" label="Limpiar" (click)="limpiarFiltros()"></button>
         </div>
 
-        <!-- ── Filtros ──────────────────────────────────────────────────────── -->
         <div class="card-body filters-bar">
             <div class="grid">
                 <div class="col-12 md:col-4">
@@ -112,7 +110,6 @@
                 </div>
             </div>
 
-            <!-- ── Date Range Filter ─────────────────────────────────────── -->
             <div class="date-filter-row">
                 <div class="quick-range-chips">
                     <button *ngFor="let r of quickRanges" type="button"
@@ -135,7 +132,6 @@
             </div>
         </div>
 
-        <!-- ── Bulk Action Toolbar ───────────────────────────────────────── -->
         <div class="bulk-toolbar" *ngIf="selectedCount > 0" role="toolbar" aria-label="Acciones masivas">
             <span class="bulk-count">
                 <i class="pi pi-check-square"></i>
@@ -156,7 +152,6 @@
             </div>
         </div>
 
-        <!-- ── Table ─────────────────────────────────────────────────────── -->
         <div class="card-body table-shell">
             <p-table [value]="ventasFiltradas" dataKey="id"
                 [(selection)]="selectedVentas"
@@ -236,7 +231,6 @@
                         </td>
                     </tr>
 
-                    <!-- Expand row -->
                     <tr class="expand-row" *ngIf="isDetalleAbierto(venta)">
                         <td colspan="8">
                             <div class="expand-box">
@@ -300,7 +294,6 @@
     </article>
 </section>
 
-<!-- ── DRAWER: Detalle completo del pedido ──────────────────────────────────── -->
 <p-drawer
     [(visible)]="drawerVisible"
     position="right"
@@ -319,7 +312,6 @@
     </ng-template>
 
     <div *ngIf="ventaDrawer as venta" class="drawer-body">
-        <!-- Meta grid -->
         <div class="drawer-meta-grid">
             <div class="meta-row"><span class="meta-key">Pedido</span><span class="meta-val font-bold">#{{ venta.id }}</span></div>
             <div class="meta-row"><span class="meta-key">Fecha</span><span class="meta-val">{{ venta.fecha | date:'dd/MM/yyyy HH:mm' }}</span></div>
@@ -347,7 +339,6 @@
         </div>
         <ng-template #emptyDrawer><p class="expand-empty">Sin detalle disponible.</p></ng-template>
 
-        <!-- Confirmar pago si aplica -->
         <div class="drawer-pago-alert" *ngIf="pagoPendiente(venta)">
             <i class="pi pi-exclamation-triangle"></i>
             <span>Pago manual pendiente — Ref: <strong>{{ venta.pago?.referencia || 'Sin referencia' }}</strong></span>
@@ -360,7 +351,6 @@
     </div>
 </p-drawer>
 
-<!-- ── DIALOG: Cambio de estado masivo ──────────────────────────────────────── -->
 <p-dialog [(visible)]="showBulkDialog" [modal]="true" [draggable]="false" [resizable]="false"
     [style]="{ width: 'min(28rem, 96vw)' }" [transitionOptions]="'200ms ease-out'">
     <ng-template pTemplate="header">

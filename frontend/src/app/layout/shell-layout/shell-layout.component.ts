@@ -17,10 +17,6 @@ import { AccessibilityService } from '../../core/services/accessibility.service'
 import { moveFocusWithArrow } from '../../accessibility/arrow-navigation';
 import { NovaAssistant } from '../../assistant/nova-assistant';
 
-// ── Route transition animation ────────────────────────────────────────────────
-// Sólo anima el :enter para evitar flashes de layout durante el :leave.
-// prefers-reduced-motion: la media query global en styles.scss colapsa
-// animation-duration a 0.01ms, por lo que este trigger se respeta automáticamente.
 const routeAnim = trigger('routeAnim', [
   transition('* => *', [
     query(':enter', [
@@ -53,7 +49,6 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   private cd      = inject(ChangeDetectorRef);
   private sub     = new Subscription();
 
-  /** Incrementa en cada NavigationEnd → desencadena routeAnim */
   routeState = 0;
 
   @HostListener('keydown', ['$event'])
@@ -66,15 +61,11 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.motionQuery.addEventListener('change', this.onMotionChange);
-    // ── Animación de ruta ──────────────────────────────────────────────────────
     this.sub.add(
       this.router.events.pipe(filter(e => e instanceof NavigationEnd))
         .subscribe(() => { this.routeState++; this.cd.markForCheck(); })
     );
 
-    // ── Pipe PrimeNG toasts → aria-live region ─────────────────────────────────
-    // MessageService.messageObserver es público en PrimeNG 21.
-    // Convertimos cada toast en un anuncio para screen readers sin duplicar UI.
     this.sub.add(
       (this.msgSvc as any).messageObserver.subscribe((payload: any) => {
         const msg = Array.isArray(payload) ? payload[0] : payload;

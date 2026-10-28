@@ -66,7 +66,6 @@ export class Detalle implements OnInit, OnDestroy {
 
   getPrecioFinal = precioFinal;
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
   ngOnInit() {
     this.route.params.subscribe(params => this.cargarProducto(params['id']));
 
@@ -80,7 +79,6 @@ export class Detalle implements OnInit, OnDestroy {
 
   ngOnDestroy() { this.authSub.unsubscribe(); }
 
-  // ── Carga de producto — O(1) con endpoint REST real ────────────────────────
   cargarProducto(id: any) {
     this.loading = true;
     this.sugeridos = [];
@@ -105,7 +103,6 @@ export class Detalle implements OnInit, OnDestroy {
 
         if (this.auth.isAuthenticated) this.syncFavoritosFromApi();
 
-        // Cargar sugeridos en segundo plano (no bloquea el render del producto)
         this.cargarSugeridos(product.categoria, idNum);
       },
       error: () => {
@@ -117,7 +114,6 @@ export class Detalle implements OnInit, OnDestroy {
     });
   }
 
-  // Sugeridos lazy — solo 4 productos de la misma categoría
   private cargarSugeridos(categoria: string, excludeId: number) {
     if (!categoria) return;
     this.loadingSugeridos = true;
@@ -139,7 +135,6 @@ export class Detalle implements OnInit, OnDestroy {
     });
   }
 
-  // ── Carrito ─────────────────────────────────────────────────────────────────
   agregarAlCarro() {
     if (!this.product) return;
     this.normalizarCantidad(this.cantidad);
@@ -192,7 +187,6 @@ export class Detalle implements OnInit, OnDestroy {
     this.speech.read(`${this.product.nombre}. Precio: ${precio} soles. ${stock > 0 ? `${stock} unidades disponibles.` : 'Producto agotado.'} ${this.product.descripcion || 'Sin descripción adicional.'}`);
   }
 
-  // ── Computed ────────────────────────────────────────────────────────────────
   get calificacionPromedio() {
     if (!this.reviews.length) return 0;
     return Number((this.reviews.reduce((a, r) => a + r.stars, 0) / this.reviews.length).toFixed(1));
@@ -209,7 +203,6 @@ export class Detalle implements OnInit, OnDestroy {
     return this.favoritos.includes(Number(this.product?.id || 0));
   }
 
-  // ── Favoritos ───────────────────────────────────────────────────────────────
   toggleFavorito() {
     const id = Number(this.product?.id || 0);
     if (!id) return;
@@ -225,7 +218,6 @@ export class Detalle implements OnInit, OnDestroy {
     this.persistFavoritos();
   }
 
-  // ── Compartir ───────────────────────────────────────────────────────────────
   compartirProducto() {
     navigator.clipboard.writeText(window.location.href).then(
       ()  => this.messageService.add({ severity: 'success', summary: 'Enlace copiado', detail: 'Comparte este producto.' }),
@@ -233,7 +225,6 @@ export class Detalle implements OnInit, OnDestroy {
     );
   }
 
-  // ── Reseñas ─────────────────────────────────────────────────────────────────
   registrarResena() {
     const usuario = this.auth.currentUserValue;
     const comment = (this.nuevaResena.comment || '').trim();
@@ -277,7 +268,6 @@ export class Detalle implements OnInit, OnDestroy {
     return `Hace ${Math.floor(hours / 24)} d`;
   }
 
-  // ── Persistencia (localStorage) ─────────────────────────────────────────────
   private loadReviewsByProduct(id: number): ProductReview[] {
     try {
       const raw = localStorage.getItem(`nt_product_reviews_${id}`);

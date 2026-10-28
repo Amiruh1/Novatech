@@ -1,7 +1,5 @@
-// ── Auth Modal — NovaTech 2026 ────────────────────────────────────────────────
 :host { display: block; }
 
-// ── Validación inline — solo aparece cuando hay error/ok ─────────────────────
 .char-counter {
   display: block;
   text-align: right;
@@ -23,7 +21,6 @@
   &.req-ok    { color: var(--app-success); font-weight: 600; }
 }
 
-// ── p-dialog override — sin header, borde redondeado ─────────────────────────
 :host ::ng-deep .auth-modal-shell {
   .p-dialog-header { display: none !important; }
   .p-dialog-content {
@@ -33,7 +30,6 @@
   }
 }
 
-// ── p-password dentro del formulario de registro ──────────────────────────────
 :host ::ng-deep .auth-form {
   p-password { display: block !important; width: 100% !important; }
 
@@ -79,14 +75,12 @@
   }
 }
 
-// ── Layout grid — lado izquierdo (brand) + derecho (formulario) ───────────────
 .auth-grid {
   display: grid;
   grid-template-columns: 42% 58%;
   min-height: 30rem;
 }
 
-// ── Brand — lado izquierdo oscuro ─────────────────────────────────────────────
 .auth-brand {
   position: relative;
   background: linear-gradient(160deg, #0f172a 0%, #1e3358 55%, #0b1120 100%);
@@ -213,25 +207,23 @@
   justify-content: center;
 }
 
-// ── Formulario — lado derecho ─────────────────────────────────────────────────
 .auth-form {
   padding: 1.8rem 1.9rem;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  background: var(--app-surface);       // respeta el tema (era #ffffff hardcoded)
+  background: var(--app-surface);
   overflow-y: auto;
   max-height: 92vh;
 }
 
-// ── Tab switch Login / Crear cuenta ──────────────────────────────────────────
 .view-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.35rem;
   padding: 0.22rem;
   border-radius: 0.9rem;
-  background: var(--app-surface-muted);  // era #f1f5f9 hardcoded
+  background: var(--app-surface-muted);
   margin-bottom: 0.25rem;
 }
 
@@ -240,7 +232,7 @@
   padding: 0.6rem 0.75rem;
   border-radius: 0.7rem;
   background: transparent;
-  color: var(--app-muted);               // era #64748b hardcoded
+  color: var(--app-muted);
   font-weight: 700;
   font-size: 0.875rem;
   cursor: pointer;
@@ -248,22 +240,21 @@
   transition: all 0.2s ease;
 
   &.active {
-    background: var(--app-surface);      // era #ffffff hardcoded
-    color: var(--app-text);              // era #0f172a hardcoded
+    background: var(--app-surface);
+    color: var(--app-text);
     box-shadow: 0 2px 12px -3px var(--app-primary-glow);
   }
 
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
-// ── Field wrap ────────────────────────────────────────────────────────────────
 .field-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.32rem;
 
   label {
-    color: var(--app-text-2);            // era #374151 hardcoded
+    color: var(--app-text-2);
     font-size: 0.81rem;
     font-weight: 700;
     letter-spacing: 0.01em;
@@ -288,7 +279,6 @@
   gap: 0.7rem;
 }
 
-// ── Password wrap — custom eye button (login + reset views) ──────────────────
 .pwd-wrap {
   position: relative;
   display: flex;
@@ -303,7 +293,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--app-muted);              // era #94a3b8 hardcoded
+  color: var(--app-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,7 +313,6 @@
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
-// ── Login meta row ────────────────────────────────────────────────────────────
 .login-meta-row {
   display: flex;
   align-items: center;
@@ -377,14 +366,12 @@
   gap: 0.42rem;
 }
 
-// ── Submit button ─────────────────────────────────────────────────────────────
 .submit-btn {
   margin-top: 0.1rem;
   border-radius: var(--r-lg) !important;
   font-size: 0.92rem !important;
   font-weight: 700 !important;
   height: 2.75rem;
-  // Glass effect — identidad NovaTech
   box-shadow: 0 4px 20px var(--app-primary-glow),
               inset 0 1px 0 rgba(255,255,255,0.28) !important;
 
@@ -398,7 +385,6 @@
   }
 }
 
-// ── Forgot password hero ──────────────────────────────────────────────────────
 .forgot-hero {
   display: flex;
   align-items: flex-start;
@@ -418,13 +404,13 @@
 
   .forgot-title {
     font-weight: 700;
-    color: var(--app-text);              // era #0f172a hardcoded
+    color: var(--app-text);
     margin: 0 0 0.2rem;
     font-size: 0.93rem;
   }
 
   .forgot-sub {
-    color: var(--app-muted);             // era #64748b hardcoded
+    color: var(--app-muted);
     font-size: 0.8rem;
     line-height: 1.55;
     margin: 0;
@@ -433,7 +419,6 @@
 
 .text-center { text-align: center; }
 
-// ── Google Sign-In ────────────────────────────────────────────────────────────
 .auth-divider {
   display: flex;
   align-items: center;
@@ -450,21 +435,18 @@
   }
 }
 
-// Contenedor del botón oficial de Google (renderButton genera el iframe)
 .google-btn-wrap {
   width: 100%;
   display: flex;
   justify-content: center;
   min-height: 2.75rem;
 
-  // El botón de Google renderiza un iframe — forzamos ancho completo
   > div, iframe {
     width: 100% !important;
     max-width: 100% !important;
   }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 620px) {
   .auth-grid { grid-template-columns: 1fr; }
 

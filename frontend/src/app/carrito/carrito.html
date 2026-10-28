@@ -6,7 +6,6 @@
 
     <div class="carrito-layout" *ngIf="items.length > 0; else emptyCart">
 
-        <!-- Lista de productos -->
         <div class="carrito-items">
             <article class="app-surface-card">
                 <div class="card-head card-head--divided">
@@ -21,14 +20,12 @@
 
                 <div class="carrito-items-list">
                     <div class="cart-item" *ngFor="let item of items; let last = last; trackBy: trackCartItem" [class.last]="last">
-                        <!-- Imagen -->
                         <a class="cart-item-img" [routerLink]="['/producto', item.producto.id]">
                             <img [src]="item.producto.imagen" [alt]="item.producto.nombre"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='https://placehold.co/80x80?text=NT'">
                         </a>
 
-                        <!-- Info -->
                         <div class="cart-item-info">
                             <div class="cart-item-brand">{{ item.producto.marca || item.producto.categoria }}</div>
                             <a #cartItemLink class="cart-item-name" [routerLink]="['/producto', item.producto.id]">
@@ -37,7 +34,6 @@
                             <div class="cart-item-sku" *ngIf="item.producto.sku">SKU: {{ item.producto.sku }}</div>
                         </div>
 
-                        <!-- Cantidad -->
                         <div class="cart-item-qty" role="group" [attr.aria-label]="'Cantidad de ' + item.producto.nombre" [class.qty-updated]="savedQty[item.producto.id]">
                             <button class="qty-btn" type="button"
                                 [disabled]="item.cantidad <= 1"
@@ -56,18 +52,15 @@
                             </button>
                         </div>
 
-                        <!-- Precio unitario -->
                         <div class="cart-item-unit">
                             <span class="unit-label">c/u</span>
                             <span class="unit-price">S/ {{ getPrecioFinal(item.producto) | number:'1.2-2' }}</span>
                         </div>
 
-                        <!-- Subtotal -->
                         <div class="cart-item-subtotal">
                             S/ {{ (getPrecioFinal(item.producto) * item.cantidad) | number:'1.2-2' }}
                         </div>
 
-                        <!-- Eliminar -->
                         <button class="cart-item-remove" type="button"
                             (click)="eliminar(item.producto.id)"
                             [attr.aria-label]="'Eliminar ' + item.producto.nombre + ' del carrito'">
@@ -78,7 +71,6 @@
             </article>
         </div>
 
-        <!-- Resumen y CTA -->
         <aside class="carrito-resumen">
             <article class="app-surface-card resumen-card">
                 <div class="card-head">
@@ -127,7 +119,6 @@
                 </div>
             </article>
 
-            <!-- Continuar comprando -->
             <button pButton type="button" icon="pi pi-arrow-left" label="Seguir comprando"
                 severity="secondary" [outlined]="true" class="p-button-sm w-full mt-3"
                 routerLink="/tienda">

@@ -2,7 +2,6 @@ import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormsModule, ReactiveFormsModule, FormBuilder, Validators, ValidationErrors } from '@angular/forms';
 
-// Cross-field validator: precio_oferta debe ser menor que precio
 function ofertaMenorQuePrecio(group: AbstractControl): ValidationErrors | null {
   const precio  = Number(group.get('precio')?.value  ?? 0);
   const oferta  = group.get('precio_oferta')?.value;
@@ -12,7 +11,6 @@ function ofertaMenorQuePrecio(group: AbstractControl): ValidationErrors | null {
   return null;
 }
 
-// Cross-field validator: no restar más stock del que existe
 function stockDeduccionValida(group: AbstractControl): ValidationErrors | null {
   const op       = group.get('operacion')?.value;
   const cantidad = Number(group.get('cantidad')?.value ?? 0);

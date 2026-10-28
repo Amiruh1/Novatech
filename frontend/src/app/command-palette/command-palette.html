@@ -3,7 +3,6 @@
 
     <div class="cp-panel">
 
-        <!-- Search input -->
         <div class="cp-search-row">
             <i class="pi pi-search cp-search-icon" aria-hidden="true"></i>
             <input #searchInput
@@ -23,10 +22,8 @@
             <kbd class="cp-esc-key" aria-label="Presiona Escape para cerrar">esc</kbd>
         </div>
 
-        <!-- Results -->
         <div class="cp-results" #resultsList id="cp-results" role="listbox" *ngIf="totalResults > 0">
 
-            <!-- Navigation / Account commands -->
             <div *ngIf="filteredCommands.length > 0" class="cp-group">
                 <div class="cp-group-label">Acciones</div>
 
@@ -50,7 +47,6 @@
                 </button>
             </div>
 
-            <!-- Product results -->
             <div *ngIf="productResults.length > 0" class="cp-group">
                 <div class="cp-group-label">Productos</div>
 
@@ -76,19 +72,16 @@
             </div>
         </div>
 
-        <!-- Empty state when query has results nowhere -->
         <div class="cp-empty" *ngIf="!totalResults && query.trim() && !searching">
             <i class="pi pi-search-minus" aria-hidden="true"></i>
             <span>Sin resultados para "<strong>{{ query }}</strong>"</span>
         </div>
 
-        <!-- Default — no query -->
         <div class="cp-empty cp-hint" *ngIf="!query.trim() && totalResults === 0 && filteredCommands.length === 0">
             <i class="pi pi-bolt" aria-hidden="true"></i>
             <span>Escribe para buscar o usar ↑↓ para navegar</span>
         </div>
 
-        <!-- Footer shortcuts -->
         <div class="cp-footer">
             <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
             <span><kbd>↵</kbd> ejecutar</span>

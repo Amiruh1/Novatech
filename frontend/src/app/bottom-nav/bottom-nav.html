@@ -1,6 +1,5 @@
 <nav class="bottom-nav" role="navigation" aria-label="Navegación principal">
 
-    <!-- Inicio -->
     <button class="bn-item" type="button"
         [class.active]="isActive('/tienda')"
         (click)="irATienda()"
@@ -12,7 +11,6 @@
         <span class="bn-label">Inicio</span>
     </button>
 
-    <!-- Buscar (navega a tienda con foco en búsqueda) -->
     <button class="bn-item" type="button"
         [class.active]="false"
         (click)="irATienda()"
@@ -23,7 +21,6 @@
         <span class="bn-label">Buscar</span>
     </button>
 
-    <!-- Carrito — con badge de cantidad -->
     <button class="bn-item bn-cart" type="button"
         [class.active]="isActive('/carrito') || isActive('/checkout')"
         (click)="irACarrito()"
@@ -38,7 +35,6 @@
         <span class="bn-label">Carrito</span>
     </button>
 
-    <!-- Favoritos / Mis compras -->
     <button class="bn-item" type="button"
         [class.active]="isActive('/miscompras')"
         (click)="irAFavoritos()"
@@ -50,7 +46,6 @@
         <span class="bn-label">Favoritos</span>
     </button>
 
-    <!-- Cuenta -->
     <button class="bn-item" type="button"
         [class.active]="isActive('/configuracion')"
         (click)="irACuenta()"

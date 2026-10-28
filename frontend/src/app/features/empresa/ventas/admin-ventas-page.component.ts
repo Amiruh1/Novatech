@@ -60,20 +60,16 @@ export class AdminVentasPage implements OnInit {
   loadingVentas:   boolean = false;
   updatingEstadoId: number | null = null;
 
-  // ── Drawer (reemplaza dialog de detalle) ─────────────────────────────────────
   drawerVisible: boolean = false;
   ventaDrawer:   any | null = null;
 
-  // ── Bulk Selection ────────────────────────────────────────────────────────────
   selectedVentas: any[] = [];
   showBulkDialog  = false;
   bulkEstado:     string = '';
   procesandoBulk  = false;
 
-  // ── Date Range Filter ─────────────────────────────────────────────────────────
-  fechaRango: Date[] | null = null; // [desde, hasta] del datepicker range
+  fechaRango: Date[] | null = null;
 
-  // ── Autocomplete Filters ──────────────────────────────────────────────────────
   clientesDisponibles: FilterOption[] = [];
   productosDisponibles: FilterOption[] = [];
   clientesSugeridos:   FilterOption[] = [];
@@ -104,7 +100,6 @@ export class AdminVentasPage implements OnInit {
 
   ngOnInit() { this.cargarVentas(); }
 
-  // ── KPI Getters ───────────────────────────────────────────────────────────────
   get totalPedidosVista()    { return this.ventasFiltradas.length; }
   get totalMontoVista()      { return this.ventasFiltradas.reduce((a, v) => a + Number(v.total || 0), 0); }
   get ticketPromedioVista()  { return this.ventasFiltradas.length ? this.totalMontoVista / this.ventasFiltradas.length : 0; }
@@ -112,7 +107,6 @@ export class AdminVentasPage implements OnInit {
   get pedidosEntregadosVista() { return this.ventasFiltradas.filter(v => (v.estado || 'pendiente') === 'entregado').length; }
   get selectedCount() { return this.selectedVentas.length; }
 
-  // ── Data Loading ───────────────────────────────────────────────────────────────
   cargarVentas() {
     if (this.loadingVentas) return;
     this.loadingVentas   = true;
@@ -143,7 +137,6 @@ export class AdminVentasPage implements OnInit {
       });
   }
 
-  // ── Quick date range shortcuts ────────────────────────────────────────────────
   setQuickRange(range: string) {
     const now  = new Date();
     const hoy  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -159,7 +152,6 @@ export class AdminVentasPage implements OnInit {
     this.aplicarFiltros();
   }
 
-  // ── Filters ───────────────────────────────────────────────────────────────────
   aplicarFiltros() {
     let data = [...this.ventas];
 
@@ -182,7 +174,7 @@ export class AdminVentasPage implements OnInit {
     }
 
     this.ventasFiltradas = data;
-    this.selectedVentas  = []; // reset selection on filter change
+    this.selectedVentas  = [];
   }
 
   limpiarFiltros() {
@@ -193,7 +185,6 @@ export class AdminVentasPage implements OnInit {
     this.aplicarFiltros();
   }
 
-  // ── Expand row ────────────────────────────────────────────────────────────────
   toggleDetalle(venta: any, event?: Event) {
     event?.stopPropagation();
     const id = Number(venta?.id || 0);
@@ -203,13 +194,11 @@ export class AdminVentasPage implements OnInit {
 
   isDetalleAbierto(venta: any) { return this.expandedSaleId === Number(venta?.id || 0); }
 
-  // ── Drawer ────────────────────────────────────────────────────────────────────
   abrirDrawer(venta: any) {
     this.ventaDrawer   = venta;
     this.drawerVisible = true;
   }
 
-  // ── Estado ────────────────────────────────────────────────────────────────────
   cambiarEstado(venta: any) {
     const id = venta.id;
     if (!id || !venta.estado) return;
@@ -227,7 +216,6 @@ export class AdminVentasPage implements OnInit {
       });
   }
 
-  // ── Bulk actions ─────────────────────────────────────────────────────────────
   abrirBulkDialog() {
     if (!this.selectedVentas.length) return;
     this.bulkEstado   = '';
@@ -242,7 +230,6 @@ export class AdminVentasPage implements OnInit {
     let ok = 0;
     let fail = 0;
 
-    // Sequential to avoid overloading the API
     for (const id of ids) {
       try {
         await this.salesService.updateSaleStatus(id, this.bulkEstado).toPromise();
@@ -267,7 +254,6 @@ export class AdminVentasPage implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // ── Export CSV ────────────────────────────────────────────────────────────────
   exportarCSV(soloSeleccionados = false) {
     const fuente = soloSeleccionados && this.selectedVentas.length
       ? this.selectedVentas
@@ -305,7 +291,6 @@ export class AdminVentasPage implements OnInit {
     });
   }
 
-  // ── Confirm payment ────────────────────────────────────────────────────────────
   confirmarPago(venta: any) {
     const id = Number(venta?.id || 0);
     if (!id || this.confirmandoPagoId) return;
@@ -328,7 +313,6 @@ export class AdminVentasPage implements OnInit {
     return String(venta?.pago_estado || '').toLowerCase() === 'pendiente';
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────────
   esEstadoTerminal(estado: string) { return estado === 'cancelado' || estado === 'reembolsado'; }
 
   getSeverity(estado: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined {
@@ -358,7 +342,6 @@ export class AdminVentasPage implements OnInit {
       : [...this.productosDisponibles];
   }
 
-  // ── Private helpers ───────────────────────────────────────────────────────────
   private prepararOpcionesBusqueda() {
     const clientMap  = new Map<number, FilterOption>();
     const productMap = new Map<number, FilterOption>();

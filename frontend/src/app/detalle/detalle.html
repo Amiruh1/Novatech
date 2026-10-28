@@ -1,8 +1,4 @@
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  NovaTech 2026 — Detalle de Producto                         -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
 
-<!-- Skeleton loading state -->
 <section class="app-shell-page detalle-shell" *ngIf="loading">
     <div class="detalle-skeleton">
         <p-skeleton width="260px" height="1.2rem" styleClass="mb-5"></p-skeleton>
@@ -22,10 +18,8 @@
     </div>
 </section>
 
-<!-- Product content -->
 <section class="app-shell-page detalle-shell" *ngIf="!loading && product" aria-label="Detalle de producto">
 
-    <!-- ── Breadcrumb ─────────────────────────────────────────── -->
     <nav class="detalle-breadcrumb" aria-label="Ruta de navegación">
         <a routerLink="/tienda" class="bc-link">Tienda</a>
         <i class="pi pi-angle-right bc-sep" aria-hidden="true"></i>
@@ -34,22 +28,17 @@
         <span class="bc-current" aria-current="page">{{ product.nombre }}</span>
     </nav>
 
-    <!-- ── Main layout ────────────────────────────────────────── -->
     <div class="detalle-layout">
 
-        <!-- LEFT: Gallery -->
         <div class="detalle-gallery-col">
 
-            <!-- Main image -->
             <button type="button" class="gallery-main" (click)="abrirZoomImagen()"
                     aria-label="Ampliar imagen del producto">
 
-                <!-- Agotado overlay -->
                 <span class="gallery-agotado" *ngIf="product.stock === 0 || product.stock === '0'" aria-label="Producto agotado">
                     <span>AGOTADO</span>
                 </span>
 
-                <!-- Discount badge -->
                 <span class="gallery-discount" *ngIf="hayOferta" aria-label="{{ descuentoAproximado }}% de descuento">
                     -{{ descuentoAproximado }}%
                 </span>
@@ -65,7 +54,6 @@
                 </span>
             </button>
 
-            <!-- Social actions under image (desktop) -->
             <div class="gallery-actions">
                 <button class="gallery-action-btn" type="button"
                     [class.active]="esFavorito"
@@ -85,16 +73,13 @@
             </div>
         </div>
 
-        <!-- RIGHT: Product info -->
         <div class="detalle-info-col">
 
-            <!-- Brand + badges -->
             <div class="detalle-brand-row">
                 <span class="detalle-brand">{{ product.marca || 'NovaTech' }}</span>
                 <span class="detalle-sku" *ngIf="product.sku">SKU: {{ product.sku }}</span>
             </div>
 
-            <!-- Product name -->
             <h1 class="detalle-nombre">{{ product.nombre }}</h1>
 
             <div class="product-speech-actions" role="group" aria-label="Lectura del producto">
@@ -108,7 +93,6 @@
                 </button>
             </div>
 
-            <!-- Rating (if has reviews) -->
             <div class="detalle-rating" *ngIf="totalResenas > 0">
                 <p-rating [ngModel]="calificacionPromedio" [readonly]="true"                          aria-label="Calificación: {{ calificacionPromedio }} de 5"></p-rating>
                 <a href="#reviews-section" class="rating-link">
@@ -118,7 +102,6 @@
 
             <div class="detalle-divider" role="separator"></div>
 
-            <!-- Price block -->
             <div class="detalle-precio-block">
                 <div class="detalle-precio-row">
                     <span class="precio-original" *ngIf="hayOferta" aria-label="Precio original">
@@ -138,7 +121,6 @@
                 </div>
             </div>
 
-            <!-- Stock indicator -->
             <div class="detalle-stock" role="status" aria-live="polite">
                 <span class="stock-pill out" *ngIf="product.stock === 0 || product.stock === '0'">
                     <i class="pi pi-times-circle" aria-hidden="true"></i> Agotado
@@ -153,7 +135,6 @@
                 </span>
             </div>
 
-            <!-- Quantity + Add to cart -->
             <div class="detalle-add-block" *ngIf="puedeAgregar">
                 <div class="detalle-qty" role="group" aria-label="Cantidad a agregar">
                     <span class="qty-label">Cantidad</span>
@@ -187,7 +168,6 @@
                 <span>Producto agotado — ¡Te avisamos cuando llegue!</span>
             </div>
 
-            <!-- Guarantees -->
             <div class="detalle-guarantees" aria-label="Beneficios de compra">
                 <div class="guarantee-item">
                     <i class="pi pi-shield" aria-hidden="true"></i>
@@ -207,7 +187,6 @@
                 </div>
             </div>
 
-            <!-- Description -->
             <div class="detalle-desc" *ngIf="product.descripcion">
                 <h2 class="detalle-section-label">Descripción</h2>
                 <p class="detalle-desc-text">{{ product.descripcion }}</p>
@@ -215,7 +194,6 @@
         </div>
     </div>
 
-    <!-- ── Related Products ───────────────────────────────────── -->
     <section class="detalle-section" *ngIf="sugeridos.length > 0" aria-label="Productos relacionados">
         <div class="page-intro">
             <h2 class="page-title">También te puede interesar</h2>
@@ -247,7 +225,6 @@
         </div>
     </section>
 
-    <!-- Sugeridos skeleton -->
     <section class="detalle-section" *ngIf="loadingSugeridos && !sugeridos.length">
         <div class="page-intro">
             <p-skeleton width="220px" height="1.5rem"></p-skeleton>
@@ -257,7 +234,6 @@
         </div>
     </section>
 
-    <!-- ── Reviews ────────────────────────────────────────────── -->
     <section class="detalle-section" id="reviews-section" aria-label="Opiniones del producto">
         <div class="page-intro">
             <h2 class="page-title">Opiniones del producto</h2>
@@ -268,7 +244,6 @@
 
         <div class="reviews-layout">
 
-            <!-- Review form -->
             <article class="app-surface-card review-form-card">
                 <div class="card-head">
                     <div class="review-form-icon"><i class="pi pi-star" aria-hidden="true"></i></div>
@@ -296,10 +271,8 @@
                 </div>
             </article>
 
-            <!-- Reviews list -->
             <div class="reviews-list-col" role="feed" aria-label="Lista de opiniones">
 
-                <!-- Empty state -->
                 <div class="table-empty-state" *ngIf="reviews.length === 0">
                     <div class="empty-icon-wrap">
                         <i class="pi pi-star" aria-hidden="true"></i>
@@ -308,7 +281,6 @@
                     <p>Sé el primero en comentar este producto.</p>
                 </div>
 
-                <!-- Review items -->
                 <article class="review-item" *ngFor="let review of reviews"
                          [attr.aria-label]="'Reseña de ' + review.author">
                     <div class="review-head">
@@ -331,7 +303,6 @@
 
 </section>
 
-<!-- ── Dialog: "Producto agregado" ──────────────────────────────── -->
 <p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
     [attr.data-narrator-context]="displayModal ? 'producto-agregado' : null" data-narrator-title="Producto agregado"
     closeAriaLabel="Cerrar producto agregado"
@@ -357,7 +328,6 @@
             </div>
         </div>
 
-        <!-- Suggested cross-sell -->
         <div class="modal-sugeridos" *ngIf="sugeridos.length > 0">
             <p class="modal-sugeridos-label">¿Y si le sumas esto?</p>
             <div class="modal-sugeridos-row">
@@ -388,7 +358,6 @@
     </ng-template>
 </p-dialog>
 
-<!-- ── Dialog: Zoom de imagen ─────────────────────────────────────── -->
 <p-dialog #zoomDialog [(visible)]="displayImageZoom" [modal]="true" [draggable]="false" [resizable]="false"
     [attr.data-narrator-context]="displayImageZoom ? 'vista-ampliada' : null" data-narrator-title="Vista ampliada"
     closeAriaLabel="Cerrar vista ampliada"
@@ -410,7 +379,6 @@
     <app-narrator-toggle></app-narrator-toggle>
 </p-dialog>
 
-<!-- ── Mobile sticky buy bar ──────────────────────────────────────── -->
 <div class="mobile-sticky-buy" *ngIf="product && !loading" role="region" aria-label="Compra rápida">
     <div class="mobile-price-block">
         <small class="mobile-stock-label" [class.out]="!puedeAgregar">

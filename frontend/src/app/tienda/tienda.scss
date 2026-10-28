@@ -1,5 +1,3 @@
-// Catalog presentation adapted from the local Vuexy ecommerce template.
-// Variables and overrides stay inside this page, including its comparison dialog.
 .tienda-shell {
   --shop-primary: #6254d8;
   --shop-accent: #7367f0;
@@ -329,7 +327,6 @@
   .compare-copy .delta, .compare-copy .stock.warning { color: #875000; font-size: 0.7rem; }
   .compare-copy .stock.danger { color: #b42332; }
 
-  // PrimeNG emits internal elements: keep these overrides scoped to the store.
   ::ng-deep {
     .p-button {
       max-width: 100%;

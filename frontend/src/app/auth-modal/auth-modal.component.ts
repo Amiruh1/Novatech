@@ -13,7 +13,6 @@ import { AuthService } from '../services/auth';
 import { AuthModalMode, AuthModalService, AuthModalView } from '../services/auth-modal';
 import { GOOGLE_CLIENT_ID } from '../core/config/api.config';
 
-// Tipos mínimos para el Google Identity Services SDK
 declare global {
   interface Window {
     google?: {
@@ -98,7 +97,6 @@ export class AuthModalComponent implements OnInit, OnDestroy {
           this.loading = false;
         }
 
-        // Renderiza el botón oficial de Google tras la animación del modal
         if (state.visible) {
           setTimeout(() => this.renderGoogleButtons(), 500);
         }
@@ -559,11 +557,7 @@ export class AuthModalComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  // ── Google Sign-In ──────────────────────────────────────────────────────────
 
-  // renderGoogleButtons — renderiza el botón oficial de Google en los contenedores del modal.
-  // Usa renderButton() en lugar de prompt() para evitar que los navegadores lo bloqueen,
-  // ya que renderButton() abre un popup directamente desde el click del usuario.
   private renderGoogleButtons(): void {
     if (!window.google?.accounts?.id) return;
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('TU_CLIENT_ID')) return;
@@ -576,11 +570,10 @@ export class AuthModalComponent implements OnInit, OnDestroy {
       auto_select: false
     });
 
-    // Renderiza en ambos contenedores (login y register) si existen en el DOM
     ['google-btn-login', 'google-btn-register'].forEach(id => {
       const container = document.getElementById(id);
       if (!container) return;
-      container.innerHTML = ''; // Limpia render anterior
+      container.innerHTML = '';
       window.google!.accounts.id.renderButton(container, {
         theme:  'outline',
         size:   'large',

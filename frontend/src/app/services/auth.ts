@@ -46,28 +46,24 @@ export class AuthService {
     return localStorage.getItem(this.storageTokenKey);
   }
 
-  // --- LOGIN ---
   login(credentials: any): Observable<any> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response) => this.persistSession(response))
     );
   }
 
-  // --- REGISTRO PUBLICO CLIENTE ---
   register(payload: { nombre: string; email: string; password: string; tipo_documento: string; numero_documento: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, payload).pipe(
       tap((response) => this.persistSession(response))
     );
   }
 
-  // --- GOOGLE SIGN-IN ---
   googleLogin(credential: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/google`, { credential }).pipe(
       tap((response) => this.persistSession(response))
     );
   }
 
-  // --- RECUPERACION DE PASSWORD ---
   forgotPassword(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email });
   }
@@ -92,7 +88,6 @@ export class AuthService {
     return this.http.put<{ message: string }>(`${this.apiUrl}/update-profile`, payload);
   }
 
-  // --- LOGOUT ---
   logout() {
     this.currentUserSubject.next(null);
     localStorage.removeItem(this.storageUserKey);

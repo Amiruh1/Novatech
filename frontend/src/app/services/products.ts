@@ -104,10 +104,8 @@ export class ProductsService {
   }
 
   getProductById(id: number) {
-    // Llama al endpoint REST individual — O(1) vs. cargar todo el catálogo
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map(res => {
-        // Normaliza distintos formatos de respuesta del backend
         return res?.producto ?? res?.data ?? res;
       })
     );

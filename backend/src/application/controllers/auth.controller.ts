@@ -384,7 +384,6 @@ export async function updateProfile(req: any, res: Response) {
   }
 }
 
-// ── Google Sign-In ────────────────────────────────────────────────────────────
 export async function googleLogin(req: Request, res: Response) {
   const { credential } = req.body as { credential?: string };
   const jwtSecret  = process.env.JWT_SECRET;

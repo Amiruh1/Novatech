@@ -2,7 +2,6 @@ import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { getDirecciones, createDireccion, updateDireccion, deleteDireccion } from '../../business/services/direcciones.service';
 
-// Código postal peruano: exactamente 5 dígitos numéricos
 const CP_PATTERN = /^\d{5}$/;
 
 function validateDireccion(body: Record<string, unknown>): string | null {

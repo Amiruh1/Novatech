@@ -1,8 +1,4 @@
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  Dashboard 2026 — Stripe · Vercel · Linear flagship          ║
-// ╚══════════════════════════════════════════════════════════════╝
 
-// ── Header ─────────────────────────────────────────────────────────────────────
 .page-intro-actions {
   display: flex;
   align-items: flex-end;
@@ -18,7 +14,6 @@
   flex-wrap: wrap;
 }
 
-// ── Period Selector ───────────────────────────────────────────────────────────
 .period-tabs {
   display: flex;
   background: var(--app-surface-muted);
@@ -52,7 +47,6 @@
   }
 }
 
-// ── Alert Banner ──────────────────────────────────────────────────────────────
 .dash-alert-banner {
   display: flex;
   align-items: center;
@@ -93,12 +87,10 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-// ── KPI Grid ──────────────────────────────────────────────────────────────────
 .dashboard-stats {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-// ── PRIMARY Card (income) — spans 2 columns ───────────────────────────────────
 .stat-primary {
   grid-column: span 2;
   flex-direction: row;
@@ -136,7 +128,6 @@
   .income-val { font-size: clamp(1.35rem, 2vw, 2rem); }
 }
 
-// ── Mini sparklines in normal cards ──────────────────────────────────────────
 .sparkline-mini {
   display: block;
   width: 72px;
@@ -152,7 +143,6 @@
   &.pending-spark { stroke: var(--app-warning); }
 }
 
-// ── Animated counter value ────────────────────────────────────────────────────
 .counter-value {
   font-variant-numeric: tabular-nums;
   transition: none;
@@ -160,7 +150,6 @@
 
 .income-val { font-size: clamp(1.1rem, 1.6vw, 1.5rem); }
 
-// ── Trend badges ──────────────────────────────────────────────────────────────
 .stat-trend {
   display: inline-flex;
   align-items: center;
@@ -194,7 +183,6 @@
   }
 }
 
-// ── KPI Card color variants — uses theme tokens ───────────────────────────────
 .stat-card.stock     { background: linear-gradient(135deg, var(--app-info-soft), var(--app-info-glow)); }
 .stat-card.orders    { background: linear-gradient(135deg, var(--app-accent-soft), var(--app-accent-glow)); }
 .stat-card.income    { background: linear-gradient(135deg, var(--app-success-soft), var(--app-success-glow)); }
@@ -202,7 +190,6 @@
 .stat-card.pending   { background: linear-gradient(135deg, var(--app-warning-soft), var(--app-warning-glow)); }
 .stat-card.delivered { background: linear-gradient(135deg, var(--app-success-soft), var(--app-primary-glow)); }
 
-// ── KPI Icon color variants ───────────────────────────────────────────────────
 .stat-card .icon.stock     { background: linear-gradient(145deg, var(--app-info), var(--app-info-strong)); }
 .stat-card .icon.orders    { background: linear-gradient(145deg, var(--app-accent), var(--app-accent-strong)); }
 .stat-card .icon.income    { background: linear-gradient(145deg, var(--app-success), var(--app-primary-strong)); }
@@ -210,7 +197,6 @@
 .stat-card .icon.pending   { background: linear-gradient(145deg, var(--app-warning), var(--app-danger)); }
 .stat-card .icon.delivered { background: linear-gradient(145deg, var(--app-success), var(--app-primary)); }
 
-// ── Chart & Table cards ───────────────────────────────────────────────────────
 .chart-card          { height: 100%; }
 .chart-card .card-body { min-height: 19rem; }
 .table-card          { height: 100%; }
@@ -235,14 +221,12 @@
   &:hover { text-decoration: underline; }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 1300px) {
   .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat-primary { grid-column: span 2; }
 }
 
 @media (max-width: 860px) {
-  // Ocultar gráficos en mobile para no saturar — solo KPIs
   .dash-charts-col { display: none; }
   .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat-primary { grid-column: span 2; .sparkline-wrap { display: none; } }

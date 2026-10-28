@@ -1,6 +1,5 @@
 <section class="app-shell-page favoritos-shell">
 
-    <!-- ── Header ──────────────────────────────────────────────────────────── -->
     <div class="fav-page-header">
         <div>
             <h1 class="page-title">Mis favoritos</h1>
@@ -11,7 +10,6 @@
         </div>
     </div>
 
-    <!-- ── Filter / Sort toolbar ────────────────────────────────────────────── -->
     <div class="fav-toolbar" *ngIf="!loading && productos.length > 0">
         <div class="fav-filter-group">
             <button class="fav-filter-btn" [class.active]="filtroActivo === 'todos'" (click)="setFiltro('todos')">
@@ -37,7 +35,6 @@
         </div>
     </div>
 
-    <!-- ── Skeleton ─────────────────────────────────────────────────────────── -->
     <div class="fav-grid" *ngIf="loading">
         <div class="fav-skeleton" *ngFor="let s of [1,2,3,4,5,6]">
             <p-skeleton height="210px" borderRadius="1.25rem 1.25rem 0 0"></p-skeleton>
@@ -50,12 +47,10 @@
         </div>
     </div>
 
-    <!-- ── Grid ─────────────────────────────────────────────────────────────── -->
     <div class="fav-grid" *ngIf="!loading && productosFiltrados.length > 0">
         <article class="fav-card" *ngFor="let product of productosFiltrados; let i = index"
                  [style.animation-delay]="(i * 0.05) + 's'">
 
-            <!-- Imagen -->
             <div class="fav-img-zone" [routerLink]="['/producto', product.id]" role="link" tabindex="0"
                  [attr.aria-label]="'Ver detalle de ' + product.nombre">
                 <img [src]="product.imagen" [alt]="product.nombre" loading="lazy"
@@ -79,7 +74,6 @@
                 </button>
             </div>
 
-            <!-- Contenido -->
             <div class="fav-content">
                 <div class="fav-brand">{{ product.marca || product.categoria }}</div>
                 <h3 class="fav-name" [routerLink]="['/producto', product.id]">{{ product.nombre }}</h3>
@@ -116,14 +110,12 @@
         </article>
     </div>
 
-    <!-- Sin resultados del filtro -->
     <div class="fav-no-results" *ngIf="!loading && productos.length > 0 && productosFiltrados.length === 0">
         <i class="pi pi-filter-slash"></i>
         <p>Ningún favorito coincide con este filtro.</p>
         <button pButton type="button" label="Ver todos" icon="pi pi-list" class="p-button-sm p-button-outlined" (click)="setFiltro('todos')"></button>
     </div>
 
-    <!-- Empty state -->
     <div class="fav-empty" *ngIf="!loading && productos.length === 0">
         <div class="fav-empty-icon">
             <i class="pi pi-heart" aria-hidden="true"></i>

@@ -1,13 +1,8 @@
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  Detalle 2026 — Página de producto                          ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 .detalle-shell { max-width: 100%; }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
 .detalle-skeleton { max-width: 72rem; margin: 0 auto; }
 
-// ── Breadcrumb ────────────────────────────────────────────────────────────────
 .detalle-breadcrumb {
   display: flex;
   align-items: center;
@@ -35,7 +30,6 @@
   white-space: nowrap;
 }
 
-// ── Main Layout ───────────────────────────────────────────────────────────────
 .detalle-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -48,7 +42,6 @@
 .detalle-gallery-col { position: sticky; top: calc(var(--topbar-height) + var(--sp-4)); }
 .detalle-info-col    { min-width: 0; }
 
-// ── Gallery ───────────────────────────────────────────────────────────────────
 .gallery-main {
   width: 100%;
   padding: 0;
@@ -203,7 +196,6 @@
   }
 }
 
-// ── Product Info ──────────────────────────────────────────────────────────────
 .detalle-brand-row {
   display: flex;
   align-items: center;
@@ -258,7 +250,6 @@
   margin: var(--sp-4) 0;
 }
 
-// ── Price Block ───────────────────────────────────────────────────────────────
 .detalle-precio-block {
   display: flex;
   flex-direction: column;
@@ -314,7 +305,6 @@
   i { font-size: 0.75rem; color: var(--app-primary); }
 }
 
-// ── Stock ─────────────────────────────────────────────────────────────────────
 .detalle-stock { margin-bottom: var(--sp-5); }
 
 .stock-pill {
@@ -332,7 +322,6 @@
   &.out { background: var(--app-danger-soft); color: var(--app-danger); border: 1px solid var(--app-danger-glow); }
 }
 
-// ── Add to Cart ───────────────────────────────────────────────────────────────
 .detalle-add-block {
   display: flex;
   flex-direction: column;
@@ -445,7 +434,6 @@
   i { font-size: 1rem; color: var(--app-danger); }
 }
 
-// ── Guarantees ────────────────────────────────────────────────────────────────
 .detalle-guarantees {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -467,7 +455,6 @@
   i { color: var(--app-primary); font-size: 0.88rem; }
 }
 
-// ── Description ───────────────────────────────────────────────────────────────
 .detalle-section-label {
   font-size: 0.68rem;
   text-transform: uppercase;
@@ -484,13 +471,11 @@
   margin: 0;
 }
 
-// ── Section wrapper ───────────────────────────────────────────────────────────
 .detalle-section {
   max-width: 72rem;
   margin: 0 auto var(--sp-10);
 }
 
-// ── Related products (Sugeridos) ──────────────────────────────────────────────
 .sugeridos-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -597,7 +582,6 @@
   &:disabled { background: var(--app-border); color: var(--app-muted); cursor: not-allowed; }
 }
 
-// ── Reviews ───────────────────────────────────────────────────────────────────
 .reviews-layout {
   display: grid;
   grid-template-columns: 340px 1fr;
@@ -696,7 +680,6 @@
 .review-date   { font-size: 0.72rem; color: var(--app-muted); }
 .review-text   { font-size: 0.875rem; color: var(--app-text-2); line-height: 1.65; margin: 0; }
 
-// ── Modal "Agregado al carrito" ───────────────────────────────────────────────
 .modal-added-body { padding: var(--sp-2) 0; }
 
 .modal-product-row {
@@ -759,7 +742,6 @@
 .modal-sug-name  { font-size: 0.68rem; font-weight: 600; color: var(--app-text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: var(--sp-1); }
 .modal-sug-price { font-size: 0.75rem; font-weight: 800; color: var(--app-primary); }
 
-// ── Zoom dialog ───────────────────────────────────────────────────────────────
 .zoom-container {
   display: flex;
   align-items: center;
@@ -775,7 +757,6 @@
   border-radius: var(--r-xl);
 }
 
-// ── Mobile Sticky Bar ─────────────────────────────────────────────────────────
 .mobile-sticky-buy { display: none; }
 
 @media (max-width: 768px) {
@@ -864,7 +845,6 @@
   &:disabled { background: var(--app-border); color: var(--app-muted); cursor: not-allowed; }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 1024px) {
   .detalle-gallery-col { position: static; }
 }

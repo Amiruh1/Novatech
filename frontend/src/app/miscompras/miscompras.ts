@@ -59,7 +59,6 @@ export class Miscompras implements OnInit {
     }
   }
 
-  // Paginación de order cards
   readonly pageSize = 6;
   pageIndex = 0;
 
@@ -75,7 +74,6 @@ export class Miscompras implements OnInit {
     this.cd.markForCheck();
   }
 
-  // KPI display values (animados)
   displayTotalPedidos      = 0;
   displayTotalGastado      = 0;
   displayPedidosPendientes = 0;

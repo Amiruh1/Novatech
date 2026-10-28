@@ -22,7 +22,6 @@
     <ng-template pTemplate="body" let-prod>
       <tr class="prod-row">
 
-        <!-- ── Bloque producto unificado ───────────────────────────────── -->
         <td>
           <div class="prod-block">
             <img
@@ -42,7 +41,6 @@
           </div>
         </td>
 
-        <!-- ── Precio ──────────────────────────────────────────────────── -->
         <td>
           <div class="prod-price" *ngIf="!prod.precio_oferta">
             S/ {{ prod.precio | number:'1.2-2' }}
@@ -53,7 +51,6 @@
           </div>
         </td>
 
-        <!-- ── Stock ──────────────────────────────────────────────────── -->
         <td>
           <p-tag
             [severity]="getStockSeverity(prod.stock)"
@@ -62,7 +59,6 @@
           ></p-tag>
         </td>
 
-        <!-- ── Acciones ───────────────────────────────────────────────── -->
         <td>
           <div class="action-cell">
             <p-button

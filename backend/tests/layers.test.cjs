@@ -1,5 +1,3 @@
-// Run after npm run build: node --test tests/layers.test.cjs
-// The pool is replaced before loading services; these tests never connect to MySQL.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');

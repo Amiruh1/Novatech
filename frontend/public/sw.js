@@ -1,4 +1,3 @@
-// Estrategia: Network First para API, Cache First para assets estáticos
 
 const CACHE_NAME    = 'novatech-v3';
 const STATIC_ASSETS = ['/', '/tienda', '/favicon.svg?v=novatech-1', '/favicon.ico?v=novatech-1', '/icons/icon-192.png', '/icons/icon-512.png'];
@@ -25,16 +24,13 @@ self.addEventListener('fetch', (event) => {
   if (LOCAL_DEVELOPMENT) return;
   const url = new URL(event.request.url);
 
-  // Siempre red para llamadas API
   if (url.pathname.startsWith('/api/')) return;
 
-  // Cache First para assets (imágenes, fuentes, JS, CSS)
   if (event.request.method === 'GET') {
     event.respondWith(
       caches.match(event.request).then(cached => {
         if (cached) return cached;
         return fetch(event.request).then(response => {
-          // Solo cachear respuestas exitosas y estáticas
           if (response.ok && !url.pathname.startsWith('/api/')) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));

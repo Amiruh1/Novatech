@@ -8,8 +8,6 @@ export function isAllowedImageSource(source: string): boolean {
   } catch { return false; }
 }
 
-// Cada redirección vuelve a pasar por la lista de orígenes permitidos.
-// La capa business decide después si los bytes representan una imagen válida.
 export async function readSeedImageBytes(source: string, maxBytes: number, request: typeof fetch = fetch) {
   let url = source;
   const signal = AbortSignal.timeout(20000);

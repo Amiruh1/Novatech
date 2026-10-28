@@ -21,7 +21,6 @@ async function up() {
     await db.query(createTableQuery);
     console.log('[Migración] Tabla "banners" creada o ya existe.');
 
-    // Verificar si ya tiene datos
     const [rows]: any = await db.query('SELECT COUNT(*) as cuenta FROM banners');
     if (rows[0].cuenta === 0) {
       console.log('[Migración] Insertando banners iniciales...');

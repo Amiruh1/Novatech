@@ -336,7 +336,6 @@
                                      [class.has-offer]="getHayOferta(product)"
                                      [class.out-of-stock]="product.stock == 0 || product.stock === '0'">
 
-                                <!-- Image zone -->
                                 <div class="pc-img-zone">
                                     <a class="pc-image-link" [routerLink]="['/producto', product.id]" [attr.aria-label]="'Ver ' + product.nombre">
                                     <img [src]="product.imagen"
@@ -354,7 +353,6 @@
                                     </div>
                                     </a>
 
-                                    <!-- Product actions stay visible for touch and keyboard use. -->
                                     <div class="pc-quick-actions">
                                         <button class="pc-fav-btn" type="button"
                                             [class.active]="esFavorito(product.id)"
@@ -373,7 +371,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Content zone -->
                                 <div class="pc-content">
                                     <div class="pc-brand">{{ product.marca || product.categoria }}</div>
 
@@ -390,7 +387,6 @@
                                         </span>
                                     </div>
 
-                                    <!-- Solo mostrar cuando stock es crítico -->
                                     <div class="pc-low-stock"
                                          *ngIf="+product.stock > 0 && +product.stock <= 5 && product.stock !== '0'">
                                         <i class="pi pi-exclamation-circle"></i>

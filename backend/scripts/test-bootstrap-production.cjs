@@ -1,5 +1,3 @@
-// Prueba de integración en un MySQL desechable. Nunca usa la base del .env.
-// Ejecutar: npm run build && node scripts/test-bootstrap-production.cjs
 const assert = require('node:assert/strict');
 const { randomBytes } = require('node:crypto');
 const { execFileSync, spawn } = require('node:child_process');
@@ -74,7 +72,6 @@ async function main() {
     await assert.rejects(bootstrapProduction(pool, { ...config, BOOTSTRAP_ADMIN_PASSWORD: 'é'.repeat(40) }), /72 bytes/);
     console.log('OK: rechaza entorno incorrecto y claves inválidas.');
 
-    // Inicia la API con parámetros explícitos del contenedor, sin leer la BD local.
     api = spawn(process.execPath, [path.join(__dirname, '../dist/index.js')], {
       cwd: path.join(__dirname, '..'), stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, NODE_ENV: 'production', PORT: '0',
@@ -107,7 +104,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  // No imprimir comandos Docker o errores SQL: pueden incluir la clave efímera.
   console.error(error instanceof assert.AssertionError ? error.message : 'Falló la prueba de integración del bootstrap.');
   process.exitCode = 1;
 });

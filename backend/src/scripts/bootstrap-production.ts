@@ -3,8 +3,6 @@ import type { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import db from '../access-data/config/db';
 import { ensureProductionSchema } from '../access-data/repositories/production-schema.repository';
 
-// Identifica únicamente las cuentas y el hash publicados en el SQL de ejemplo.
-// Si alguien cambió su contraseña, este script no modifica esa cuenta.
 const DEMO_EMAILS = ['admin@novatech.com', 'cliente@novatech.com'];
 const DEMO_HASH_SHA256 = '9a775f7fd90d9784e5ffd91b3698ef9f431a526e0cdaed39d9643db86e596c29';
 
@@ -26,8 +24,6 @@ export async function bootstrapProduction(pool: Pool, env: NodeJS.ProcessEnv) {
 
   await ensureProductionSchema(pool);
 
-  // Esta desactivación se confirma por separado: un conflicto con el correo
-  // del administrador no debe dejar habilitada una contraseña de demostración.
   const [disabled] = await pool.execute<ResultSetHeader>(
     `UPDATE usuarios
      SET activo = 0, reset_token = NULL, reset_token_expires = NULL
@@ -74,7 +70,6 @@ async function main() {
       ? 'Administrador inicial creado. Credenciales disponibles en el secreto del ambiente.'
       : 'El administrador ya existe; se conservó su contraseña.');
   } catch (error) {
-    // Los errores SQL pueden incluir parámetros: nunca se imprimen completos.
     console.error(error instanceof BootstrapConfigError
       ? error.message
       : 'No se pudo completar el bootstrap. Revisa conexión, esquema y permisos de la base.');

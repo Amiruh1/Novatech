@@ -1,10 +1,5 @@
 :host { display: block; }
 
-// ── Route view wrapper ─────────────────────────────────────────────────────────
-// El trigger @routeAnim de Angular Animations vive en el .route-view.
-// No necesita estilos especiales — sólo aseguramos que no corte overflow
-// durante la animación de entrada (translateY puede quedar clipado en algunos casos).
 .route-view {
-  // Permite que la transformación sea visible sin scrollbar temporales
   overflow-x: clip;
 }

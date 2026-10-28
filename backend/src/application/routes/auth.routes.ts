@@ -38,7 +38,6 @@ router.post('/reset-password-code', resetPasswordByCode);
 router.post('/change-password', verifyToken, changePassword);
 router.put('/update-profile', verifyToken, updateProfile);
 
-// Google Sign-In — verifica el ID token de Google y retorna JWT propio
 router.post('/google', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false }), googleLogin);
 
 export default router;

@@ -26,7 +26,6 @@ export class App {
   private registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       if (isDevMode()) {
-        // Local development must receive the latest code instead of cached bundles.
         void navigator.serviceWorker.getRegistrations().then(registrations => {
           for (const registration of registrations) {
             const script = registration.active?.scriptURL || registration.waiting?.scriptURL;
@@ -37,7 +36,6 @@ export class App {
       }
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => {
-          // SW no disponible en dev — silenciar
         });
       });
     }

@@ -2,7 +2,6 @@
 
     <p class="checkout-feedback" id="checkout-feedback" role="alert" tabindex="-1" *ngIf="validationMessage && !showDirDialog">{{ validationMessage }}</p>
 
-    <!-- Progress Bar -->
     <div class="checkout-progress" *ngIf="step < 4">
         <div class="progress-inner">
             <div class="progress-steps">
@@ -24,13 +23,10 @@
         </div>
     </div>
 
-    <!-- ── Layout ─────────────────────────────────────────────────────────── -->
     <div class="checkout-layout" *ngIf="step < 4">
 
-        <!-- Main content -->
         <div class="checkout-main">
 
-            <!-- ── STEP 1: Order Summary ──────────────────────────────────── -->
             <article class="app-surface-card checkout-card" *ngIf="step === 1" [@stepAnim]>
                 <div class="card-head">
                     <div class="step-head-icon"><i class="pi pi-list" aria-hidden="true"></i></div>
@@ -57,7 +53,6 @@
                 </div>
             </article>
 
-            <!-- ── STEP 2: Address ────────────────────────────────────────── -->
             <article class="app-surface-card checkout-card" *ngIf="step === 2" [@stepAnim]>
                 <div class="card-head">
                     <div class="step-head-icon address"><i class="pi pi-map-marker" aria-hidden="true"></i></div>
@@ -72,12 +67,10 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Loading -->
                     <div class="dir-loading" *ngIf="loadingDirs" role="status">
                         <i class="pi pi-spin pi-spinner"></i> Cargando direcciones...
                     </div>
 
-                    <!-- Address cards -->
                     <div class="dir-options" role="group" aria-label="Direcciones de envío" *ngIf="!loadingDirs && misDirecciones.length > 0">
                         <label class="dir-option"
                              *ngFor="let dir of misDirecciones; let i = index"
@@ -104,7 +97,6 @@
                         </label>
                     </div>
 
-                    <!-- No addresses -->
                     <div class="dir-empty" *ngIf="!loadingDirs && !misDirecciones.length">
                         <i class="pi pi-map"></i>
                         <p>No tienes direcciones guardadas.</p>
@@ -115,7 +107,6 @@
                 </div>
             </article>
 
-            <!-- ── STEP 3: Payment ────────────────────────────────────────── -->
             <article class="app-surface-card checkout-card" *ngIf="step === 3" [@stepAnim]>
                 <div class="card-head">
                     <div class="step-head-icon payment"><i class="pi pi-credit-card" aria-hidden="true"></i></div>
@@ -126,7 +117,6 @@
                 </div>
                 <div class="card-body">
 
-                    <!-- Method selector tabs -->
                     <div class="method-tabs" role="group" aria-label="Método de pago">
                         <button class="method-tab"
                                 *ngFor="let m of metodosPago"
@@ -139,7 +129,6 @@
                         </button>
                     </div>
 
-                    <!-- Tarjeta -->
                     <div class="pay-fields" *ngIf="metodoPagoSeleccionado === 'tarjeta'">
                         <div class="pay-field full">
                             <label for="cc-name">Titular de la tarjeta</label>
@@ -176,7 +165,6 @@
                         </div>
                     </div>
 
-                    <!-- Yape/Plin -->
                     <div class="pay-fields" *ngIf="metodoPagoSeleccionado === 'billetera'">
                         <div class="yape-hint">
                             <i class="pi pi-info-circle"></i>
@@ -198,7 +186,6 @@
                         </div>
                     </div>
 
-                    <!-- Transferencia -->
                     <div class="pay-fields" *ngIf="metodoPagoSeleccionado === 'transferencia'">
                         <div class="yape-hint">
                             <i class="pi pi-info-circle"></i>
@@ -216,7 +203,6 @@
                         </div>
                     </div>
 
-                    <!-- Comprobante -->
                     <div class="comprobante-section">
                         <div class="section-label-co">Tipo de comprobante</div>
                         <div class="comprobante-tabs" role="group" aria-label="Tipo de comprobante">
@@ -250,7 +236,6 @@
                         </div>
                     </div>
 
-                    <!-- Comentario -->
                     <div class="pay-field mt-4">
                         <label for="delivery-comment">Comentario de entrega (opcional)</label>
                         <textarea pTextarea id="delivery-comment" rows="2" [(ngModel)]="comentarioPago"
@@ -262,7 +247,6 @@
 
         </div>
 
-        <!-- Order sidebar -->
         <aside class="checkout-sidebar">
             <article class="app-surface-card">
                 <div class="card-head">
@@ -270,7 +254,6 @@
                 </div>
                 <div class="card-body sidebar-body">
 
-                    <!-- Mini item list -->
                     <div class="sidebar-items">
                         <div class="sidebar-item" *ngFor="let item of items">
                             <div class="sb-img">
@@ -283,7 +266,6 @@
                         </div>
                     </div>
 
-                    <!-- Address summary (step 3+) -->
                     <div class="sidebar-section" *ngIf="step >= 3 && direccionActual">
                         <div class="sidebar-section-label">Envío a</div>
                         <div class="sidebar-address">
@@ -295,7 +277,6 @@
                         </div>
                     </div>
 
-                    <!-- Totals -->
                     <div class="sidebar-totals">
                         <div class="sidebar-total-row">
                             <span>Subtotal</span>
@@ -316,7 +297,6 @@
                         </div>
                     </div>
 
-                    <!-- CTA -->
                     <button class="co-btn-next" type="button"
                         [disabled]="procesando"
                         (click)="siguiente()">
@@ -346,7 +326,6 @@
 
     </div>
 
-    <!-- ── STEP 4: Success ──────────────────────────────────────────────── -->
     <div class="checkout-success" *ngIf="step === 4" [@successAnim]>
         <div class="success-icon-wrap">
             <div class="success-ring"></div>
@@ -394,7 +373,6 @@
 
 </section>
 
-<!-- ── Mobile Sticky Action Bar — CTA siempre accesible ──────── -->
 <div class="checkout-mobile-bar" *ngIf="step < 4" role="region" aria-label="Acción de pago">
     <div class="cmb-total">
         <span class="cmb-label">Total</span>
@@ -411,7 +389,6 @@
     </button>
 </div>
 
-<!-- Quick-add address dialog -->
 <p-dialog [(visible)]="showDirDialog" [modal]="true" [draggable]="false" [resizable]="false"
     [attr.data-narrator-context]="showDirDialog ? 'nueva-direccion' : null" data-narrator-title="Nueva dirección"
     closeAriaLabel="Cerrar nueva dirección"

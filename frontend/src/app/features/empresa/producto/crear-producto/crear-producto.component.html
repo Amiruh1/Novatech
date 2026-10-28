@@ -114,7 +114,6 @@
         (busyChange)="subiendoImagen = $event"
         (uploaded)="form.patchValue({ imagen: $event })" />
       <small class="help">También puedes pegar una URL pública de imagen.</small>
-      <!-- Image preview -->
       <div class="img-preview-wrap" *ngIf="form.get('imagen')?.value?.startsWith('http')">
         <img [src]="form.get('imagen')?.value"
              alt="Vista previa del producto"
@@ -141,7 +140,6 @@
   </ng-template>
 </p-dialog>
 
-<!-- Template reutilizable para selectores con iconos -->
 <ng-template #selectTemplate let-options="options" let-controlName="controlName" let-placeholder="placeholder">
   <p-select
     [options]="options"

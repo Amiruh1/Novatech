@@ -32,7 +32,6 @@ export class DashboardPage implements OnInit {
 
   loading = true;
 
-  // ── Period filter ────────────────────────────────────────────────────────────
   period: DashPeriod = 'mes';
 
   readonly periods: { label: string; value: DashPeriod }[] = [
@@ -41,11 +40,9 @@ export class DashboardPage implements OnInit {
     { label: 'Mes',    value: 'mes'    }
   ];
 
-  // ── Raw source data ──────────────────────────────────────────────────────────
   private allProducts: ProductModel[] = [];
   private allSales:    SaleModel[]    = [];
 
-  // ── Derived KPIs (recalculated on period change) ─────────────────────────────
   totalProductos    = 0;
   totalStock        = 0;
   totalPedidos      = 0;
@@ -53,13 +50,11 @@ export class DashboardPage implements OnInit {
   valorInventario   = 0;
   pedidosPendientes = 0;
   pedidosEntregados = 0;
-  alertasPago       = 0; // pedidos con pago manual pendiente
+  alertasPago       = 0;
 
-  // Trend % vs. previous equal period
   trendIngresos     = 0;
   trendPedidos      = 0;
 
-  // Animated display values
   displayTotalProductos    = 0;
   displayTotalStock        = 0;
   displayTotalPedidos      = 0;
@@ -68,7 +63,6 @@ export class DashboardPage implements OnInit {
   displayPedidosPendientes = 0;
   displayPedidosEntregados = 0;
 
-  // ── Sparkline data (7 daily points) ─────────────────────────────────────────
   sparkIngresos:  number[] = [];
   sparkPedidos:   number[] = [];
   sparkPendientes: number[] = [];
@@ -83,7 +77,6 @@ export class DashboardPage implements OnInit {
   lowStockProducts: ProductModel[] = [];
   recentSales:      SaleModel[]    = [];
 
-  // ── Getters ──────────────────────────────────────────────────────────────────
   get pctEntregados(): number {
     if (!this.totalPedidos) return 0;
     return Math.round((this.pedidosEntregados / this.totalPedidos) * 100);
@@ -106,10 +99,8 @@ export class DashboardPage implements OnInit {
     return `${sign}${this.trendPedidos.toFixed(1)}% vs. período anterior`;
   }
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────────
   ngOnInit() { this.cargarDatos(); }
 
-  // ── Period API ───────────────────────────────────────────────────────────────
   setPeriod(p: DashPeriod) {
     this.period = p;
     this.recalcular();
@@ -144,7 +135,6 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  // ── Core recalculation ───────────────────────────────────────────────────────
   private recalcular() {
     const { current, previous } = this.filtrarPorPeriodo();
 
@@ -157,13 +147,11 @@ export class DashboardPage implements OnInit {
     this.pedidosEntregados = current.filter(s => (s.estado || 'pendiente') === 'entregado').length;
     this.alertasPago       = current.filter(s => String(s['pago_estado'] || '').toLowerCase() === 'pendiente').length;
 
-    // Trend vs. previous period
     const prevIngresos = previous.reduce((a, s) => a + Number(s.total || 0), 0);
     const prevPedidos  = previous.length;
     this.trendIngresos = prevIngresos > 0 ? ((this.totalIngresos - prevIngresos) / prevIngresos) * 100 : 0;
     this.trendPedidos  = prevPedidos  > 0 ? ((this.totalPedidos  - prevPedidos)  / prevPedidos)  * 100 : 0;
 
-    // Sparklines from daily buckets
     this.sparkIngresos   = this.buildSparkline(current, 'total', 7);
     this.sparkPedidos    = this.buildSparkline(current, 'count', 7);
     this.sparkPendientes = this.buildSparkline(
@@ -173,7 +161,6 @@ export class DashboardPage implements OnInit {
     this.animarTodosLosContadores();
   }
 
-  // ── Period helpers ───────────────────────────────────────────────────────────
   private filtrarPorPeriodo(): { current: SaleModel[]; previous: SaleModel[] } {
     const now  = new Date();
     const msDay = 86400000;
@@ -186,7 +173,7 @@ export class DashboardPage implements OnInit {
       prevStart = new Date(cutStart.getTime() - msDay);
       prevEnd   = cutStart;
     } else if (this.period === 'semana') {
-      const day = now.getDay(); // 0=Sun
+      const day = now.getDay();
       cutStart  = new Date(now.getTime() - (day === 0 ? 6 : day - 1) * msDay);
       cutStart  = new Date(cutStart.getFullYear(), cutStart.getMonth(), cutStart.getDate());
       prevStart = new Date(cutStart.getTime() - 7 * msDay);
@@ -206,7 +193,6 @@ export class DashboardPage implements OnInit {
     return { current, previous };
   }
 
-  /** Genera N puntos diarios para sparkline desde un array de ventas */
   private buildSparkline(sales: SaleModel[], mode: 'total' | 'count', days: number): number[] {
     const buckets = new Array(days).fill(0);
     const now     = Date.now();
@@ -224,7 +210,6 @@ export class DashboardPage implements OnInit {
     return buckets;
   }
 
-  // ── SVG Sparkline path ───────────────────────────────────────────────────────
   sparkPath(data: number[], w = 72, h = 24): string {
     if (!data.length) return '';
     const max   = Math.max(...data, 1);
@@ -238,7 +223,6 @@ export class DashboardPage implements OnInit {
     return `M ${pts.join(' L ')}`;
   }
 
-  // ── Animated Counters ────────────────────────────────────────────────────────
   private animarTodosLosContadores() {
     this.animateCounter(this.totalProductos,    v => { this.displayTotalProductos    = v; this.cd.detectChanges(); });
     this.animateCounter(this.totalStock,        v => { this.displayTotalStock        = v; this.cd.detectChanges(); });
@@ -261,7 +245,6 @@ export class DashboardPage implements OnInit {
     requestAnimationFrame(frame);
   }
 
-  // ── Severity helpers ─────────────────────────────────────────────────────────
   getStockSeverity(stock: number): 'success' | 'warn' | 'danger' {
     if (stock <= 3) return 'danger';
     if (stock <= 8) return 'warn';
@@ -280,7 +263,6 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  // ── Chart builders ───────────────────────────────────────────────────────────
   private configurarCharts(products: ProductModel[], sales: SaleModel[]) {
     const sorted = [...products].sort((a, b) => Number(a.stock||0) - Number(b.stock||0)).slice(0, 8);
 

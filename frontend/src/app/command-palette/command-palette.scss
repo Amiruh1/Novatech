@@ -1,8 +1,4 @@
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  Command Palette 2026 — Linear · Raycast · Vercel style     ║
-// ╚══════════════════════════════════════════════════════════════╝
 
-// ── Backdrop ──────────────────────────────────────────────────────────────────
 .cp-backdrop {
   position: fixed;
   inset: 0;
@@ -21,7 +17,6 @@
   to   { opacity: 1; backdrop-filter: blur(8px); }
 }
 
-// ── Panel ─────────────────────────────────────────────────────────────────────
 .cp-panel {
   width: min(640px, 96vw);
   background: var(--app-surface);
@@ -51,7 +46,6 @@
   }
 }
 
-// ── Search row ────────────────────────────────────────────────────────────────
 .cp-search-row {
   display: flex;
   align-items: center;
@@ -99,7 +93,6 @@
   letter-spacing: 0.03em;
 }
 
-// ── Results ───────────────────────────────────────────────────────────────────
 .cp-results {
   overflow-y: auto;
   flex: 1;
@@ -119,7 +112,6 @@
   padding: var(--sp-2) var(--sp-5) var(--sp-1);
 }
 
-// ── Command Item ──────────────────────────────────────────────────────────────
 .cp-item {
   display: flex;
   align-items: center;
@@ -209,7 +201,6 @@
   transition: opacity var(--dur-fast) var(--ease-smooth), transform var(--dur-fast) var(--ease-spring);
 }
 
-// ── Product Item ──────────────────────────────────────────────────────────────
 .cp-product-img {
   width: 2.5rem;
   height: 2.5rem;
@@ -233,7 +224,6 @@
   flex-shrink: 0;
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
 .cp-empty {
   display: flex;
   align-items: center;
@@ -248,7 +238,6 @@
 
 .cp-hint { color: var(--app-muted); font-style: italic; }
 
-// ── Footer shortcuts ─────────────────────────────────────────────────────────
 .cp-footer {
   display: flex;
   align-items: center;
@@ -279,7 +268,6 @@
   }
 }
 
-// ── prefers-reduced-motion ────────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   .cp-backdrop, .cp-panel { animation: none !important; }
 }

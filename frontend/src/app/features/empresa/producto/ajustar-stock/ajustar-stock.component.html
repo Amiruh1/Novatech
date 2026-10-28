@@ -63,7 +63,6 @@
       <small class="error" *ngIf="cantidadControl?.touched && cantidadControl?.hasError('min')">
         Debes indicar una cantidad mínima de 1.
       </small>
-      <!-- Cross-field error: no se puede restar más del stock actual -->
       <small class="error" *ngIf="form.errors?.['stockInsuficiente'] && form.get('operacion')?.value === 'restar'">
         No puedes reducir más de {{ form.get('stockActual')?.value }} unidades (stock actual).
       </small>

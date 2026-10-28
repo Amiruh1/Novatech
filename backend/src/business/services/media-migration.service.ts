@@ -35,7 +35,6 @@ export async function migrateMedia(repository: MediaMigrationRepository, options
       if (!images.length) break;
       for (const image of images) {
         afterId = image.id;
-        // Conserva exactamente el fallback que ya muestra tienda.ts para cada categoría.
         const source = image.imagen === null && table === 'categorias' && image.nombre
           ? `https://picsum.photos/seed/${image.nombre}/200/200` : image.imagen;
         if (!source || !isAllowedImageSource(source)) { summary.skipped++; continue; }
@@ -43,7 +42,6 @@ export async function migrateMedia(repository: MediaMigrationRepository, options
         if (!options.apply) continue;
         try {
           const { content, contentType, extension } = await download(source);
-          // Clave estable por contenido: repetir tras un fallo no crea duplicados.
           const digest = createHash('sha256').update(content).digest('hex');
           const url = await save({ key: `images/imported-${digest}.${extension}`, content, contentType });
           if (await repository.replace(table, image, url)) summary.migrated++;

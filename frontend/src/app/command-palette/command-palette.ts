@@ -161,7 +161,6 @@ export class CommandPalette implements OnInit, OnDestroy {
     return cat === 'navigation' ? 'Navegación' : cat === 'admin' ? 'Administración' : 'Mi cuenta';
   }
 
-  // Registro del atajo global de teclado — se registra en el host de la app
   @HostListener('window:keydown', ['$event'])
   onGlobalKey(e: KeyboardEvent) {
     if (this.accessibility.panelOpen()) return;

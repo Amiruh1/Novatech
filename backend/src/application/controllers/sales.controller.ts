@@ -14,7 +14,6 @@ import * as salesService from '../../business/services/sales.service';
 
 type MetodoPagoKey = 'tarjeta' | 'billetera' | 'transferencia' | 'no-definido';
 
-// H8: costo de envío definido en backend; el cliente no puede modificarlo
 const COSTO_ENVIO_FIJO = Number(process.env.COSTO_ENVIO || 15);
 
 interface NormalizedPaymentMetadata {
@@ -113,7 +112,6 @@ export async function postSale(req: AuthRequest, res: Response) {
   const detalleValidado = sanitizeDetalle(detalle);
   const pagoValidado = sanitizePaymentMetadata(pago);
 
-  // H8: costo_envio calculado en backend según tipo de despacho; se ignora el valor del cliente
   const costoEnvioCalculado = pagoValidado.tipo_despacho === 'retiro' ? 0 : COSTO_ENVIO_FIJO;
 
   if (!userId) {

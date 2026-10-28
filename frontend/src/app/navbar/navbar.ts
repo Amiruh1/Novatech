@@ -113,12 +113,10 @@ export class Navbar implements OnInit, OnDestroy {
   themeOptions: AppThemeOption[] = [];
   isStorefront = false;
 
-  // Mini-cart
   cartSidebarOpen: boolean = false;
   cartItems: CartItem[] = [];
   getPrecioFinal = precioFinal;
 
-  // RF-11: product quick-search
   productQuickResults: ProductModel[] = [];
   private allProducts: ProductModel[] = [];
   private productsLoaded = false;
@@ -310,7 +308,6 @@ export class Navbar implements OnInit, OnDestroy {
     }
   }
 
-  // Mini-cart Handlers
   toggleCart() {
     this.cartSidebarOpen = !this.cartSidebarOpen;
   }
@@ -324,7 +321,7 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   get cartTotal() {
-    return this.cartService.getTotal(0); // Envío se asume 0 en minicart
+    return this.cartService.getTotal(0);
   }
 
   removerDelCarrito(productId: number) {

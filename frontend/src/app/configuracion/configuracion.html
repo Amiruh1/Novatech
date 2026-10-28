@@ -7,7 +7,6 @@
 
     <div class="config-grid">
 
-        <!-- ── Perfil personal — ocupa las 2 columnas ─────────────────────── -->
         <article class="cfg-card cfg-card--wide">
             <div class="cfg-card-header">
                 <div class="cfg-icon cfg-icon--profile"><i class="pi pi-user"></i></div>
@@ -17,7 +16,6 @@
                 </div>
             </div>
 
-            <!-- Banner de usuario -->
             <div class="cfg-profile-banner" *ngIf="usuario">
                 <div class="cfg-avatar">{{ getInitial(usuario?.nombre) }}</div>
                 <div class="cfg-profile-info">
@@ -94,7 +92,6 @@
             </div>
         </article>
 
-        <!-- ── Seguridad ───────────────────────────────────────────────────── -->
         <article class="cfg-card">
             <div class="cfg-card-header">
                 <div class="cfg-icon cfg-icon--security"><i class="pi pi-shield"></i></div>
@@ -135,7 +132,6 @@
                     </small>
                 </div>
 
-                <!-- Barra de fuerza — solo aparece cuando se escribe -->
                 <div class="pass-strength-wrap" *ngIf="passNueva.length > 0">
                     <div class="pass-strength-bar">
                         <div class="pass-strength-fill"
@@ -179,7 +175,6 @@
             </div>
         </article>
 
-        <!-- ── Libreta de direcciones — comparte fila con Seguridad ─────── -->
         <article class="cfg-card">
             <div class="cfg-card-header">
                 <div class="cfg-icon cfg-icon--address"><i class="pi pi-map-marker"></i></div>
@@ -233,7 +228,6 @@
     </div>
 </section>
 
-<!-- ── Dialog Dirección ──────────────────────────────────────────────────── -->
 <p-dialog
     [(visible)]="mostrarDirDialog"
     [modal]="true"
@@ -252,7 +246,6 @@
     </ng-template>
     <div class="dir-form">
 
-        <!-- Alias -->
         <div class="form-group">
             <label>Alias *</label>
             <input pInputText
@@ -273,7 +266,6 @@
             </div>
         </div>
 
-        <!-- Destinatario — solo letras (handler bloquea números en tiempo real) -->
         <div class="form-group">
             <label>Destinatario *</label>
             <input pInputText
@@ -293,7 +285,6 @@
             </small>
         </div>
 
-        <!-- Dirección detallada — debe incluir número de calle -->
         <div class="form-group">
             <label>Dirección detallada *</label>
             <input pInputText
@@ -314,7 +305,6 @@
             </small>
         </div>
 
-        <!-- Distrito y Provincia -->
         <div class="form-row">
             <div class="form-group">
                 <label>Distrito *</label>

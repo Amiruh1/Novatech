@@ -174,7 +174,6 @@ export async function loginWithGoogleCredential(credential: string, clientId: st
   return loginWithGoogle(identity.email, identity.name || identity.email.split('@')[0], identity.sub);
 }
 
-// ── Google Sign-In — busca o crea usuario por email de Google ─────────────────
 export async function loginWithGoogle(
   email: string,
   nombre: string,
@@ -183,14 +182,12 @@ export async function loginWithGoogle(
   const normalizedEmail  = email.trim().toLowerCase();
   const normalizedNombre = (nombre || '').trim() || normalizedEmail.split('@')[0];
 
-  // Si ya existe la cuenta, retornar directamente (sin verificar contraseña)
   const rows = await authRepository.findGoogleUser(normalizedEmail);
   const existing = (rows as LoginResult[]);
   if (existing.length > 0) {
     return existing[0];
   }
 
-  // Cuenta nueva — crear con contraseña aleatoria (nunca usable directamente)
   const randomPassword = crypto.randomBytes(32).toString('hex');
   const hash = await bcrypt.hash(randomPassword, 10);
 

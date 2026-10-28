@@ -1,18 +1,11 @@
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  NovaTech 2026 — Global Design System                                   ║
-// ║  Inspired by: HyperOS · OxygenOS 16 · VisionOS · Linear · Vercel       ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
 
 @use 'sass:meta';
 
 @import 'primeflex/primeflex.css';
 @import 'primeicons/primeicons.css';
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
-// font-display: swap está incluido en el parámetro display=swap de la URL
 
-// ── 1. Design Tokens 2026 ─────────────────────────────────────────────────────
 :root {
-  // Colors — base palette
   --app-bg:             #f2f6fb;
   --app-bg-glow-a:      rgba(13, 148, 136, 0.07);
   --app-bg-glow-b:      rgba(14, 165, 233, 0.09);
@@ -35,17 +28,14 @@
   --app-success:        #16a34a;
   --app-success-glow:   rgba(22, 163, 74, 0.14);
   --app-success-soft:   rgba(22, 163, 74, 0.08);
-  // Accent — indigo/violet (UI chrome, icons, decorative)
   --app-accent:         #6366f1;
   --app-accent-strong:  #4f46e5;
   --app-accent-glow:    rgba(99, 102, 241, 0.15);
   --app-accent-soft:    rgba(99, 102, 241, 0.08);
-  // Info — sky blue (informational elements, address, links)
   --app-info:           #0ea5e9;
   --app-info-strong:    #0284c7;
   --app-info-glow:      rgba(14, 165, 233, 0.15);
   --app-info-soft:      rgba(14, 165, 233, 0.08);
-  // Glass tokens — adapts per theme
   --glass-bg:           rgba(255, 255, 255, 0.72);
   --glass-border:       rgba(255, 255, 255, 0.88);
   --glass-shadow:       0 8px 32px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.85);
@@ -53,20 +43,18 @@
   --glass-saturate:     180%;
   --glass-specular:     rgba(255, 255, 255, 0.55);
 
-  // Spacing Scale — 4px base
-  --sp-1:  0.25rem;   // 4px
-  --sp-2:  0.5rem;    // 8px
-  --sp-3:  0.75rem;   // 12px
-  --sp-4:  1rem;      // 16px
-  --sp-5:  1.25rem;   // 20px
-  --sp-6:  1.5rem;    // 24px
-  --sp-8:  2rem;      // 32px
-  --sp-10: 2.5rem;    // 40px
-  --sp-12: 3rem;      // 48px
-  --sp-16: 4rem;      // 64px
-  --sp-20: 5rem;      // 80px
+  --sp-1:  0.25rem;
+  --sp-2:  0.5rem;
+  --sp-3:  0.75rem;
+  --sp-4:  1rem;
+  --sp-5:  1.25rem;
+  --sp-6:  1.5rem;
+  --sp-8:  2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-20: 5rem;
 
-  // Border Radius Scale
   --r-xs:   0.25rem;
   --r-sm:   0.5rem;
   --r-md:   0.75rem;
@@ -75,11 +63,9 @@
   --r-2xl:  1.75rem;
   --r-pill: 9999px;
 
-  // Legacy compat tokens
   --radius-card: var(--r-2xl);
   --radius-pill: var(--r-pill);
 
-  // Shadow Elevations — 5 levels
   --shadow-soft:    0 1px 3px rgba(15,23,42,.04), 0 4px 12px -4px rgba(15,23,42,.06);
   --shadow-medium:  0 4px 16px -4px rgba(15,23,42,.1), 0 2px 6px rgba(15,23,42,.04);
   --shadow-premium: 0 8px 32px -8px rgba(15,23,42,.14), 0 4px 12px rgba(15,23,42,.05);
@@ -87,11 +73,9 @@
   --shadow-float:   0 16px 48px -12px rgba(15,23,42,.22), 0 4px 16px rgba(15,23,42,.07);
   --shadow-modal:   0 2px 8px rgba(15,23,42,.05), 0 12px 40px -8px rgba(15,23,42,.18), 0 40px 80px -24px rgba(15,23,42,.26);
 
-  // Legacy compat
   --card-shadow: var(--shadow-premium);
   --soft-shadow: var(--shadow-medium);
 
-  // Motion System — spring physics inspired
   --ease-spring:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --ease-out:     cubic-bezier(0.16,  1,    0.3,  1);
   --ease-bounce:  cubic-bezier(0.34,  1.56, 0.64, 1);
@@ -101,13 +85,11 @@
   --dur-slow:  380ms;
   --dur-enter: 440ms;
 
-  // Shell layout
   --sidebar-width:           17rem;
   --sidebar-collapsed-width: 5.5rem;
   --topbar-height:           4.5rem;
   --page-padding:            1.5rem;
 
-  // Shell palette
   --shell-gradient-start: #060d1c;
   --shell-gradient-mid:   #0b1628;
   --shell-gradient-end:   #0d1f36;
@@ -116,24 +98,19 @@
   --shell-accent-2:       #38bdf8;
 }
 
-// ── 2. Themes ──────────────────────────────────────────────────────────────────
 body.theme-ocean {
-  // Fondos con tinte azul-oceánico suave
   --app-bg:             #f0f8ff;
   --app-surface-muted:  #eaf4ff;
   --app-border-subtle:  #d6eaff;
   --app-bg-glow-a:      rgba(13, 148, 136, 0.14);
   --app-bg-glow-b:      rgba(14, 165, 233, 0.18);
-  // Primary teal-cyan
   --app-primary:        #0d9488;
   --app-primary-strong: #0f766e;
   --app-primary-glow:   rgba(13, 148, 136, 0.22);
-  // Acento índigo como profundidad oceánica
   --app-accent:         #4f46e5;
   --app-accent-strong:  #3730a3;
   --app-accent-glow:    rgba(79, 70, 229, 0.18);
   --app-accent-soft:    rgba(79, 70, 229, 0.07);
-  // Shell — azul marino profundo
   --shell-gradient-start: #050f22;
   --shell-gradient-mid:   #0b1d3e;
   --shell-gradient-end:   #0e2952;
@@ -142,7 +119,6 @@ body.theme-ocean {
 }
 
 body.theme-sunset {
-  // Fondos cálidos ámbar-coral
   --app-bg:             #fffbf4;
   --app-bg-glow-a:      rgba(234, 88, 12, 0.18);
   --app-bg-glow-b:      rgba(244, 63, 94, 0.14);
@@ -153,7 +129,6 @@ body.theme-sunset {
   --app-text:           #3b1007;
   --app-text-2:         #7c2d12;
   --app-muted:          #92400e;
-  // Primary — naranja ardiente con rosa coral de acento
   --app-primary:        #ea580c;
   --app-primary-strong: #c2410c;
   --app-primary-glow:   rgba(234, 88, 12, 0.24);
@@ -165,7 +140,6 @@ body.theme-sunset {
   --app-info:           #d97706;
   --app-info-strong:    #b45309;
   --app-info-soft:      rgba(217, 119, 6, 0.09);
-  // Shell — crepúsculo profundo
   --shell-gradient-start: #2d0900;
   --shell-gradient-mid:   #7c1d0c;
   --shell-gradient-end:   #991b10;
@@ -175,7 +149,6 @@ body.theme-sunset {
 }
 
 body.theme-graphite {
-  // Fondos — pizarra oscura con tinte violeta suave
   --app-bg:             #0c1120;
   --app-bg-glow-a:      rgba(139, 92, 246, 0.08);
   --app-bg-glow-b:      rgba(56, 189, 248, 0.07);
@@ -186,11 +159,9 @@ body.theme-graphite {
   --app-text:           #f0f4fc;
   --app-text-2:         #c8d4e8;
   --app-muted:          #8fa0bb;
-  // Primary — cyan brillante
   --app-primary:        #2dd4bf;
   --app-primary-strong: #14b8a6;
   --app-primary-glow:   rgba(45, 212, 191, 0.26);
-  // Acento — violeta eléctrico (identidad única Graphite)
   --app-accent:         #a78bfa;
   --app-accent-strong:  #7c3aed;
   --app-accent-glow:    rgba(167, 139, 250, 0.24);
@@ -203,13 +174,11 @@ body.theme-graphite {
   --app-info-strong:    #0ea5e9;
   --app-info-glow:      rgba(56, 189, 248, 0.22);
   --app-info-soft:      rgba(56, 189, 248, 0.10);
-  // Glass — semitransparente oscuro con especular violeta
   --glass-bg:           rgba(22, 30, 48, 0.76);
   --glass-border:       rgba(46, 63, 92, 0.6);
   --glass-shadow:       0 8px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(167,139,250,.06);
   --glass-saturate:     150%;
   --glass-specular:     rgba(167, 139, 250, 0.1);
-  // Shell — noche absoluta con tinte violeta
   --shell-gradient-start: #000000;
   --shell-gradient-mid:   #07030f;
   --shell-gradient-end:   #0c1120;
@@ -219,7 +188,6 @@ body.theme-graphite {
   --shadow-modal: 0 2px 8px rgba(0,0,0,.12), 0 12px 40px -8px rgba(0,0,0,.4), 0 40px 80px -24px rgba(167,139,250,.12);
 }
 
-// ── 3. Reset & Base ────────────────────────────────────────────────────────────
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
@@ -242,7 +210,6 @@ h1, h2, h3, h4, h5, h6, .page-title {
   line-height: 1.25;
 }
 
-// ── 4. Shell Layout ────────────────────────────────────────────────────────────
 .app-shell-page {
   min-height: 100vh;
   margin-left: var(--sidebar-width);
@@ -261,7 +228,6 @@ body.sidebar-collapsed .app-shell-page {
   }
 }
 
-// ── 5. Typography ──────────────────────────────────────────────────────────────
 .page-intro { margin-bottom: var(--sp-5); }
 
 .page-title {
@@ -281,7 +247,6 @@ body.sidebar-collapsed .app-shell-page {
   line-height: 1.55;
 }
 
-// ── 6. Surface Cards ───────────────────────────────────────────────────────────
 .app-surface-card {
   background: var(--app-surface);
   border: 1px solid var(--app-border);
@@ -299,7 +264,6 @@ body.sidebar-collapsed .app-shell-page {
   gap: var(--sp-3);
 }
 
-// Variante con separador — solo cuando el contenido del body requiere separación visual explícita
 .card-head--divided {
   padding-bottom: var(--sp-4);
   border-bottom: 1px solid var(--app-border-subtle);
@@ -322,16 +286,13 @@ body.sidebar-collapsed .app-shell-page {
 
 .card-body { padding: var(--sp-5); }
 
-// ── 7. Global premium interactions ────────────────────────────────────────────
 
-// Press feedback — scale(0.97) spring on all interactive buttons
 .p-button:not(:disabled):active,
 button:not(:disabled):not([pbutton]):active {
   transform: scale(0.97) !important;
   transition: transform 80ms var(--ease-spring) !important;
 }
 
-// Glass surface utility — saturate + specular highlight
 .glass-surface {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
@@ -354,7 +315,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// Tabular nums — precios, KPIs, montos (evita saltos al animar)
 .stat-value,
 .fav-price-main,
 .fav-price-old,
@@ -368,9 +328,7 @@ button:not(:disabled):not([pbutton]):active {
   font-variant-numeric: tabular-nums;
 }
 
-// ── 8. Admin shared components ────────────────────────────────────────────────
 
-// Search input pill — unificado en todos los módulos admin
 .admin-search-wrap,
 .search-wrap {
   display: inline-flex;
@@ -401,7 +359,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// Admin filter label — sin mayúsculas
 .filter-label,
 .admin-filter-label {
   display: block;
@@ -411,12 +368,11 @@ button:not(:disabled):not([pbutton]):active {
   color: var(--app-muted);
 }
 
-// Admin product block cell — imagen + info unificados
 .prod-block {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  min-width: 0; // permite que flex child se trunque
+  min-width: 0;
 
   .prod-thumb {
     width: 52px;
@@ -428,7 +384,6 @@ button:not(:disabled):not([pbutton]):active {
     flex-shrink: 0;
   }
 
-  // div info (nombre + meta) — no expande la columna
   > div {
     min-width: 0;
     overflow: hidden;
@@ -439,7 +394,6 @@ button:not(:disabled):not([pbutton]):active {
     font-weight: 700;
     color: var(--app-text);
     line-height: 1.3;
-    // Nombres largos: 2 líneas máx, luego ellipsis
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -485,7 +439,6 @@ button:not(:disabled):not([pbutton]):active {
   .prod-cat::after { content: '·'; margin-left: var(--sp-2); }
 }
 
-// ── Utilidades globales de truncación de texto ─────────────────────────────
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -509,13 +462,11 @@ button:not(:disabled):not([pbutton]):active {
   word-break: break-word;
 }
 
-// Columnas de tabla — limita ancho para que texto largo no desborde
 .col-name    { max-width: 22rem; }
 .col-email   { max-width: 18rem; }
 .col-address { max-width: 20rem; }
 .col-narrow  { max-width: 10rem; }
 
-// Admin payment pills
 .payment-pill {
   display: inline-flex;
   align-items: center;
@@ -532,7 +483,6 @@ button:not(:disabled):not([pbutton]):active {
   strong { color: var(--app-text); }
 }
 
-// ── 9. KPI / Stat Cards ────────────────────────────────────────────────────────
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -607,7 +557,6 @@ button:not(:disabled):not([pbutton]):active {
   font-family: 'Sora', system-ui, sans-serif;
 }
 
-// ── 8. Status Chips ────────────────────────────────────────────────────────────
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -620,7 +569,6 @@ button:not(:disabled):not([pbutton]):active {
   letter-spacing: 0.05em;
 }
 
-// ── 9. Form System ─────────────────────────────────────────────────────────────
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -683,7 +631,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── 10. PrimeNG: Buttons ───────────────────────────────────────────────────────
 .p-button {
   border-radius: var(--r-lg) !important;
   font-weight: 700 !important;
@@ -704,13 +651,11 @@ button:not(:disabled):not([pbutton]):active {
   transition-duration: var(--dur-fast) !important;
 }
 
-// Primary button glow on hover
 .p-button:enabled:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 22px -12px rgba(15, 23, 42, 0.4);
 }
 
-// ── 11. PrimeNG: Inputs ────────────────────────────────────────────────────────
 .p-inputtext,
 .p-select,
 .p-inputnumber-input,
@@ -749,7 +694,6 @@ button:not(:disabled):not([pbutton]):active {
 
 .p-select-option { color: var(--app-text); }
 
-// ── 12. PrimeNG: Tags ─────────────────────────────────────────────────────────
 .p-tag {
   border-radius: var(--r-pill) !important;
   font-weight: 700 !important;
@@ -757,7 +701,6 @@ button:not(:disabled):not([pbutton]):active {
   letter-spacing: 0.04em !important;
 }
 
-// ── 13. PrimeNG: DataTable ─────────────────────────────────────────────────────
 .p-datatable {
   border: 1px solid var(--app-border) !important;
   border-radius: var(--r-xl) !important;
@@ -789,21 +732,17 @@ button:not(:disabled):not([pbutton]):active {
   background: var(--app-border-subtle) !important;
 }
 
-// ── 14. Dialog System 2026 — iOS spring suave ─────────────────────────────────
 
-// Overlay backdrop — fade muy suave
 @keyframes overlayIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-// Enter: escala desde 68% con spring gentil — sin blur para evitar el "pop"
 @keyframes dlgIn {
   0%   { opacity: 0; transform: scale(0.68) translateY(6px); }
   100% { opacity: 1; transform: scale(1)    translateY(0);   }
 }
 
-// Exit: encoge al centro, limpio
 @keyframes dlgOut {
   0%   { opacity: 1; transform: scale(1);    }
   100% { opacity: 0; transform: scale(0.82); }
@@ -818,7 +757,6 @@ button:not(:disabled):not([pbutton]):active {
   overflow: hidden !important;
   box-shadow: var(--shadow-modal) !important;
   transform-origin: center center !important;
-  // Spring con overshoot mínimo (llega a ~1.04 y vuelve) — como iOS, sin mareos
   animation: dlgIn 400ms cubic-bezier(0.34, 1.26, 0.64, 1) both !important;
 }
 
@@ -906,7 +844,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ─ Dialog hero header (shared by all dialogs)
 .dlg-hero {
   display: flex;
   align-items: center;
@@ -956,7 +893,6 @@ button:not(:disabled):not([pbutton]):active {
   font-weight: 500;
 }
 
-// ─ ConfirmDialog
 .p-confirmdialog.p-dialog .p-dialog-header {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
   padding: var(--sp-5) 3.8rem var(--sp-5) var(--sp-5) !important;
@@ -1008,10 +944,7 @@ button:not(:disabled):not([pbutton]):active {
   font-weight: 700 !important;
 }
 
-// ── 14b. Glass / Liquid Buttons — iOS Liquid Glass identity ───────────────────
 
-// Fix p-password global — input llena el ancho, iconfield se expande
-// (el fix específico del ojo está en configuracion.scss con ::ng-deep)
 .p-password {
   width: 100%;
 
@@ -1025,18 +958,14 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── Liquid Glass — efecto agua/vidrio iOS para botones CTA principales
-// Aplica sobre botones de acción en headers admin (Nuevo producto, etc.)
 .header-actions .p-button:not(.p-button-text):not(.p-button-outlined),
 .page-intro-actions .p-button:not(.p-button-text):not(.p-button-outlined) {
   position: relative !important;
   overflow: hidden !important;
-  // Sombra con glow del primary
   box-shadow:
     0 4px 20px var(--app-primary-glow),
     inset 0 1px 0 rgba(255,255,255,0.3) !important;
 
-  // Specular highlight — línea de luz en el borde superior
   &::after {
     content: '' !important;
     position: absolute !important;
@@ -1049,7 +978,6 @@ button:not(:disabled):not([pbutton]):active {
     z-index: 1 !important;
   }
 
-  // Capa de vidrio — gradiente diagonal de luz
   &::before {
     content: '' !important;
     position: absolute !important;
@@ -1068,7 +996,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── 15. Modal Footer Buttons ───────────────────────────────────────────────────
 .btn-modal-footer {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1076,7 +1003,6 @@ button:not(:disabled):not([pbutton]):active {
   width: 100%;
 }
 
-// Shared base for all modal buttons
 .btn-modal-cancelar,
 .btn-modal-guardar,
 .btn-modal-danger,
@@ -1143,7 +1069,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── 16. Empty States 2026 ──────────────────────────────────────────────────────
 .table-empty-state {
   text-align: center;
   padding: var(--sp-16) var(--sp-4);
@@ -1185,7 +1110,6 @@ button:not(:disabled):not([pbutton]):active {
   line-height: 1.6;
 }
 
-// ── 17. Keyframe Animations ────────────────────────────────────────────────────
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1211,7 +1135,6 @@ button:not(:disabled):not([pbutton]):active {
   to   { background-position: 200% 0; }
 }
 
-// ── 18. prefers-reduced-motion ─────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1223,9 +1146,7 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── 19. prefers-color-scheme: dark — activa Graphite automáticamente ───────────
 @media (prefers-color-scheme: dark) {
-  // Solo aplica si el usuario NO eligió un tema explícito
   body:not([class*="theme"]) {
     --app-bg:             #0f172a;
     --app-bg-glow-a:      rgba(56, 189, 248, 0.06);
@@ -1250,8 +1171,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── 20. Screen-reader only utility ────────────────────────────────────────────
-// Usado por la región aria-live global en shell-layout.component.html
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1264,9 +1183,6 @@ button:not(:disabled):not([pbutton]):active {
   border: 0;
 }
 
-// ── 21. prefers-reduced-motion: override Angular Animations ───────────────────
-// La sección 18 ya colapsa CSS transitions/animations.
-// Este bloque garantiza que los triggers de @angular/animations tampoco se muevan.
 @media (prefers-reduced-motion: reduce) {
   .ng-animating {
     animation-duration: 0.01ms !important;
@@ -1275,7 +1191,6 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── Skip Link ──────────────────────────────────────────────────────────────────
 .skip-link {
   position: fixed;
   top: -5rem;
@@ -1298,19 +1213,16 @@ button:not(:disabled):not([pbutton]):active {
   }
 }
 
-// ── 22. Focus Visible — anillo global coherente con design system ───────────────
 :focus-visible {
   outline: 2.5px solid var(--app-primary);
   outline-offset: 2px;
   border-radius: var(--r-sm);
 }
 
-// Desactivar outline on click para elementos que lo necesitan solo en teclado
 :focus:not(:focus-visible) {
   outline: none;
 }
 
-// ── 23. Responsive Utilities ───────────────────────────────────────────────────
 @media (max-width: 860px) {
   .stats-grid,
   .form-grid { grid-template-columns: 1fr; }

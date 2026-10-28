@@ -1,14 +1,11 @@
-// ── Lista Productos — tabla 4 columnas premium ────────────────────────────────
 
 .table-shell { padding-top: var(--sp-3); }
 
-// Fila de producto
 .prod-row {
   transition: background var(--dur-fast) var(--ease-smooth);
   &:hover { background: var(--app-border-subtle) !important; }
 }
 
-// Precio — usa tokens de tema
 .prod-price {
   font-size: 0.92rem;
   font-weight: 800;
@@ -24,9 +21,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-// ── Acciones — pill de botones alineado a la derecha ─────────────────────────
 
-// La columna del header y las celdas del body se alinean a la derecha
 :host ::ng-deep .p-datatable-thead th:last-child {
   text-align: right !important;
 }
@@ -35,7 +30,6 @@
   text-align: right !important;
 }
 
-// Contenedor pill — inline-flex (se comprime al contenido, text-align:right del td lo alinea)
 .action-cell {
   display: inline-flex;
   align-items: center;
@@ -46,7 +40,6 @@
   padding: 0.2rem 0.35rem;
 }
 
-// Botones de acción — tamaño circular uniforme
 :host ::ng-deep .action-cell .p-button {
   width: 2.1rem !important;
   height: 2.1rem !important;
@@ -60,7 +53,6 @@
   &:hover { transform: scale(1.12) !important; }
 }
 
-// Hover colors por severidad
 :host ::ng-deep .action-cell .p-button-secondary:hover {
   background: var(--app-border-subtle) !important;
 }
@@ -75,7 +67,6 @@
   box-shadow: 0 2px 8px var(--app-danger-glow) !important;
 }
 
-// Stock chips — sin hardcode de colores
 :host ::ng-deep .stock-chip {
   border-radius: var(--r-pill);
   font-weight: 700;

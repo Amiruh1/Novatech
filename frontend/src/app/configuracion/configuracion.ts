@@ -31,7 +31,6 @@ export class ConfiguracionPage implements OnInit {
 
   usuario: any = null;
 
-  // Perfil
   inputNombre    = '';
   inputEmail     = '';
   inputDni       = '';
@@ -86,7 +85,6 @@ export class ConfiguracionPage implements OnInit {
     this.dirActual.codigo_postal = input.value;
   }
 
-  // Destinatario, distrito y provincia: solo letras + espacios + tildes + guiones
   onSoloLetrasInput(event: Event, field: 'destinatario' | 'distrito' | 'provincia'): void {
     const input = event.target as HTMLInputElement;
     const sanitized = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-\.]/g, '');
@@ -97,13 +95,11 @@ export class ConfiguracionPage implements OnInit {
     if (field === 'provincia')    this.dirActual.provincia    = sanitized;
   }
 
-  // Contraseña
   passActual  = '';
   passNueva   = '';
   passConfirm = '';
   guardandoPass = false;
 
-  // Direcciones
   direcciones: Direccion[] = [];
   loadingDirs     = false;
   mostrarDirDialog = false;
@@ -125,7 +121,6 @@ export class ConfiguracionPage implements OnInit {
 
   private readonly EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-  // ── Perfil ──────────────────────────────────────────────────────────
 
   guardarPerfil() {
     const nombreVal = this.inputNombre.trim();
@@ -166,7 +161,6 @@ export class ConfiguracionPage implements OnInit {
       return;
     }
 
-    // Validar documento solo si el usuario no tiene uno aún
     if (!this.usuario?.numero_documento && this.inputDni.trim()) {
       if (this.inputTipoDoc === 'DNI' && !/^\d{8}$/.test(this.inputDni.trim())) {
         this.msg.add({ severity: 'warn', summary: 'DNI inválido', detail: 'El DNI debe tener exactamente 8 dígitos numéricos.' });
@@ -230,7 +224,6 @@ export class ConfiguracionPage implements OnInit {
     });
   }
 
-  // ── Seguridad ───────────────────────────────────────────────────────
 
   cambiarPassword() {
     if (!this.passActual) {
@@ -278,7 +271,6 @@ export class ConfiguracionPage implements OnInit {
     });
   }
 
-  // ── Direcciones ─────────────────────────────────────────────────────
 
   cargarDirecciones() {
     this.loadingDirs = true;
@@ -299,7 +291,6 @@ export class ConfiguracionPage implements OnInit {
     this.cd.markForCheck();
   }
 
-  // Regex reutilizables para validación de dirección
   private readonly SOLO_LETRAS_RE = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-\.]+$/;
 
   guardarDireccion() {
@@ -310,7 +301,6 @@ export class ConfiguracionPage implements OnInit {
     const provincia    = this.dirActual.provincia?.trim() || '';
     const cp           = this.dirActual.codigo_postal?.toString().trim() || '';
 
-    // ── Alias ─────────────────────────────────────────────────────────
     if (!alias) {
       this.msg.add({ severity: 'warn', summary: 'Alias requerido', detail: 'El alias es obligatorio (ej. Casa, Trabajo).' });
       return;
@@ -328,7 +318,6 @@ export class ConfiguracionPage implements OnInit {
       return;
     }
 
-    // ── Destinatario — nombre completo (nombres propios) ──────────────
     if (!destinatario) {
       this.msg.add({ severity: 'warn', summary: 'Destinatario requerido', detail: 'Ingresa el nombre completo de quien recibirá el pedido.' });
       return;
@@ -350,7 +339,6 @@ export class ConfiguracionPage implements OnInit {
       return;
     }
 
-    // ── Dirección detallada — debe tener número de calle ──────────────
     if (!direccion) {
       this.msg.add({ severity: 'warn', summary: 'Dirección requerida', detail: 'La dirección detallada es obligatoria.' });
       return;
@@ -368,7 +356,6 @@ export class ConfiguracionPage implements OnInit {
       return;
     }
 
-    // ── Distrito — solo letras/tildes/espacios (contexto Peru) ────────
     if (!distrito) {
       this.msg.add({ severity: 'warn', summary: 'Distrito requerido', detail: 'El distrito es obligatorio.' });
       return;
@@ -386,7 +373,6 @@ export class ConfiguracionPage implements OnInit {
       return;
     }
 
-    // ── Provincia — solo letras/tildes/espacios ────────────────────────
     if (!provincia) {
       this.msg.add({ severity: 'warn', summary: 'Provincia requerida', detail: 'La provincia es obligatoria.' });
       return;
@@ -404,7 +390,6 @@ export class ConfiguracionPage implements OnInit {
       return;
     }
 
-    // ── Código postal — 5 dígitos (formato Perú) ──────────────────────
     if (cp && !/^\d{5}$/.test(cp)) {
       this.msg.add({ severity: 'warn', summary: 'Código postal inválido', detail: 'El código postal peruano tiene exactamente 5 dígitos numéricos (ej. 15001, 07001).' });
       return;

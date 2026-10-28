@@ -77,7 +77,6 @@ export class Tienda implements OnInit, OnDestroy {
   comparados: any[] = [];
   mostrarOrdenDropdown: boolean = false;
 
-  // Add-to-cart feedback animation state
   addedIds = new Set<number>();
 
   readonly opcionesOrden: Array<{ label: string; value: 'relevancia' | 'precio_desc' | 'precio_asc'; icon: string }> = [
@@ -349,7 +348,6 @@ export class Tienda implements OnInit, OnDestroy {
   }
 
   reintentarCarga() {
-    // The error button disappears during loading; keep focus on a stable heading.
     this.catalogTitle?.nativeElement.focus();
     this.cargarProductos();
   }
@@ -656,7 +654,6 @@ export class Tienda implements OnInit, OnDestroy {
   agregarAlCarrito(producto: ProductModel) {
     const result = this.cart.addToCart(producto);
     if (result.success) {
-      // Feedback visual: checkmark durante 700ms
       this.addedIds.add(Number(producto.id));
       setTimeout(() => {
         if (this.destroyRef.destroyed) return;

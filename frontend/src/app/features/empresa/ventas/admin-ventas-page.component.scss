@@ -283,7 +283,6 @@
 .table-empty-state h3 { margin: 0; }
 .table-empty-state p  { margin: 0.35rem 0 0; }
 
-// ── Header actions ────────────────────────────────────────────────────────────
 .ventas-header-actions {
   display: flex;
   align-items: center;
@@ -291,7 +290,6 @@
   flex-wrap: wrap;
 }
 
-// ── Date Range Filter ──────────────────────────────────────────────────────────
 .date-filter-row {
   display: flex;
   align-items: center;
@@ -328,7 +326,6 @@
   .p-inputtext { font-size: 0.82rem; }
 }
 
-// ── Bulk Toolbar ───────────────────────────────────────────────────────────────
 .bulk-toolbar {
   display: flex;
   align-items: center;
@@ -363,12 +360,10 @@
   align-items: center;
 }
 
-// ── Row selected highlight ─────────────────────────────────────────────────────
 :host ::ng-deep .p-datatable .p-datatable-tbody > tr.row-selected {
   background: var(--app-info-soft) !important;
 }
 
-// ── Drawer body ───────────────────────────────────────────────────────────────
 .drawer-body {
   padding: var(--sp-4);
   display: flex;
@@ -442,7 +437,6 @@
   strong { color: var(--app-warning); }
 }
 
-// ── Bulk dialog body ──────────────────────────────────────────────────────────
 .bulk-dialog-body {
   display: flex;
   flex-direction: column;
@@ -452,7 +446,6 @@
 
 .help { color: var(--app-muted); font-size: 0.75rem; }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 1300px) {
   .ventas-kpi { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
