@@ -1,0 +1,11 @@
+# Imagen del backend para AWS Lambda (entrada: src/lambda.js). Los secretos NO van en la imagen:
+# se cargan como variables de entorno de la función (lo hace scripts/desplegar-lambda.ps1).
+FROM public.ecr.aws/lambda/nodejs:22
+WORKDIR ${LAMBDA_TASK_ROOT}
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY src ./src
+# Logos de los correos y del comprobante PDF
+COPY assets ./assets
+ENV NODE_ENV=production
+CMD ["src/lambda.handler"]

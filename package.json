@@ -1,0 +1,31 @@
+{
+  "name": "novatech-backend",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API de NovaTech: Node.js + Express + MongoDB, imágenes en S3 y correos con SES",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js",
+    "seed:reset": "node --env-file-if-exists=.env scripts/seed.js --reset",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1169.0",
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@aws-sdk/client-sesv2": "^3.700.0",
+    "@aws-sdk/s3-presigned-post": "^3.700.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^8.0.0",
+    "jspdf": "^4.2.1",
+    "mongodb": "^6.10.0",
+    "nodemailer": "^6.10.1"
+  }
+}
